@@ -1,0 +1,31 @@
+# Run with `flutter pub run ffigen --config ffigen_mtc.yaml`.
+name: FlutterMtcBindings
+description: |
+  Bindings for `src/include/*.h`.
+
+  Regenerate bindings with `flutter pub run ffigen --config ffigen_mtc.yaml`.
+output: 'lib/flutter_mtc_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'src/include/lemon/mtc/mtc_cli.h'
+    - 'src/include/lemon/mtc/mtc_cli_cfg.h'
+    - 'src/include/lemon/mtc/mtc_cli_cb.h'
+    - 'src/include/lemon/mtc/mtc_prof.h'
+    - 'src/include/lemon/mtc/mtc_prof_db.h'
+    - 'src/include/lemon/mtc/mtc_ue_db.h'
+    - 'src/include/lemon/mtc/mtc_user.h'
+  include-directives:
+    - 'src/include/lemon/mtc/mtc_cli.h'
+    - 'src/include/lemon/mtc/mtc_cli_cfg.h'
+    - 'src/include/lemon/mtc/mtc_cli_cb.h'
+    - 'src/include/lemon/mtc/mtc_prof.h'
+    - 'src/include/lemon/mtc/mtc_prof_db.h'
+    - 'src/include/lemon/mtc/mtc_ue_db.h'
+    - 'src/include/lemon/mtc/mtc_user.h'
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full

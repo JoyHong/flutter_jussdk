@@ -40,6 +40,8 @@ flutter:
     platforms:
       android:
         ffiPlugin: true
+        package: com.jus.flutter_jussdk
+        pluginClass: FlutterJussdkPlugin
       ios:
         ffiPlugin: true
       macos:
