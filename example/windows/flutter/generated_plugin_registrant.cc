@@ -9,6 +9,6 @@
 #include <flutter_jussdk/flutter_jussdk_plugin_c_api.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
-    FlutterJussdkPluginCApiRegisterWithRegistrar(
-            registry->GetRegistrarForPlugin("FlutterJussdkPluginCApi"));
+  FlutterJussdkPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterJussdkPluginCApi"));
 }
