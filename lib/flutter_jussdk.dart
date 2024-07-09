@@ -1,131 +1,115 @@
-
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'flutter_jussdk_bindings_generated.dart';
+import 'package:ffi/ffi.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_jussdk/flutter_logger.dart';
+import 'package:flutter_jussdk/flutter_message.dart';
+import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
+import 'package:flutter_jussdk/flutter_notify.dart';
+import 'package:flutter_jussdk/flutter_account.dart';
 
-/// A very short-lived native function.
-///
-/// For very short-lived functions, it is fine to call them on the main isolate.
-/// They will block the Dart execution while running the native function, so
-/// only do this for native functions which are guaranteed to be short-lived.
-int sum(int a, int b) => _bindings.sum(a, b);
+class FlutterJussdkConstants {
 
-/// A longer lived native function, which occupies the thread calling it.
-///
-/// Do not call these kind of native functions in the main isolate. They will
-/// block Dart execution. This will cause dropped frames in Flutter applications.
-/// Instead, call these native functions on a separate isolate.
-///
-/// Modify this to suit your own use case. Example use cases:
-///
-/// 1. Reuse a single isolate for various different kinds of requests.
-/// 2. Use multiple helper isolates for parallel execution.
-Future<int> sumAsync(int a, int b) async {
-  final SendPort helperIsolateSendPort = await _helperIsolateSendPort;
-  final int requestId = _nextSumRequestId++;
-  final _SumRequest request = _SumRequest(requestId, a, b);
-  final Completer<int> completer = Completer<int>();
-  _sumRequests[requestId] = completer;
-  helperIsolateSendPort.send(request);
-  return completer.future;
+  /// 开发问题, 需要开发排查
+  static const int errorDevIntegration = -1;
+  /// mtcNotify 失败回调, 未带具体的错误码
+  static const int errorFailNotification = -2;
+  /// 自定义的错误码以这个为基准
+  static const int errorBaseCode = -3;
+
+  /// 成功, 对应 Mtc.ZOK
+  static const int ZOK = 0;
+  /// 失败, 对应 Mtc.ZFAILED
+  static const int ZFAILED = 1;
+  /// 无效, 对应 Mtc.INVALIDID
+  static const int INVALIDID = -1;
+
 }
 
-const String _libName = 'flutter_jussdk';
+class FlutterJussdk {
 
-/// The dynamic library in which the symbols for [FlutterJussdkBindings] can be found.
-final DynamicLibrary _dylib = () {
+  static const _tag = 'FlutterJussdk';
+
+  /// 日志模块对象
+  static late FlutterLogger logger;
+  /// 账号模块对象
+  static late FlutterAccount account;
+  /// 消息模块对象
+  static late FlutterMessage message;
+
+  /// 初始化 Sdk
+  /// appKey: Juphoon sdk 的 app key
+  /// router: router 地址
+  /// buildNumber: 应用的构建版本号(对应 Android 的 versionCode)
+  /// deviceId: 设备 ID
+  /// logDir: sdk 内部日志输出目录
+  /// profileDir: 用户配置文件的目录
+  /// fixedUserType: 如果该值不为空, 则后续接口的 userType 都为该值
+  static void initialize(
+      {required String appKey,
+      required String router,
+      required String buildNumber,
+      required String deviceId,
+      required Directory logDir,
+      required Directory profileDir,
+      String? fixedUserType}) {
+    final StreamController<dynamic> mtcNotifyEvents = StreamController<dynamic>();
+    logger = FlutterLogger(_mtcBindings);
+    account = FlutterAccountImpl(_mtcBindings, logger, appKey, router, buildNumber, deviceId, mtcNotifyEvents);
+    message = FlutterMessage();
+    _mtcBindings.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
+    if (Platform.isWindows) {
+      // final myUiEventCallable = NativeCallable<MyUiEvent>.listener(myUiEvent);
+      // _mtcBindings.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), myUiEventCallable.nativeFunction.cast<Void>());
+    } else {
+      _mtcBindings.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), nullptr);
+    }
+    if (Platform.isAndroid) {
+      const EventChannel('com.jus.flutter_jusdk.MtcNotify')
+          .receiveBroadcastStream()
+          .listen((event) {
+            logger.i(tag: _tag, message: 'MtcNotify:$event');
+            if (event['cookie'] > 0) {
+              FlutterNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
+            } else {
+              mtcNotifyEvents.sink.add(event);
+            }
+      });
+    } else {
+      // _mtcBindings.Mtc_CliCbSetNotify(Pointer.fromFunction(mtcNotify, 0));
+    }
+  }
+
+}
+
+final FlutterMtcBindings _mtcBindings = FlutterMtcBindings(() {
+  String libName = 'mtc';
   if (Platform.isMacOS || Platform.isIOS) {
-    return DynamicLibrary.open('$_libName.framework/$_libName');
+    return DynamicLibrary.open('$libName.framework/$libName');
   }
   if (Platform.isAndroid || Platform.isLinux) {
-    return DynamicLibrary.open('lib$_libName.so');
+    return DynamicLibrary.open('lib$libName.so');
   }
   if (Platform.isWindows) {
-    return DynamicLibrary.open('$_libName.dll');
+    return DynamicLibrary.open('$libName.dll');
   }
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
-}();
+}());
 
-/// The bindings to the native functions in [_dylib].
-final FlutterJussdkBindings _bindings = FlutterJussdkBindings(_dylib);
-
-
-/// A request to compute `sum`.
-///
-/// Typically sent from one isolate to another.
-class _SumRequest {
-  final int id;
-  final int a;
-  final int b;
-
-  const _SumRequest(this.id, this.a, this.b);
-}
-
-/// A response with the result of `sum`.
-///
-/// Typically sent from one isolate to another.
-class _SumResponse {
-  final int id;
-  final int result;
-
-  const _SumResponse(this.id, this.result);
-}
-
-/// Counter to identify [_SumRequest]s and [_SumResponse]s.
-int _nextSumRequestId = 0;
-
-/// Mapping from [_SumRequest] `id`s to the completers corresponding to the correct future of the pending request.
-final Map<int, Completer<int>> _sumRequests = <int, Completer<int>>{};
-
-/// The SendPort belonging to the helper isolate.
-Future<SendPort> _helperIsolateSendPort = () async {
-  // The helper isolate is going to send us back a SendPort, which we want to
-  // wait for.
-  final Completer<SendPort> completer = Completer<SendPort>();
-
-  // Receive port on the main isolate to receive messages from the helper.
-  // We receive two types of messages:
-  // 1. A port to send messages on.
-  // 2. Responses to requests we sent.
-  final ReceivePort receivePort = ReceivePort()
-    ..listen((dynamic data) {
-      if (data is SendPort) {
-        // The helper isolate sent us the port on which we can sent it requests.
-        completer.complete(data);
-        return;
-      }
-      if (data is _SumResponse) {
-        // The helper isolate sent us a response to a request we sent.
-        final Completer<int> completer = _sumRequests[data.id]!;
-        _sumRequests.remove(data.id);
-        completer.complete(data.result);
-        return;
-      }
-      throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
-    });
-
-  // Start the helper isolate.
-  await Isolate.spawn((SendPort sendPort) async {
-    final ReceivePort helperReceivePort = ReceivePort()
-      ..listen((dynamic data) {
-        // On the helper isolate listen to requests and respond to them.
-        if (data is _SumRequest) {
-          final int result = _bindings.sum_long_running(data.a, data.b);
-          final _SumResponse response = _SumResponse(data.id, result);
-          sendPort.send(response);
-          return;
-        }
-        throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
-      });
-
-    // Send the port to the main isolate on which we can receive requests.
-    sendPort.send(helperReceivePort.sendPort);
-  }, receivePort.sendPort);
-
-  // Wait until the helper isolate has sent us back the SendPort on which we
-  // can start sending requests.
-  return completer.future;
-}();
+// typedef MyUiEvent = Void Function(Pointer<Void> zEvntId);
+// typedef MyUiEventPtr = Pointer<NativeFunction<MyUiEvent>>;
+//
+// void myUiEvent(Pointer<Void> zEvntId) {
+//   // 发送到 ui 线程去执行 CliDrive
+//   // SchedulerBinding.instance.addPostFrameCallback((_) {
+//   _mtcBindings.Mtc_CliDrive(zEvntId);
+//   // });
+//   // return 0;
+// }
+//
+// int mtcNotify(Pointer<Char> pcName, int zCookie, Pointer<Char> pcInfo) {
+//   // pcName.cast<Utf8>().toDartString();
+//   return 0;
+// }

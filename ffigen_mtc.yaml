@@ -8,20 +8,26 @@ output: 'lib/flutter_mtc_bindings_generated.dart'
 headers:
   entry-points:
     - 'src/include/lemon/mtc/mtc_cli.h'
-    - 'src/include/lemon/mtc/mtc_cli_cfg.h'
     - 'src/include/lemon/mtc/mtc_cli_cb.h'
+    - 'src/include/lemon/mtc/mtc_cli_cfg.h'
+    - 'src/include/lemon/mtc/mtc_cli_db.h'
     - 'src/include/lemon/mtc/mtc_prof.h'
     - 'src/include/lemon/mtc/mtc_prof_db.h'
+    - 'src/include/lemon/mtc/mtc_ue.h'
     - 'src/include/lemon/mtc/mtc_ue_db.h'
     - 'src/include/lemon/mtc/mtc_user.h'
+    - 'src/include/lemon/mtc/mtc_util.h'
   include-directives:
     - 'src/include/lemon/mtc/mtc_cli.h'
-    - 'src/include/lemon/mtc/mtc_cli_cfg.h'
     - 'src/include/lemon/mtc/mtc_cli_cb.h'
+    - 'src/include/lemon/mtc/mtc_cli_cfg.h'
+    - 'src/include/lemon/mtc/mtc_cli_db.h'
     - 'src/include/lemon/mtc/mtc_prof.h'
     - 'src/include/lemon/mtc/mtc_prof_db.h'
+    - 'src/include/lemon/mtc/mtc_ue.h'
     - 'src/include/lemon/mtc/mtc_ue_db.h'
     - 'src/include/lemon/mtc/mtc_user.h'
+    - 'src/include/lemon/mtc/mtc_util.h'
 preamble: |
   // ignore_for_file: always_specify_types
   // ignore_for_file: camel_case_types

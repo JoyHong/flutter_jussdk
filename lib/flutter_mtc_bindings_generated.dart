@@ -770,6 +770,94 @@ class FlutterMtcBindings {
   late final _Mtc_CliCbSetJavaPrintX = _Mtc_CliCbSetJavaPrintXPtr.asFunction<
       int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
 
+  /// @brief Set the Zos_Printf string print callback.
+  /// Zos print and log functions will always call it if callback is not ZNULL.
+  ///
+  /// @param [in] pfnCb Callback function.
+  void Mtc_CliCbSetPrint(
+    PFN_MTCCLIPRINT pfnCb,
+  ) {
+    return _Mtc_CliCbSetPrint(
+      pfnCb,
+    );
+  }
+
+  late final _Mtc_CliCbSetPrintPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(PFN_MTCCLIPRINT)>>(
+          'Mtc_CliCbSetPrint');
+  late final _Mtc_CliCbSetPrint =
+      _Mtc_CliCbSetPrintPtr.asFunction<void Function(PFN_MTCCLIPRINT)>();
+
+  /// @brief Set the Zos_Printf string print callback.
+  /// Zos print and log functions will always call it if callback is not ZNULL.
+  ///
+  /// @param [in] pfnCb Callback function.
+  void Mtc_CliCbSetPrintX(
+    PFN_MTCCLIPRINTX pfnCb,
+  ) {
+    return _Mtc_CliCbSetPrintX(
+      pfnCb,
+    );
+  }
+
+  late final _Mtc_CliCbSetPrintXPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(PFN_MTCCLIPRINTX)>>(
+          'Mtc_CliCbSetPrintX');
+  late final _Mtc_CliCbSetPrintX =
+      _Mtc_CliCbSetPrintXPtr.asFunction<void Function(PFN_MTCCLIPRINTX)>();
+
+  /// @brief Set the service event callback to MTC driver owner.
+  /// @param [in] pfnCb Callback function.
+  void Mtc_CliCbSetNotify(
+    PFN_MTCCLINOTIFY pfnCb,
+  ) {
+    return _Mtc_CliCbSetNotify(
+      pfnCb,
+    );
+  }
+
+  late final _Mtc_CliCbSetNotifyPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(PFN_MTCCLINOTIFY)>>(
+          'Mtc_CliCbSetNotify');
+  late final _Mtc_CliCbSetNotify =
+      _Mtc_CliCbSetNotifyPtr.asFunction<void Function(PFN_MTCCLINOTIFY)>();
+
+  /// @brief Set the service event callback to MTC driver owner.
+  /// @param [in] pfnCb Callback function.
+  int Mtc_CliCbSetEvent(
+    PFN_MTCUIEVNT pfnCb,
+  ) {
+    return _Mtc_CliCbSetEvent(
+      pfnCb,
+    );
+  }
+
+  late final _Mtc_CliCbSetEventPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(PFN_MTCUIEVNT)>>(
+          'Mtc_CliCbSetEvent');
+  late final _Mtc_CliCbSetEvent =
+      _Mtc_CliCbSetEventPtr.asFunction<int Function(PFN_MTCUIEVNT)>();
+
+  /// @brief Set callback for abort.
+  ///
+  /// @param pfnCallback Callback function for abort.
+  /// @param zCookie Cookie value in notification.
+  int Mtc_CliCbSetAbort(
+    PFN_MTCCLIABORT pfnCallback,
+    int zCookie,
+  ) {
+    return _Mtc_CliCbSetAbort(
+      pfnCallback,
+      zCookie,
+    );
+  }
+
+  late final _Mtc_CliCbSetAbortPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(PFN_MTCCLIABORT, ffi.Size)>>(
+          'Mtc_CliCbSetAbort');
+  late final _Mtc_CliCbSetAbort =
+      _Mtc_CliCbSetAbortPtr.asFunction<int Function(PFN_MTCCLIABORT, int)>();
+
   /// @brief Set log level.
   ///
   /// @param [in] iLevel Log level, 0 for no log, larger value for more log.
@@ -1298,93 +1386,762 @@ class FlutterMtcBindings {
   late final _Mtc_CliCfgSetLogConfusionEnable =
       _Mtc_CliCfgSetLogConfusionEnablePtr.asFunction<int Function(bool)>();
 
-  /// @brief Set the Zos_Printf string print callback.
-  /// Zos print and log functions will always call it if callback is not ZNULL.
+  /// @brief Apply all data change to all components.
   ///
-  /// @param [in] pfnCb Callback function.
-  void Mtc_CliCbSetPrint(
-    PFN_MTCCLIPRINT pfnCb,
-  ) {
-    return _Mtc_CliCbSetPrint(
-      pfnCb,
-    );
+  /// @retval 0 Apply data change successfully.
+  /// @retval 1 Apply data change failed.
+  int Mtc_CliDbApplyAll() {
+    return _Mtc_CliDbApplyAll();
   }
 
-  late final _Mtc_CliCbSetPrintPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(PFN_MTCCLIPRINT)>>(
-          'Mtc_CliCbSetPrint');
-  late final _Mtc_CliCbSetPrint =
-      _Mtc_CliCbSetPrintPtr.asFunction<void Function(PFN_MTCCLIPRINT)>();
+  late final _Mtc_CliDbApplyAllPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('Mtc_CliDbApplyAll');
+  late final _Mtc_CliDbApplyAll =
+      _Mtc_CliDbApplyAllPtr.asFunction<int Function()>();
 
-  /// @brief Set the Zos_Printf string print callback.
-  /// Zos print and log functions will always call it if callback is not ZNULL.
+  /// @brief Get data change apply flag.
   ///
-  /// @param [in] pfnCb Callback function.
-  void Mtc_CliCbSetPrintX(
-    PFN_MTCCLIPRINTX pfnCb,
-  ) {
-    return _Mtc_CliCbSetPrintX(
-      pfnCb,
-    );
-  }
-
-  late final _Mtc_CliCbSetPrintXPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(PFN_MTCCLIPRINTX)>>(
-          'Mtc_CliCbSetPrintX');
-  late final _Mtc_CliCbSetPrintX =
-      _Mtc_CliCbSetPrintXPtr.asFunction<void Function(PFN_MTCCLIPRINTX)>();
-
-  /// @brief Set the service event callback to MTC driver owner.
-  /// @param [in] pfnCb Callback function.
-  void Mtc_CliCbSetNotify(
-    PFN_MTCCLINOTIFY pfnCb,
-  ) {
-    return _Mtc_CliCbSetNotify(
-      pfnCb,
-    );
-  }
-
-  late final _Mtc_CliCbSetNotifyPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(PFN_MTCCLINOTIFY)>>(
-          'Mtc_CliCbSetNotify');
-  late final _Mtc_CliCbSetNotify =
-      _Mtc_CliCbSetNotifyPtr.asFunction<void Function(PFN_MTCCLINOTIFY)>();
-
-  /// @brief Set the service event callback to MTC driver owner.
-  /// @param [in] pfnCb Callback function.
-  int Mtc_CliCbSetEvent(
-    PFN_MTCUIEVNT pfnCb,
-  ) {
-    return _Mtc_CliCbSetEvent(
-      pfnCb,
-    );
-  }
-
-  late final _Mtc_CliCbSetEventPtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function(PFN_MTCUIEVNT)>>(
-          'Mtc_CliCbSetEvent');
-  late final _Mtc_CliCbSetEvent =
-      _Mtc_CliCbSetEventPtr.asFunction<int Function(PFN_MTCUIEVNT)>();
-
-  /// @brief Set callback for abort.
+  /// @return Data change apply flag.
   ///
-  /// @param pfnCallback Callback function for abort.
-  /// @param zCookie Cookie value in notification.
-  int Mtc_CliCbSetAbort(
-    PFN_MTCCLIABORT pfnCallback,
-    int zCookie,
+  /// @see @ref Mtc_CliDbSetApplyChange
+  bool Mtc_CliDbGetApplyChange() {
+    return _Mtc_CliDbGetApplyChange();
+  }
+
+  late final _Mtc_CliDbGetApplyChangePtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>(
+          'Mtc_CliDbGetApplyChange');
+  late final _Mtc_CliDbGetApplyChange =
+      _Mtc_CliDbGetApplyChangePtr.asFunction<bool Function()>();
+
+  /// @brief Set data change apply flag realtime.
+  ///
+  /// @retval 0 Set data change apply flag successfully.
+  /// @retval 1 Set data change apply flag failed.
+  ///
+  /// @see @ref Mtc_CliDbGetApplyChange
+  int Mtc_CliDbSetApplyChange(
+    bool bApply,
   ) {
-    return _Mtc_CliCbSetAbort(
-      pfnCallback,
-      zCookie,
+    return _Mtc_CliDbSetApplyChange(
+      bApply,
     );
   }
 
-  late final _Mtc_CliCbSetAbortPtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function(PFN_MTCCLIABORT, ffi.Size)>>(
-          'Mtc_CliCbSetAbort');
-  late final _Mtc_CliCbSetAbort =
-      _Mtc_CliCbSetAbortPtr.asFunction<int Function(PFN_MTCCLIABORT, int)>();
+  late final _Mtc_CliDbSetApplyChangePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetApplyChange');
+  late final _Mtc_CliDbSetApplyChange =
+      _Mtc_CliDbSetApplyChangePtr.asFunction<int Function(bool)>();
+
+  /// @brief Get data HTTP proxy.
+  ///
+  /// @return Data HTTP proxy.
+  ///
+  /// @see @ref Mtc_CliDbSetHttpProxy
+  ffi.Pointer<ffi.Char> Mtc_CliDbGetHttpProxy() {
+    return _Mtc_CliDbGetHttpProxy();
+  }
+
+  late final _Mtc_CliDbGetHttpProxyPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_CliDbGetHttpProxy');
+  late final _Mtc_CliDbGetHttpProxy =
+      _Mtc_CliDbGetHttpProxyPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief Set data HTTP proxy realtime.
+  ///
+  /// @retval 0 Set data HTTP proxy successfully.
+  /// @retval 1 Set data HTTP proxy failed.
+  ///
+  /// @see @ref Mtc_CliDbGetHttpProxy
+  int Mtc_CliDbSetHttpProxy(
+    ffi.Pointer<ffi.Char> pcProxy,
+  ) {
+    return _Mtc_CliDbSetHttpProxy(
+      pcProxy,
+    );
+  }
+
+  late final _Mtc_CliDbSetHttpProxyPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Char>)>>(
+          'Mtc_CliDbSetHttpProxy');
+  late final _Mtc_CliDbSetHttpProxy = _Mtc_CliDbSetHttpProxyPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get DNS local listen port from database.
+  ///
+  /// @return The DNS local listen port.
+  ///
+  /// @see @ref Mtc_CliDbSetDnsLclPort
+  int Mtc_CliDbGetDnsLclPort() {
+    return _Mtc_CliDbGetDnsLclPort();
+  }
+
+  late final _Mtc_CliDbGetDnsLclPortPtr =
+      _lookup<ffi.NativeFunction<ffi.UnsignedInt Function()>>(
+          'Mtc_CliDbGetDnsLclPort');
+  late final _Mtc_CliDbGetDnsLclPort =
+      _Mtc_CliDbGetDnsLclPortPtr.asFunction<int Function()>();
+
+  /// @brief Set DNS local listen port.
+  ///
+  /// @param [in] iPort DNS local listen port.
+  ///
+  /// @retval 0 Set DNS local listen port successfully.
+  /// @retval 1 Set DNS local listen port failed.
+  ///
+  /// @see @ref Mtc_CliDbGetDnsLclPort
+  int Mtc_CliDbSetDnsLclPort(
+    int iPort,
+  ) {
+    return _Mtc_CliDbSetDnsLclPort(
+      iPort,
+    );
+  }
+
+  late final _Mtc_CliDbSetDnsLclPortPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetDnsLclPort');
+  late final _Mtc_CliDbSetDnsLclPort =
+      _Mtc_CliDbSetDnsLclPortPtr.asFunction<int Function(int)>();
+
+  /// @brief Get DNS primary or secondary server IP from database.
+  ///
+  /// @param [in] bPrimary DNS primary option.
+  ///
+  /// @return The DNS primary or secondary server IP.
+  ///
+  /// @see @ref Mtc_CliDbSetDnsServIp
+  int Mtc_CliDbGetDnsServIp(
+    bool bPrimary,
+  ) {
+    return _Mtc_CliDbGetDnsServIp(
+      bPrimary,
+    );
+  }
+
+  late final _Mtc_CliDbGetDnsServIpPtr =
+      _lookup<ffi.NativeFunction<ffi.UnsignedInt Function(ffi.Bool)>>(
+          'Mtc_CliDbGetDnsServIp');
+  late final _Mtc_CliDbGetDnsServIp =
+      _Mtc_CliDbGetDnsServIpPtr.asFunction<int Function(bool)>();
+
+  /// @brief Set DNS primary or secondary server IP.
+  ///
+  /// @param [in] bPrimary DNS primary option.
+  /// @param [in] iServIp DNS primary or secondary server IP.
+  ///
+  /// @retval 0 Set DNS primary or secondary server IP successfully.
+  /// @retval 1 Set DNS primary or secondary server IP failed.
+  ///
+  /// @see @ref Mtc_CliDbGetDnsServIp
+  int Mtc_CliDbSetDnsServIp(
+    bool bPrimary,
+    int iServIp,
+  ) {
+    return _Mtc_CliDbSetDnsServIp(
+      bPrimary,
+      iServIp,
+    );
+  }
+
+  late final _Mtc_CliDbSetDnsServIpPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool, ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetDnsServIp');
+  late final _Mtc_CliDbSetDnsServIp =
+      _Mtc_CliDbSetDnsServIpPtr.asFunction<int Function(bool, int)>();
+
+  /// @brief Get DNS primary or secondary server port from database.
+  ///
+  /// @param [in] bPrimary DNS primary option.
+  ///
+  /// @return The DNS primary or secondary server port.
+  ///
+  /// @see @ref Mtc_CliDbSetDnsServPort
+  int Mtc_CliDbGetDnsServPort(
+    bool bPrimary,
+  ) {
+    return _Mtc_CliDbGetDnsServPort(
+      bPrimary,
+    );
+  }
+
+  late final _Mtc_CliDbGetDnsServPortPtr =
+      _lookup<ffi.NativeFunction<ffi.UnsignedInt Function(ffi.Bool)>>(
+          'Mtc_CliDbGetDnsServPort');
+  late final _Mtc_CliDbGetDnsServPort =
+      _Mtc_CliDbGetDnsServPortPtr.asFunction<int Function(bool)>();
+
+  /// @brief Set DNS primary or secondary server port.
+  ///
+  /// @param [in] bPrimary DNS primary option.
+  /// @param [in] iPort DNS primary or secondary server port.
+  ///
+  /// @retval 0 Set DNS primary or secondary server port successfully.
+  /// @retval 1 Set DNS primary or secondary server port failed.
+  ///
+  /// @see @ref Mtc_CliDbGetDnsServPort
+  int Mtc_CliDbSetDnsServPort(
+    bool bPrimary,
+    int iPort,
+  ) {
+    return _Mtc_CliDbSetDnsServPort(
+      bPrimary,
+      iPort,
+    );
+  }
+
+  late final _Mtc_CliDbSetDnsServPortPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool, ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetDnsServPort');
+  late final _Mtc_CliDbSetDnsServPort =
+      _Mtc_CliDbSetDnsServPortPtr.asFunction<int Function(bool, int)>();
+
+  /// @brief Get DNS use google dns server flag from local database.
+  ///
+  /// @return The DNS use google dns server flag.
+  ///
+  /// @see @ref Mtc_CliDbSetDnsUseGoogle
+  bool Mtc_CliDbGetDnsUseGoogle() {
+    return _Mtc_CliDbGetDnsUseGoogle();
+  }
+
+  late final _Mtc_CliDbGetDnsUseGooglePtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>(
+          'Mtc_CliDbGetDnsUseGoogle');
+  late final _Mtc_CliDbGetDnsUseGoogle =
+      _Mtc_CliDbGetDnsUseGooglePtr.asFunction<bool Function()>();
+
+  /// @brief Set DNS use google dns server flag.
+  ///
+  /// @param [in] bUse The DNS use google dns server flag.
+  /// ZTRUE for using google public dns server as second DNS server.
+  /// ZFALSE for not use.
+  ///
+  /// @retval 0 Set DNS use google dns server flag successfully.
+  /// @retval 1 Set DNS use google dns server flag failed.
+  ///
+  /// @see @ref Mtc_CliDbGetDnsUseGoogle
+  int Mtc_CliDbSetDnsUseGoogle(
+    bool bUse,
+  ) {
+    return _Mtc_CliDbSetDnsUseGoogle(
+      bUse,
+    );
+  }
+
+  late final _Mtc_CliDbSetDnsUseGooglePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetDnsUseGoogle');
+  late final _Mtc_CliDbSetDnsUseGoogle =
+      _Mtc_CliDbSetDnsUseGooglePtr.asFunction<int Function(bool)>();
+
+  /// @brief Get data Host Maps.
+  ///
+  /// @return Data Host Maps.
+  ///
+  /// @see @ref Mtc_CliDbSetHostMaps
+  ffi.Pointer<ffi.Char> Mtc_CliDbGetHostMaps() {
+    return _Mtc_CliDbGetHostMaps();
+  }
+
+  late final _Mtc_CliDbGetHostMapsPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_CliDbGetHostMaps');
+  late final _Mtc_CliDbGetHostMaps =
+      _Mtc_CliDbGetHostMapsPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief Set data Host Maps.
+  ///
+  /// @retval 0 Set data Host Maps successfully.
+  /// @retval 1 Set data Host Maps failed.
+  ///
+  /// @see @ref Mtc_CliDbGetHostMaps
+  int Mtc_CliDbSetHostMaps(
+    ffi.Pointer<ffi.Char> pcHostMaps,
+  ) {
+    return _Mtc_CliDbSetHostMaps(
+      pcHostMaps,
+    );
+  }
+
+  late final _Mtc_CliDbSetHostMapsPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Char>)>>(
+          'Mtc_CliDbSetHostMaps');
+  late final _Mtc_CliDbSetHostMaps = _Mtc_CliDbSetHostMapsPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get first connect type.
+  ///
+  /// @return Data First connect type.
+  ///
+  /// @see @ref Mtc_CliDbSetFirstConnType
+  int Mtc_CliDbGetFirstConnType() {
+    return _Mtc_CliDbGetFirstConnType();
+  }
+
+  late final _Mtc_CliDbGetFirstConnTypePtr =
+      _lookup<ffi.NativeFunction<ffi.UnsignedInt Function()>>(
+          'Mtc_CliDbGetFirstConnType');
+  late final _Mtc_CliDbGetFirstConnType =
+      _Mtc_CliDbGetFirstConnTypePtr.asFunction<int Function()>();
+
+  /// @brief Set first connect type.
+  ///
+  /// @param [in] iFirstConnType The first connect protocol type.
+  ///
+  /// @retval 0 Set type successfully.
+  /// @retval 1 Set type failed.
+  ///
+  /// @see @ref Mtc_CliDbGetFirstConnType
+  int Mtc_CliDbSetFirstConnType(
+    int iFirstConnType,
+  ) {
+    return _Mtc_CliDbSetFirstConnType(
+      iFirstConnType,
+    );
+  }
+
+  late final _Mtc_CliDbSetFirstConnTypePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetFirstConnType');
+  late final _Mtc_CliDbSetFirstConnType =
+      _Mtc_CliDbSetFirstConnTypePtr.asFunction<int Function(int)>();
+
+  /// @brief Get use statistics mod enable.
+  ///
+  /// @return Stsc used flag.
+  ///
+  /// @see @ref Mtc_CliDbSetStsEnable
+  bool Mtc_CliDbGetStsEnable() {
+    return _Mtc_CliDbGetStsEnable();
+  }
+
+  late final _Mtc_CliDbGetStsEnablePtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('Mtc_CliDbGetStsEnable');
+  late final _Mtc_CliDbGetStsEnable =
+      _Mtc_CliDbGetStsEnablePtr.asFunction<bool Function()>();
+
+  /// @brief Set use statistics mod enable.
+  ///
+  /// @retval 0 Set stsc enable flag successfully.
+  /// @retval 1 Set stsc enable flag failed.
+  ///
+  /// @see @ref Mtc_CliDbGetStsEnable
+  int Mtc_CliDbSetStsEnable(
+    bool bEnable,
+  ) {
+    return _Mtc_CliDbSetStsEnable(
+      bEnable,
+    );
+  }
+
+  late final _Mtc_CliDbSetStsEnablePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetStsEnable');
+  late final _Mtc_CliDbSetStsEnable =
+      _Mtc_CliDbSetStsEnablePtr.asFunction<int Function(bool)>();
+
+  /// @brief Get get apply data async dns flag.
+  ///
+  /// @return async dns flag.
+  ///
+  /// @see @ref Mtc_CliDbSetAsyncDns
+  bool Mtc_CliDbGetAsyncDns() {
+    return _Mtc_CliDbGetAsyncDns();
+  }
+
+  late final _Mtc_CliDbGetAsyncDnsPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('Mtc_CliDbGetAsyncDns');
+  late final _Mtc_CliDbGetAsyncDns =
+      _Mtc_CliDbGetAsyncDnsPtr.asFunction<bool Function()>();
+
+  /// @brief Set get apply data async dns flag.
+  ///
+  /// @retval 0 Set async dns flag successfully.
+  /// @retval 1 Set async dns flag failed.
+  ///
+  /// @see @ref Mtc_CliDbGetAsyncDns
+  int Mtc_CliDbSetAsyncDns(
+    bool bAsyncDns,
+  ) {
+    return _Mtc_CliDbSetAsyncDns(
+      bAsyncDns,
+    );
+  }
+
+  late final _Mtc_CliDbSetAsyncDnsPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetAsyncDns');
+  late final _Mtc_CliDbSetAsyncDns =
+      _Mtc_CliDbSetAsyncDnsPtr.asFunction<int Function(bool)>();
+
+  /// @brief Get path select algo type.
+  ///
+  /// @return path select algo type.
+  ///
+  /// @see @ref Mtc_CliDbSetPathAlgoType
+  int Mtc_CliDbGetPathAlgoType() {
+    return _Mtc_CliDbGetPathAlgoType();
+  }
+
+  late final _Mtc_CliDbGetPathAlgoTypePtr =
+      _lookup<ffi.NativeFunction<ffi.UnsignedInt Function()>>(
+          'Mtc_CliDbGetPathAlgoType');
+  late final _Mtc_CliDbGetPathAlgoType =
+      _Mtc_CliDbGetPathAlgoTypePtr.asFunction<int Function()>();
+
+  /// @brief Set path select algo type.
+  ///
+  /// @param [in] iType The path select algo type.
+  ///
+  /// @retval 0 Set type successfully.
+  /// @retval 1 Set type failed.
+  ///
+  /// @see @ref Mtc_CliDbGetPathAlgoType
+  int Mtc_CliDbSetPathAlgoType(
+    int iType,
+  ) {
+    return _Mtc_CliDbSetPathAlgoType(
+      iType,
+    );
+  }
+
+  late final _Mtc_CliDbSetPathAlgoTypePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetPathAlgoType');
+  late final _Mtc_CliDbSetPathAlgoType =
+      _Mtc_CliDbSetPathAlgoTypePtr.asFunction<int Function(int)>();
+
+  /// @brief Get get always work mode flag.
+  ///
+  /// @return always work mode flag.
+  ///
+  /// @see @ref Mtc_CliDbSetAlwaysWorkMode
+  bool Mtc_CliDbGetAlwaysWorkMode() {
+    return _Mtc_CliDbGetAlwaysWorkMode();
+  }
+
+  late final _Mtc_CliDbGetAlwaysWorkModePtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>(
+          'Mtc_CliDbGetAlwaysWorkMode');
+  late final _Mtc_CliDbGetAlwaysWorkMode =
+      _Mtc_CliDbGetAlwaysWorkModePtr.asFunction<bool Function()>();
+
+  /// @brief Set get always work mode flag.
+  ///
+  /// @retval 0 Set always work mode flag successfully.
+  /// @retval 1 Set always work mode flag failed.
+  ///
+  /// @see @ref Mtc_CliDbGetAlwaysWorkMode
+  int Mtc_CliDbSetAlwaysWorkMode(
+    bool bEnable,
+  ) {
+    return _Mtc_CliDbSetAlwaysWorkMode(
+      bEnable,
+    );
+  }
+
+  late final _Mtc_CliDbSetAlwaysWorkModePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetAlwaysWorkMode');
+  late final _Mtc_CliDbSetAlwaysWorkMode =
+      _Mtc_CliDbSetAlwaysWorkModePtr.asFunction<int Function(bool)>();
+
+  /// @brief Get force login session flag.
+  ///
+  /// @return force login session flag.
+  ///
+  /// @see @ref Mtc_CliDbSetForceLogin
+  bool Mtc_CliDbGetForceLogin() {
+    return _Mtc_CliDbGetForceLogin();
+  }
+
+  late final _Mtc_CliDbGetForceLoginPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>(
+          'Mtc_CliDbGetForceLogin');
+  late final _Mtc_CliDbGetForceLogin =
+      _Mtc_CliDbGetForceLoginPtr.asFunction<bool Function()>();
+
+  /// @brief Set force login session flag realtime.
+  ///
+  /// @retval 0 Set force login session flag successfully.
+  /// @retval 1 Set force login session failed.
+  ///
+  /// @see @ref Mtc_CliDbGetForceLogin
+  int Mtc_CliDbSetForceLogin(
+    bool bEnable,
+  ) {
+    return _Mtc_CliDbSetForceLogin(
+      bEnable,
+    );
+  }
+
+  late final _Mtc_CliDbSetForceLoginPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetForceLogin');
+  late final _Mtc_CliDbSetForceLogin =
+      _Mtc_CliDbSetForceLoginPtr.asFunction<int Function(bool)>();
+
+  /// @brief Get alwasys try registerAlive flag.
+  ///
+  /// @return alwasys try registerAlive flag.
+  ///
+  /// @see @ref Mtc_CliDbSetAlwaysTryAlive
+  bool Mtc_CliDbGetAlwaysTryAlive() {
+    return _Mtc_CliDbGetAlwaysTryAlive();
+  }
+
+  late final _Mtc_CliDbGetAlwaysTryAlivePtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>(
+          'Mtc_CliDbGetAlwaysTryAlive');
+  late final _Mtc_CliDbGetAlwaysTryAlive =
+      _Mtc_CliDbGetAlwaysTryAlivePtr.asFunction<bool Function()>();
+
+  /// @brief Set alwasys try registerAlive realtime.
+  ///
+  /// @retval 0 Set alwasys try registerAlive successfully.
+  /// @retval 1 Set alwasys try registerAlive failed.
+  ///
+  /// @see @ref Mtc_CliDbGetAlwaysTryAlive
+  int Mtc_CliDbSetAlwaysTryAlive(
+    bool bEnable,
+  ) {
+    return _Mtc_CliDbSetAlwaysTryAlive(
+      bEnable,
+    );
+  }
+
+  late final _Mtc_CliDbSetAlwaysTryAlivePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetAlwaysTryAlive');
+  late final _Mtc_CliDbSetAlwaysTryAlive =
+      _Mtc_CliDbSetAlwaysTryAlivePtr.asFunction<int Function(bool)>();
+
+  /// @brief Get tls only flag.
+  ///
+  /// @return tls only flag.
+  ///
+  /// @see @ref Mtc_CliDbSetTlsOnly
+  bool Mtc_CliDbGetTlsOnly() {
+    return _Mtc_CliDbGetTlsOnly();
+  }
+
+  late final _Mtc_CliDbGetTlsOnlyPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function()>>('Mtc_CliDbGetTlsOnly');
+  late final _Mtc_CliDbGetTlsOnly =
+      _Mtc_CliDbGetTlsOnlyPtr.asFunction<bool Function()>();
+
+  /// @brief Set tls only flag.
+  ///
+  /// @retval 0 Set tls only successfully.
+  /// @retval 1 Set tls only failed.
+  ///
+  /// @see @ref Mtc_CliDbGetTlsOnly
+  int Mtc_CliDbSetTlsOnly(
+    bool bEnable,
+  ) {
+    return _Mtc_CliDbSetTlsOnly(
+      bEnable,
+    );
+  }
+
+  late final _Mtc_CliDbSetTlsOnlyPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Bool)>>(
+          'Mtc_CliDbSetTlsOnly');
+  late final _Mtc_CliDbSetTlsOnly =
+      _Mtc_CliDbSetTlsOnlyPtr.asFunction<int Function(bool)>();
+
+  /// @brief Get common mtu.
+  ///
+  /// @return common mtu.
+  ///
+  /// @see @ref Mtc_CliDbSetCommonMtuSize
+  int Mtc_CliDbGetCommonMtuSize() {
+    return _Mtc_CliDbGetCommonMtuSize();
+  }
+
+  late final _Mtc_CliDbGetCommonMtuSizePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>(
+          'Mtc_CliDbGetCommonMtuSize');
+  late final _Mtc_CliDbGetCommonMtuSize =
+      _Mtc_CliDbGetCommonMtuSizePtr.asFunction<int Function()>();
+
+  /// @brief Set common mtu.
+  ///
+  /// @retval ZOK Set value successfully.
+  /// @retval ZFAILED Set value failed.
+  ///
+  /// @see @ref Mtc_CliDbGetCommonMtuSize
+  int Mtc_CliDbSetCommonMtuSize(
+    int iMtu,
+  ) {
+    return _Mtc_CliDbSetCommonMtuSize(
+      iMtu,
+    );
+  }
+
+  late final _Mtc_CliDbSetCommonMtuSizePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetCommonMtuSize');
+  late final _Mtc_CliDbSetCommonMtuSize =
+      _Mtc_CliDbSetCommonMtuSizePtr.asFunction<int Function(int)>();
+
+  /// @brief Get access type.
+  ///
+  /// @return access type.
+  ///
+  /// @see @ref Mtc_CliDbSetCommonMtuSize
+  int Mtc_CliDbGetAccessType() {
+    return _Mtc_CliDbGetAccessType();
+  }
+
+  late final _Mtc_CliDbGetAccessTypePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('Mtc_CliDbGetAccessType');
+  late final _Mtc_CliDbGetAccessType =
+      _Mtc_CliDbGetAccessTypePtr.asFunction<int Function()>();
+
+  /// @brief Set access type.
+  ///
+  /// @param [in] iAccessType The statistics upload type @ref EN_MTC_CLI_DB_ACCESS_TYPE.
+  /// @retval ZOK Set value successfully.
+  /// @retval ZFAILED Set value failed.
+  ///
+  /// @see @ref Mtc_CliDbGetAccessType
+  int Mtc_CliDbSetAccessType(
+    int iAccessType,
+  ) {
+    return _Mtc_CliDbSetAccessType(
+      iAccessType,
+    );
+  }
+
+  late final _Mtc_CliDbSetAccessTypePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetAccessType');
+  late final _Mtc_CliDbSetAccessType =
+      _Mtc_CliDbSetAccessTypePtr.asFunction<int Function(int)>();
+
+  /// @brief Set set root der data.
+  ///
+  /// @param [in] pcRootData The root data.
+  ///
+  /// @retval 0 Set root data successfully.
+  /// @retval 1 Set root data failed.
+  ///
+  /// @see @ref Mtc_CliDbGetRootDerData
+  int Mtc_CliDbSetRootDerData(
+    ffi.Pointer<ffi.Char> pcRootData,
+  ) {
+    return _Mtc_CliDbSetRootDerData(
+      pcRootData,
+    );
+  }
+
+  late final _Mtc_CliDbSetRootDerDataPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Char>)>>(
+          'Mtc_CliDbSetRootDerData');
+  late final _Mtc_CliDbSetRootDerData = _Mtc_CliDbSetRootDerDataPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get root der data.
+  ///
+  /// @return Root der data.
+  ///
+  /// @see @ref Mtc_CliDbSetRootDerData
+  ffi.Pointer<ffi.Char> Mtc_CliDbGetRootDerData() {
+    return _Mtc_CliDbGetRootDerData();
+  }
+
+  late final _Mtc_CliDbGetRootDerDataPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_CliDbGetRootDerData');
+  late final _Mtc_CliDbGetRootDerData = _Mtc_CliDbGetRootDerDataPtr.asFunction<
+      ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief Set set trust cert data.
+  ///
+  /// @param [in] pcCertName The cert name.
+  /// @param [in] pcCertData The cert data.
+  ///
+  /// @retval 0 Set root data successfully.
+  /// @retval 1 Set root data failed.
+  ///
+  /// @see @ref Mtc_CliDbGetTrustCert
+  int Mtc_CliDbSetTrustCert(
+    ffi.Pointer<ffi.Char> pcCertName,
+    ffi.Pointer<ffi.Char> pcCertData,
+  ) {
+    return _Mtc_CliDbSetTrustCert(
+      pcCertName,
+      pcCertData,
+    );
+  }
+
+  late final _Mtc_CliDbSetTrustCertPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_CliDbSetTrustCert');
+  late final _Mtc_CliDbSetTrustCert = _Mtc_CliDbSetTrustCertPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get root der data.
+  ///
+  /// @param [in] pcCertName The cert name.
+  ///
+  /// @return Root der data.
+  ///
+  /// @see @ref Mtc_CliDbSetTrustCert
+  ffi.Pointer<ffi.Char> Mtc_CliDbGetTrustCert(
+    ffi.Pointer<ffi.Char> pcCertName,
+  ) {
+    return _Mtc_CliDbGetTrustCert(
+      pcCertName,
+    );
+  }
+
+  late final _Mtc_CliDbGetTrustCertPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Pointer<ffi.Char>)>>('Mtc_CliDbGetTrustCert');
+  late final _Mtc_CliDbGetTrustCert = _Mtc_CliDbGetTrustCertPtr.asFunction<
+      ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get agentCall level.
+  ///
+  /// @return agentCall level.
+  ///
+  /// @see @ref Mtc_CliDbSetAgentCallLevel
+  int Mtc_CliDbGetAgentCallLevel() {
+    return _Mtc_CliDbGetAgentCallLevel();
+  }
+
+  late final _Mtc_CliDbGetAgentCallLevelPtr =
+      _lookup<ffi.NativeFunction<ffi.UnsignedInt Function()>>(
+          'Mtc_CliDbGetAgentCallLevel');
+  late final _Mtc_CliDbGetAgentCallLevel =
+      _Mtc_CliDbGetAgentCallLevelPtr.asFunction<int Function()>();
+
+  /// @brief Set agentCall level.
+  ///
+  /// @retval ZOK Set value successfully.
+  /// @retval ZFAILED Set value failed.
+  ///
+  /// @see @ref Mtc_CliDbGetAgentCallLevel
+  int Mtc_CliDbSetAgentCallLevel(
+    int iLevel,
+  ) {
+    return _Mtc_CliDbSetAgentCallLevel(
+      iLevel,
+    );
+  }
+
+  late final _Mtc_CliDbSetAgentCallLevelPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.UnsignedInt)>>(
+          'Mtc_CliDbSetAgentCallLevel');
+  late final _Mtc_CliDbSetAgentCallLevel =
+      _Mtc_CliDbSetAgentCallLevelPtr.asFunction<int Function(int)>();
 
   /// @brief Get user count in profile management.
   ///
@@ -1806,6 +2563,1285 @@ class FlutterMtcBindings {
               ffi.Pointer<ffi.Char>)>>('Mtc_ProfDbSetExtParm');
   late final _Mtc_ProfDbSetExtParm = _Mtc_ProfDbSetExtParmPtr.asFunction<
       int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC create a user from JustalkCloud.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcUserName The Username string.
+  /// @param [in] pcPassword The password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeCreateOkNotification or @ref MtcUeCreateDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeCreate(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUserName,
+    ffi.Pointer<ffi.Char> pcPassword,
+  ) {
+    return _Mtc_UeCreate(
+      zCookie,
+      pcUserName,
+      pcPassword,
+    );
+  }
+
+  late final _Mtc_UeCreatePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeCreate');
+  late final _Mtc_UeCreate = _Mtc_UeCreatePtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC create a user from JustalkCloud.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcRelations The relations type and id in a JSON array.
+  /// Each element in array is a JSON object contains
+  /// @ref MtcUeRelationTypeKey and @ref MtcUeRelationIdKey
+  /// @param [in] pcPassword The password string.
+  /// @param [in] bPwdSetByUser unused, set true
+  /// @param [in] pcProps The props name and value in a JSON array.
+  /// Each element in array is a JSON object contains
+  /// @ref MtcUeInitialPropertyNameKey and @ref MtcUeInitialPropertyValueKey
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeCreateOkNotification or @ref MtcUeCreateDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeCreate2(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcRelations,
+    ffi.Pointer<ffi.Char> pcPassword,
+    bool bPwdSetByUser,
+    ffi.Pointer<ffi.Char> pcProps,
+  ) {
+    return _Mtc_UeCreate2(
+      zCookie,
+      pcRelations,
+      pcPassword,
+      bPwdSetByUser,
+      pcProps,
+    );
+  }
+
+  late final _Mtc_UeCreate2Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Bool,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeCreate2');
+  late final _Mtc_UeCreate2 = _Mtc_UeCreate2Ptr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, bool,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC create a user with authentic code from JustalkCloud.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentic Code string.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE The user entry type.
+  /// @param [in] pcLinkedId The Phone number string.
+  /// @param [in] pcPassword The password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeCreateOkNotification or @ref MtcUeCreateDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeCreateWithAuthCode(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+    ffi.Pointer<ffi.Char> pcPassword,
+  ) {
+    return _Mtc_UeCreateWithAuthCode(
+      zCookie,
+      pcAuthCode,
+      iIdType,
+      pcLinkedId,
+      pcPassword,
+    );
+  }
+
+  late final _Mtc_UeCreateWithAuthCodePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeCreateWithAuthCode');
+  late final _Mtc_UeCreateWithAuthCode =
+      _Mtc_UeCreateWithAuthCodePtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, int, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC create a user with authentic code from JustalkCloud.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentic Code string.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The Phone number string.
+  /// @param [in] pcPassword The password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeCreateOkNotification or @ref MtcUeCreateDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeCreateWithAuthCodeX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+    ffi.Pointer<ffi.Char> pcPassword,
+  ) {
+    return _Mtc_UeCreateWithAuthCodeX(
+      zCookie,
+      pcAuthCode,
+      pcIdType,
+      pcLinkedId,
+      pcPassword,
+    );
+  }
+
+  late final _Mtc_UeCreateWithAuthCodeXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeCreateWithAuthCodeX');
+  late final _Mtc_UeCreateWithAuthCodeX =
+      _Mtc_UeCreateWithAuthCodeXPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC require an Authentication code from  JustalkCloud.
+  ///
+  /// @param [in] iRequestType @ref EN_MTC_UE_REQUEST_TYPE The auth will be used for what?.
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE The auth tool type.
+  /// @param [in] pcLinkedId The auth tool number string.
+  /// @param [in] iExpires The authCode will be work well in iExpires seconds.
+  /// @param [in] iRetryCount means how many times the message is sent.
+  /// @param [in] pcBy means whether message is sent by SMS @ref MTC_UE_AUTHCODE_BYSMS
+  /// or audio @ref MTC_UE_AUTHCODE_BYCALL.
+  /// @param [in] pcTemplate The template of the message with authorization code.
+  /// @param [in] pcEmailTitle The title of the email with authorization code.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeRequestAuthCodeOkNotification or @ref MtcUeRequestAuthCodeDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeRequestAuthCode(
+    int iRequestType,
+    int zCookie,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+    int iExpires,
+    int iRetryCount,
+    ffi.Pointer<ffi.Char> pcBy,
+    ffi.Pointer<ffi.Char> pcTemplate,
+    ffi.Pointer<ffi.Char> pcEmailTitle,
+  ) {
+    return _Mtc_UeRequestAuthCode(
+      iRequestType,
+      zCookie,
+      iIdType,
+      pcLinkedId,
+      iExpires,
+      iRetryCount,
+      pcBy,
+      pcTemplate,
+      pcEmailTitle,
+    );
+  }
+
+  late final _Mtc_UeRequestAuthCodePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.UnsignedInt,
+              ffi.Size,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeRequestAuthCode');
+  late final _Mtc_UeRequestAuthCode = _Mtc_UeRequestAuthCodePtr.asFunction<
+      int Function(
+          int,
+          int,
+          int,
+          ffi.Pointer<ffi.Char>,
+          int,
+          int,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC require an Authentication code from  JustalkCloud.
+  ///
+  /// @param [in] iRequestType @ref EN_MTC_UE_REQUEST_TYPE The auth will be used for what?.
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The auth tool number string.
+  /// @param [in] iExpires The authCode will be work well in iExpires seconds.
+  /// @param [in] iRetryCount means how many times the message is sent.
+  /// @param [in] pcBy means whether message is sent by SMS @ref MTC_UE_AUTHCODE_BYSMS
+  /// or audio @ref MTC_UE_AUTHCODE_BYCALL.
+  /// @param [in] pcTemplate The template of the message with authorization code.
+  /// @param [in] pcEmailTitle The title of the email with authorization code.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeRequestAuthCodeOkNotification or @ref MtcUeRequestAuthCodeDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeRequestAuthCodeX(
+    int iRequestType,
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+    int iExpires,
+    int iRetryCount,
+    ffi.Pointer<ffi.Char> pcBy,
+    ffi.Pointer<ffi.Char> pcTemplate,
+    ffi.Pointer<ffi.Char> pcEmailTitle,
+  ) {
+    return _Mtc_UeRequestAuthCodeX(
+      iRequestType,
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+      iExpires,
+      iRetryCount,
+      pcBy,
+      pcTemplate,
+      pcEmailTitle,
+    );
+  }
+
+  late final _Mtc_UeRequestAuthCodeXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.UnsignedInt,
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeRequestAuthCodeX');
+  late final _Mtc_UeRequestAuthCodeX = _Mtc_UeRequestAuthCodeXPtr.asFunction<
+      int Function(
+          int,
+          int,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          int,
+          int,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC require an Authentication code from  JustalkCloud.
+  ///
+  /// @param [in] iRequestType @ref EN_MTC_UE_REQUEST_TYPE The auth will be used for what?.
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE The auth tool type.
+  /// @param [in] pcLinkedId The auth tool number string.
+  /// @param [in] iExpires The authCode will be work well in iExpires seconds.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeRequestClientAuthCodeOkNotification or @ref MtcUeRequestClientAuthCodeDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeRequestClientAuthCode(
+    int iRequestType,
+    int zCookie,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+    int iExpires,
+  ) {
+    return _Mtc_UeRequestClientAuthCode(
+      iRequestType,
+      zCookie,
+      iIdType,
+      pcLinkedId,
+      iExpires,
+    );
+  }
+
+  late final _Mtc_UeRequestClientAuthCodePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.UnsignedInt, ffi.Size, ffi.Int,
+              ffi.Pointer<ffi.Char>, ffi.Int)>>('Mtc_UeRequestClientAuthCode');
+  late final _Mtc_UeRequestClientAuthCode = _Mtc_UeRequestClientAuthCodePtr
+      .asFunction<int Function(int, int, int, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief MTC require an Authentication code from  JustalkCloud.
+  ///
+  /// @param [in] iRequestType @ref EN_MTC_UE_REQUEST_TYPE The auth will be used for what?.
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The auth tool number string.
+  /// @param [in] iExpires The authCode will be work well in iExpires seconds.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeRequestClientAuthCodeOkNotification or @ref MtcUeRequestClientAuthCodeDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeRequestClientAuthCodeX(
+    int iRequestType,
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+    int iExpires,
+  ) {
+    return _Mtc_UeRequestClientAuthCodeX(
+      iRequestType,
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+      iExpires,
+    );
+  }
+
+  late final _Mtc_UeRequestClientAuthCodeXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.UnsignedInt, ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, ffi.Int)>>('Mtc_UeRequestClientAuthCodeX');
+  late final _Mtc_UeRequestClientAuthCodeX =
+      _Mtc_UeRequestClientAuthCodeXPtr.asFunction<
+          int Function(
+              int, int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentication code string get from the email or phone.
+  /// @param [in] iIdType The UserId string.
+  /// @param [in] pcLinkedId The encrypted password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeFetchPasswordOkNotification or @ref MtcUeResetPasswordDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeFetchPassword(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeFetchPassword(
+      zCookie,
+      pcAuthCode,
+      iIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeFetchPasswordPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>, ffi.Int,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeFetchPassword');
+  late final _Mtc_UeFetchPassword = _Mtc_UeFetchPasswordPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentication code string get from the email or phone.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The encrypted password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeFetchPasswordOkNotification or @ref MtcUeFetchPasswordDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeFetchPasswordX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeFetchPasswordX(
+      zCookie,
+      pcAuthCode,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeFetchPasswordXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeFetchPasswordX');
+  late final _Mtc_UeFetchPasswordX = _Mtc_UeFetchPasswordXPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The encrypted password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeFetchPasswordOkNotification or @ref MtcUeFetchPasswordDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeFetchPassword2(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeFetchPassword2(
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeFetchPassword2Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeFetchPassword2');
+  late final _Mtc_UeFetchPassword2 = _Mtc_UeFetchPassword2Ptr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC reset password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentication code string get from the email or phone.
+  /// @param [in] pcPassword The new password string.
+  /// @param [in] iIdType The UserId string.
+  /// @param [in] pcLinkedId The encrypted password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeResetPasswordOkNotification or @ref MtcUeResetPasswordDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeResetPassword(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    ffi.Pointer<ffi.Char> pcPassword,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeResetPassword(
+      zCookie,
+      pcAuthCode,
+      pcPassword,
+      iIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeResetPasswordPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeResetPassword');
+  late final _Mtc_UeResetPassword = _Mtc_UeResetPasswordPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC reset password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentication code string get from the email or phone.
+  /// @param [in] pcPassword The new password string.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The encrypted password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeResetPasswordOkNotification or @ref MtcUeResetPasswordDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeResetPasswordX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    ffi.Pointer<ffi.Char> pcPassword,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeResetPasswordX(
+      zCookie,
+      pcAuthCode,
+      pcPassword,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeResetPasswordXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeResetPasswordX');
+  late final _Mtc_UeResetPasswordX = _Mtc_UeResetPasswordXPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC change an old password to a new password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcOldPassword The old password string.
+  /// @param [in] pcNewPassword The new password string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeChangePasswordOkNotification or @ref MtcUeChangePasswordDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeChangePassword(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcOldPassword,
+    ffi.Pointer<ffi.Char> pcNewPassword,
+  ) {
+    return _Mtc_UeChangePassword(
+      zCookie,
+      pcOldPassword,
+      pcNewPassword,
+    );
+  }
+
+  late final _Mtc_UeChangePasswordPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeChangePassword');
+  late final _Mtc_UeChangePassword = _Mtc_UeChangePasswordPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC bind the mailbox or phone number associated with an account.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentication code string get from the email or phone.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE .
+  /// @param [in] pcLinkedId The phone number string or mainbox string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeBindRelationshipOkNotification or @ref MtcUeBindRelationshipDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeBindRelationship(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeBindRelationship(
+      zCookie,
+      pcAuthCode,
+      iIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeBindRelationshipPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>, ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeBindRelationship');
+  late final _Mtc_UeBindRelationship = _Mtc_UeBindRelationshipPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC bind the mailbox or phone number associated with an account.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcAuthCode The Authentication code string get from the email or phone.
+  /// @param [in] pcIdType The Id Type .
+  /// @param [in] pcLinkedId The phone number string or mainbox string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeBindRelationshipOkNotification or @ref MtcUeBindRelationshipDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeBindRelationshipX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcAuthCode,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeBindRelationshipX(
+      zCookie,
+      pcAuthCode,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeBindRelationshipXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeBindRelationshipX');
+  late final _Mtc_UeBindRelationshipX = _Mtc_UeBindRelationshipXPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC bind the mailbox or phone number associated with an account.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type .
+  /// @param [in] pcLinkedId The phone number string or mainbox string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeBindRelationshipOkNotification or @ref MtcUeBindRelationshipDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeBindRelationship2(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeBindRelationship2(
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeBindRelationship2Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeBindRelationship2');
+  late final _Mtc_UeBindRelationship2 = _Mtc_UeBindRelationship2Ptr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC unbind the mailbox or phone number associated with an account.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE.
+  /// @param [in] pcLinkedId The phone number string or mainbox string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeBindRelationshipOkNotification or @ref MtcUeBindRelationshipDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeUnbindRelationship(
+    int zCookie,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeUnbindRelationship(
+      zCookie,
+      iIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeUnbindRelationshipPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Int,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeUnbindRelationship');
+  late final _Mtc_UeUnbindRelationship = _Mtc_UeUnbindRelationshipPtr
+      .asFunction<int Function(int, int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC unbind the mailbox or phone number associated with an account.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The phone number string or mainbox string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeBindRelationshipOkNotification or @ref MtcUeBindRelationshipDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeUnbindRelationshipX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeUnbindRelationshipX(
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeUnbindRelationshipXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeUnbindRelationshipX');
+  late final _Mtc_UeUnbindRelationshipX =
+      _Mtc_UeUnbindRelationshipXPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE.
+  /// @param [in] pcLinkedId The username string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcCliAccountQueryOkNotification or @ref MtcCliAccountQueryDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeQueryStatus(
+    int zCookie,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeQueryStatus(
+      zCookie,
+      iIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeQueryStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size, ffi.Int, ffi.Pointer<ffi.Char>)>>('Mtc_UeQueryStatus');
+  late final _Mtc_UeQueryStatus = _Mtc_UeQueryStatusPtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The username string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcCliAccountQueryOkNotification or @ref MtcCliAccountQueryDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeQueryStatusX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeQueryStatusX(
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeQueryStatusXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeQueryStatusX');
+  late final _Mtc_UeQueryStatusX = _Mtc_UeQueryStatusXPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] iIdType @ref EN_MTC_USER_ID_TYPE.
+  /// @param [in] pcLinkedId The username string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeQueryAccountOkNotification or @ref MtcUeQueryAccountDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeQueryAccount(
+    int zCookie,
+    int iIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeQueryAccount(
+      zCookie,
+      iIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeQueryAccountPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size, ffi.Int, ffi.Pointer<ffi.Char>)>>('Mtc_UeQueryAccount');
+  late final _Mtc_UeQueryAccount = _Mtc_UeQueryAccountPtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC fetch the encrypted password.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcIdType The Id Type.
+  /// @param [in] pcLinkedId The username string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeQueryAccountOkNotification or @ref MtcUeQueryAccountDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeQueryAccountX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcIdType,
+    ffi.Pointer<ffi.Char> pcLinkedId,
+  ) {
+    return _Mtc_UeQueryAccountX(
+      zCookie,
+      pcIdType,
+      pcLinkedId,
+    );
+  }
+
+  late final _Mtc_UeQueryAccountXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeQueryAccountX');
+  late final _Mtc_UeQueryAccountX = _Mtc_UeQueryAccountXPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC get all relations.
+  ///
+  /// @param  zCookie The UI cookie value.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeGetAllRelationsOkNotifcation or
+  /// @ref MtcUeGetAllRelationsDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeGetAllRelations(
+    int zCookie,
+  ) {
+    return _Mtc_UeGetAllRelations(
+      zCookie,
+    );
+  }
+
+  late final _Mtc_UeGetAllRelationsPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Size)>>(
+          'Mtc_UeGetAllRelations');
+  late final _Mtc_UeGetAllRelations =
+      _Mtc_UeGetAllRelationsPtr.asFunction<int Function(int)>();
+
+  /// @brief MTC delete user account that already login.
+  ///
+  /// @param  zCookie The cookie which you want to set.
+  /// @param  iDelaySec delay time, only support 0 now.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeDeleteUserOkNotifcation or
+  /// @ref MtcUeDeleteUserDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeDeleteUser(
+    int zCookie,
+    int iDelaySec,
+  ) {
+    return _Mtc_UeDeleteUser(
+      zCookie,
+      iDelaySec,
+    );
+  }
+
+  late final _Mtc_UeDeleteUserPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Size, ffi.Int)>>(
+          'Mtc_UeDeleteUser');
+  late final _Mtc_UeDeleteUser =
+      _Mtc_UeDeleteUserPtr.asFunction<int Function(int, int)>();
+
+  /// @brief Check if URI is valid relation.
+  ///
+  /// @param [in] pcUri The URI string.
+  ///
+  /// @retval true The URI is valid relation.
+  /// @retval false The URI is not valid realtion.
+  bool Mtc_UeIsValidRelation(
+    ffi.Pointer<ffi.Char> pcUri,
+  ) {
+    return _Mtc_UeIsValidRelation(
+      pcUri,
+    );
+  }
+
+  late final _Mtc_UeIsValidRelationPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ffi.Char>)>>(
+          'Mtc_UeIsValidRelation');
+  late final _Mtc_UeIsValidRelation = _Mtc_UeIsValidRelationPtr.asFunction<
+      bool Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC get ID of current login URI.
+  ///
+  /// @return The string of ID. ZNULL when failed.
+  ffi.Pointer<ffi.Char> Mtc_UeGetId() {
+    return _Mtc_UeGetId();
+  }
+
+  late final _Mtc_UeGetIdPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_UeGetId');
+  late final _Mtc_UeGetId =
+      _Mtc_UeGetIdPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief MTC get current login URI.
+  ///
+  /// @return The string of URI. ZNULL when failed.
+  ffi.Pointer<ffi.Char> Mtc_UeGetUri() {
+    return _Mtc_UeGetUri();
+  }
+
+  late final _Mtc_UeGetUriPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_UeGetUri');
+  late final _Mtc_UeGetUri =
+      _Mtc_UeGetUriPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief MTC get private unique ID of current login user.
+  ///
+  /// @return The string of ID. ZNULL when failed.
+  ffi.Pointer<ffi.Char> Mtc_UeGetUid() {
+    return _Mtc_UeGetUid();
+  }
+
+  late final _Mtc_UeGetUidPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_UeGetUid');
+  late final _Mtc_UeGetUid =
+      _Mtc_UeGetUidPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief MTC refresh authorization.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeAuthorizationRefreshOkNotification or
+  /// @ref MtcUeAuthorizationRefreshDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeRefreshAuth() {
+    return _Mtc_UeRefreshAuth();
+  }
+
+  late final _Mtc_UeRefreshAuthPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('Mtc_UeRefreshAuth');
+  late final _Mtc_UeRefreshAuth =
+      _Mtc_UeRefreshAuthPtr.asFunction<int Function()>();
+
+  /// @brief Notify the AuthCode to SDK to continue login or refresh authorization process.
+  ///
+  /// @param  pcAuthCode The AuthCode string.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// the notification of login or refresh authorization process.
+  /// Reference @ref Mtc_CliLogin or @ref Mtc_UeRefreshAuth.
+  /// @retval 1 failed
+  int Mtc_UePromptAuthCode(
+    ffi.Pointer<ffi.Char> pcAuthCode,
+  ) {
+    return _Mtc_UePromptAuthCode(
+      pcAuthCode,
+    );
+  }
+
+  late final _Mtc_UePromptAuthCodePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Char>)>>(
+          'Mtc_UePromptAuthCode');
+  late final _Mtc_UePromptAuthCode = _Mtc_UePromptAuthCodePtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set user property
+  ///
+  /// The property which name start with @ref MTC_UE_PROPERTY_PUBLIC_PREFIX can be
+  /// retained by others with @ref Mtc_BuddyQueryProperty.
+  /// The property which name start with @ref MTC_UE_PROPERTY_STATUS_PREFIX can be
+  /// retained by others with @ref Mtc_BuddyQueryUsersStatus.
+  /// Otherwise the property can not be accessed by others.
+  ///
+  /// @param  zCookie The cookie.
+  /// @param  pcName  The property name.
+  /// @param  pcValue The property value.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeSetPropertyOkNotification or
+  /// @ref MtcUeSetPropertyDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeSetProperty(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcName,
+    ffi.Pointer<ffi.Char> pcValue,
+  ) {
+    return _Mtc_UeSetProperty(
+      zCookie,
+      pcName,
+      pcValue,
+    );
+  }
+
+  late final _Mtc_UeSetPropertyPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeSetProperty');
+  late final _Mtc_UeSetProperty = _Mtc_UeSetPropertyPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get user property
+  ///
+  /// @param  zCookie The cookie.
+  /// @param  pcName  The property name.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeGetPropertyOkNotification or
+  /// @ref MtcUeGetPropertyDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeGetProperty(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcName,
+  ) {
+    return _Mtc_UeGetProperty(
+      zCookie,
+      pcName,
+    );
+  }
+
+  late final _Mtc_UeGetPropertyPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_UeGetProperty');
+  late final _Mtc_UeGetProperty = _Mtc_UeGetPropertyPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set user properties
+  ///
+  /// The property which name start with @ref MTC_UE_PROPERTY_PUBLIC_PREFIX can be
+  /// retained by others with @ref Mtc_BuddyQueryProperty.
+  /// The property which name start with @ref MTC_UE_PROPERTY_STATUS_PREFIX can be
+  /// retained by others with @ref Mtc_BuddyQueryUsersStatus.
+  /// Otherwise the property can not be accessed by others.
+  ///
+  /// @param  zCookie      The cookie.
+  /// @param  pcPropArray  The property name and value in a JSON array.
+  /// Each element in array is a JSON object contains
+  /// @ref MtcUePropertyNameKey and @ref MtcUePropertyValueKey.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeSetPropertiesOkNotification or
+  /// @ref MtcUeSetPropertiesDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeSetProperties(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcPropArray,
+  ) {
+    return _Mtc_UeSetProperties(
+      zCookie,
+      pcPropArray,
+    );
+  }
+
+  late final _Mtc_UeSetPropertiesPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_UeSetProperties');
+  late final _Mtc_UeSetProperties = _Mtc_UeSetPropertiesPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get user properties
+  ///
+  /// @param  zCookie     The cookie.
+  /// @param  pcNameArray The property names in a JSON array.
+  /// Each element in array is a string of property's name.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeGetPropertiesOkNotification or
+  /// @ref MtcUeGetPropertiesDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeGetProperties(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcNameArray,
+  ) {
+    return _Mtc_UeGetProperties(
+      zCookie,
+      pcNameArray,
+    );
+  }
+
+  late final _Mtc_UeGetPropertiesPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_UeGetProperties');
+  late final _Mtc_UeGetProperties = _Mtc_UeGetPropertiesPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set user status
+  ///
+  /// @param  zCookie The cookie.
+  /// @param  pcType  The status type.
+  /// @param  pcValue The status value.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeSetStatusOkNotification or
+  /// @ref MtcUeSetStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeSetStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcType,
+    ffi.Pointer<ffi.Char> pcValue,
+  ) {
+    return _Mtc_UeSetStatus(
+      zCookie,
+      pcType,
+      pcValue,
+    );
+  }
+
+  late final _Mtc_UeSetStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_UeSetStatus');
+  late final _Mtc_UeSetStatus = _Mtc_UeSetStatusPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Reset user name
+  ///
+  /// @param  zCookie The cookie.
+  /// @param  pcNewUserName  The new user name to set.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeResetUsernameOkNotification or
+  /// @ref MtcUeResetUsernameDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeResetUserName(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcNewUserName,
+  ) {
+    return _Mtc_UeResetUserName(
+      zCookie,
+      pcNewUserName,
+    );
+  }
+
+  late final _Mtc_UeResetUserNamePtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_UeResetUserName');
+  late final _Mtc_UeResetUserName = _Mtc_UeResetUserNamePtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set multi-status of user
+  ///
+  /// @param  zCookie The cookie.
+  /// @param  pcInfo  The status infos in a JSON array.
+  /// Each element in array is an object which contains
+  /// @ref MtcUeStatusNameKey, @ref MtcUeStatusValueKey.
+  /// @param qwTimeStamp The timestamp that status apply.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will be notified by
+  /// @ref MtcUeSetStatusOkNotification or
+  /// @ref MtcUeSetStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeSetStatusX(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+    int qwTimeStamp,
+  ) {
+    return _Mtc_UeSetStatusX(
+      zCookie,
+      pcInfo,
+      qwTimeStamp,
+    );
+  }
+
+  late final _Mtc_UeSetStatusXPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.LongLong)>>('Mtc_UeSetStatusX');
+  late final _Mtc_UeSetStatusX = _Mtc_UeSetStatusXPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief Send online message to peer, only for p2p.
+  ///
+  /// When the message has been sent successfully, @ref MtcUeSendOnlineMessageOkNotification will
+  /// be reported.
+  /// When the mssage sent fail, @ref MtcUeSendOnlineMessageDidFailNotification will be reported.
+  ///
+  /// The peer user will be notified by @ref MtcUeOnlineMessageDidReceiveNotification.
+  ///
+  /// @param  zCookie   The user defined cookie.
+  /// @param  pcToId    The target user's URI.
+  /// @param  pcText    The content text of the message.
+  /// @param  iTiming   The Timing time value(second).
+  ///
+  /// @retval 0       The request has been sent successfully.
+  /// @retval 1   Failed to send the request.
+  int Mtc_UeSendOnlineMessage(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcToId,
+    ffi.Pointer<ffi.Char> pcText,
+    int iTiming,
+  ) {
+    return _Mtc_UeSendOnlineMessage(
+      zCookie,
+      pcToId,
+      pcText,
+      iTiming,
+    );
+  }
+
+  late final _Mtc_UeSendOnlineMessagePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, ffi.Int)>>('Mtc_UeSendOnlineMessage');
+  late final _Mtc_UeSendOnlineMessage = _Mtc_UeSendOnlineMessagePtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief Send online message to peer by record msg on server, only for p2p.
+  ///
+  /// When the message has been sent successfully, @ref MtcUeSendOnlineMessageOkNotification will
+  /// be reported.
+  /// When the mssage sent fail, @ref MtcUeSendOnlineMessageDidFailNotification will be reported.
+  ///
+  /// The peer user will be notified by @ref MtcUeOnlineMessageDidReceiveNotification.
+  ///
+  /// @param  zCookie   The user defined cookie.
+  /// @param  pcToId    The target user's URI.
+  /// @param  pcText    The content text of the message.
+  /// @param  iTiming   The Timing time value(second).
+  ///
+  /// @retval 0       The request has been sent successfully.
+  /// @retval 1   Failed to send the request.
+  int Mtc_UeSendOnlineMessage2(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcToId,
+    ffi.Pointer<ffi.Char> pcText,
+    int iTiming,
+  ) {
+    return _Mtc_UeSendOnlineMessage2(
+      zCookie,
+      pcToId,
+      pcText,
+      iTiming,
+    );
+  }
+
+  late final _Mtc_UeSendOnlineMessage2Ptr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, ffi.Int)>>('Mtc_UeSendOnlineMessage2');
+  late final _Mtc_UeSendOnlineMessage2 =
+      _Mtc_UeSendOnlineMessage2Ptr.asFunction<
+          int Function(
+              int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief Query user's UserId information.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcInfo  The query information. For just one user, using its URI directily.
+  /// For multiple users, it must be a string in JSON format,
+  /// which contains an array of string. Each string is the user's URI
+  /// which wants be queried.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcUeQueryUserIdOkNotification
+  /// or @ref MtcUeQueryUserIdDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_UeQueryUserId(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_UeQueryUserId(
+      zCookie,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_UeQueryUserIdPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_UeQueryUserId');
+  late final _Mtc_UeQueryUserId = _Mtc_UeQueryUserIdPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief MTC get CC.
+  ///
+  /// @retval ZNULL if no parameter which do not exist, or country code string
+  ffi.Pointer<ffi.Char> Mtc_UeGetCC() {
+    return _Mtc_UeGetCC();
+  }
+
+  late final _Mtc_UeGetCCPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_UeGetCC');
+  late final _Mtc_UeGetCC =
+      _Mtc_UeGetCCPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
   /// @brief MTC user entry set id type.
   ///
@@ -3307,6 +5343,233 @@ class FlutterMtcBindings {
       'Mtc_UserTypeT2s');
   late final _Mtc_UserTypeT2s =
       _Mtc_UserTypeT2sPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
+
+  /// @brief Print ERROR log with format string information.
+  /// User can specific log name as the log module prefix
+  /// Log print level can be set by Mtc_CliDbSetLogLevel.
+  ///
+  /// @param [in] pcLogName The log name. Default name is "ZOS" if no log name.
+  /// @param [in] pcFormat String format.
+  /// @param [in] ... String vars.
+  ///
+  /// @see @ref Mtc_AnyLogInfoStr
+  void Mtc_AnyLogErrStr(
+    ffi.Pointer<ffi.Char> pcLogName,
+    ffi.Pointer<ffi.Char> pcFormat,
+  ) {
+    return _Mtc_AnyLogErrStr(
+      pcLogName,
+      pcFormat,
+    );
+  }
+
+  late final _Mtc_AnyLogErrStrPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_AnyLogErrStr');
+  late final _Mtc_AnyLogErrStr = _Mtc_AnyLogErrStrPtr.asFunction<
+      void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Print INFO log with format string information.
+  /// User can specific log name as the log module prefix
+  /// Log print level can be set by Mtc_CliDbSetLogLevel.
+  ///
+  /// @param [in] pcLogName The log name. Default name is "ZOS" if no log name.
+  /// @param [in] pcFormat String format.
+  /// @param [in] ... String vars.
+  ///
+  /// @see @ref Mtc_AnyLogErrStr
+  void Mtc_AnyLogInfoStr(
+    ffi.Pointer<ffi.Char> pcLogName,
+    ffi.Pointer<ffi.Char> pcFormat,
+  ) {
+    return _Mtc_AnyLogInfoStr(
+      pcLogName,
+      pcFormat,
+    );
+  }
+
+  late final _Mtc_AnyLogInfoStrPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_AnyLogInfoStr');
+  late final _Mtc_AnyLogInfoStr = _Mtc_AnyLogInfoStrPtr.asFunction<
+      void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Print DEBUG log with format string information.
+  /// User can specific log name as the log module prefix
+  /// Log print level can be set by Mtc_DbSetLogLevel.
+  ///
+  /// @param [in] pcLogName The log name. Default name is "ZOS" if no log name.
+  /// @param [in] pcFormat String format.
+  /// @param [in] ... String vars.
+  ///
+  /// @see @ref Mtc_AnyLogInfoStr
+  void Mtc_AnyLogDbgStr(
+    ffi.Pointer<ffi.Char> pcLogName,
+    ffi.Pointer<ffi.Char> pcFormat,
+  ) {
+    return _Mtc_AnyLogDbgStr(
+      pcLogName,
+      pcFormat,
+    );
+  }
+
+  late final _Mtc_AnyLogDbgStrPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_AnyLogDbgStr');
+  late final _Mtc_AnyLogDbgStr = _Mtc_AnyLogDbgStrPtr.asFunction<
+      void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief This function flushs buffer into log file.
+  ///
+  /// @retval 0 Flush operation successfully.
+  /// @retval 1 Flush operation failed.
+  ///
+  /// @see
+  int Mtc_AnyLogFlush() {
+    return _Mtc_AnyLogFlush();
+  }
+
+  late final _Mtc_AnyLogFlushPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('Mtc_AnyLogFlush');
+  late final _Mtc_AnyLogFlush =
+      _Mtc_AnyLogFlushPtr.asFunction<int Function()>();
+
+  /// @brief Get last error.
+  ///
+  /// @retval Last error string.
+  ffi.Pointer<ffi.Char> Mtc_GetLastError() {
+    return _Mtc_GetLastError();
+  }
+
+  late final _Mtc_GetLastErrorPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_GetLastError');
+  late final _Mtc_GetLastError =
+      _Mtc_GetLastErrorPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief Init shell.
+  int Mtc_ShInit() {
+    return _Mtc_ShInit();
+  }
+
+  late final _Mtc_ShInitPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('Mtc_ShInit');
+  late final _Mtc_ShInit = _Mtc_ShInitPtr.asFunction<int Function()>();
+
+  /// @brief Destroy shell.
+  void Mtc_ShDestory() {
+    return _Mtc_ShDestory();
+  }
+
+  late final _Mtc_ShDestoryPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('Mtc_ShDestory');
+  late final _Mtc_ShDestory = _Mtc_ShDestoryPtr.asFunction<void Function()>();
+
+  /// @brief Add shell command.
+  ///
+  /// @param pcCmd Command name.
+  /// @param pcDesc Command description.
+  /// @param pcSynop Synopsis.
+  /// @param pfnCmd Command process entry.
+  int Mtc_ShCmdAdd(
+    ffi.Pointer<ffi.Char> pcCmd,
+    ffi.Pointer<ffi.Char> pcDesc,
+    ffi.Pointer<ffi.Char> pcSynop,
+    PFN_MTCSHCMD pfnCmd,
+  ) {
+    return _Mtc_ShCmdAdd(
+      pcCmd,
+      pcDesc,
+      pcSynop,
+      pfnCmd,
+    );
+  }
+
+  late final _Mtc_ShCmdAddPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, PFN_MTCSHCMD)>>('Mtc_ShCmdAdd');
+  late final _Mtc_ShCmdAdd = _Mtc_ShCmdAddPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>, PFN_MTCSHCMD)>();
+
+  /// @brief Start run shell.
+  int Mtc_ShRun() {
+    return _Mtc_ShRun();
+  }
+
+  late final _Mtc_ShRunPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('Mtc_ShRun');
+  late final _Mtc_ShRun = _Mtc_ShRunPtr.asFunction<int Function()>();
+
+  /// @brief Get option from arguments.
+  ///
+  /// @param [in] iArgc Argument count.
+  /// @param [in] apcArgv Argument string table.
+  /// @param [in] pcOptStr Option string.
+  /// @param [out] ppcArg Current argument string.
+  ///
+  /// @retval -1 Indicate the end of argument table.
+  /// @retval '?' Indicate unknown argument.
+  /// @retval Otherwise The option character
+  ///
+  /// The function is used to prase the argument string table.
+  /// First, you should reset g_iZshOptInd to 0.
+  /// Then repeat call this function until it returns -1,
+  /// which indicate the end of argument string table.
+  ///
+  /// If prase successfully, it return the corresponding character in [pcOptStr].
+  /// If the character in option string is followed by :, then the argument string
+  /// will assgined to [ppcArg]. \n
+  ///
+  /// @section example Example:
+  /// @code
+  /// g_iZshOptInd = 0;
+  /// while ((opt = Zsh_CmdGetOpt(argc, argv, "nt:", &argstr)) != -1)
+  /// {
+  /// switch (opt)
+  /// {
+  /// case 'n':
+  /// flag = 1;
+  /// break;
+  /// case 't':
+  /// val = atoi(argstr);
+  /// break;
+  /// default:
+  /// fprintf(stderr, "Usage: %s [-t nsec] [-n] \r\n", argv[0]);
+  /// exit(0);
+  /// }
+  /// }
+  /// @endcode
+  ///
+  /// @note Learn more detail from getopt manpage in linux
+  int Mtc_ShGetOpt(
+    int iArgc,
+    ffi.Pointer<ffi.Pointer<ffi.Char>> apcArgv,
+    ffi.Pointer<ffi.Char> pcOptStr,
+    ffi.Pointer<ffi.Pointer<ffi.Char>> ppcArg,
+  ) {
+    return _Mtc_ShGetOpt(
+      iArgc,
+      apcArgv,
+      pcOptStr,
+      ppcArg,
+    );
+  }
+
+  late final _Mtc_ShGetOptPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Int,
+              ffi.Pointer<ffi.Pointer<ffi.Char>>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Pointer<ffi.Char>>)>>('Mtc_ShGetOpt');
+  late final _Mtc_ShGetOpt = _Mtc_ShGetOptPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Pointer<ffi.Char>>,
+          ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 }
 
 /// @brief MTC client state.
@@ -3335,27 +5598,6 @@ abstract class EN_MTC_CLI_STATE_TYPE {
   /// < @brief Client is trying to logout.
   static const int EN_MTC_CLI_STATE_LOGOUTING = 4;
 }
-
-/// @brief MTC log level.
-abstract class EN_MTC_LOG_LEVEL_TYPE {
-  static const int EN_MTC_LOG_LEVEL_DISABLE = 0;
-
-  /// @brief Disable log output.
-  static const int EN_MTC_LOG_LEVEL_ERROR = 1;
-
-  /// @brief Only error message.
-  static const int EN_MTC_LOG_LEVEL_INFO = 2;
-
-  /// @brief Include error, info message.
-  static const int EN_MTC_LOG_LEVEL_DEBUG = 3;
-
-  /// @brief Inlcude error, info
-  /// and debug message.
-  static const int EN_MTC_LOG_LEVEL_FUNCTION = 4;
-}
-
-/// @brief Application context type definition
-typedef ZAPPCONTEXT = ffi.Pointer<ffi.Void>;
 
 /// @brief Type define of MTC client callback for post print message.
 /// @param pcStr is the print string.
@@ -3393,6 +5635,70 @@ typedef PFN_MTCCLIABORT = ffi.Pointer<
     ffi.NativeFunction<
         ffi.Bool Function(ffi.Size zCookie, ffi.Pointer<ffi.Char> pcDesc)>>;
 
+/// @brief MTC log level.
+abstract class EN_MTC_LOG_LEVEL_TYPE {
+  static const int EN_MTC_LOG_LEVEL_DISABLE = 0;
+
+  /// @brief Disable log output.
+  static const int EN_MTC_LOG_LEVEL_ERROR = 1;
+
+  /// @brief Only error message.
+  static const int EN_MTC_LOG_LEVEL_INFO = 2;
+
+  /// @brief Include error, info message.
+  static const int EN_MTC_LOG_LEVEL_DEBUG = 3;
+
+  /// @brief Inlcude error, info
+  /// and debug message.
+  static const int EN_MTC_LOG_LEVEL_FUNCTION = 4;
+}
+
+/// @brief Application context type definition
+typedef ZAPPCONTEXT = ffi.Pointer<ffi.Void>;
+
+/// @brief The router first conn protocol type.
+abstract class EN_MTC_CLI_DB_ROUTER_FIRSTCONN_TYPE {
+  /// <@brief udp.
+  static const int EN_MTC_CLI_DB_ROUTER_FIRSTCONN_UDP = 0;
+
+  /// <@brief tcp.
+  static const int EN_MTC_CLI_DB_ROUTER_FIRSTCONN_TCP = 1;
+
+  /// <@brief http.
+  static const int EN_MTC_CLI_DB_ROUTER_FIRSTCONN_HTTP = 2;
+}
+
+/// @brief The router path select algo type.
+abstract class EN_MTC_CLI_DB_ROUTER_PATHALGO_TYPE {
+  /// <@brief interval best.
+  static const int EN_MTC_CLI_DB_ROUTER_PATHALGO_INTERVALBEST = 0;
+
+  /// <@brief all time best.
+  static const int EN_MTC_CLI_DB_ROUTER_PATHALGO_ALLTIMEBEST = 1;
+}
+
+/// @brief MTC sts access type
+abstract class EN_MTC_CLI_DB_ACCESS_TYPE {
+  static const int EN_MTC_CLI_DB_STANDARD = 1;
+  static const int EN_MTC_CLI_DB_REC_RTMP_CD = 11;
+  static const int EN_MTC_CLI_DB_WEBRTC_BROWSER_CD = 12;
+  static const int EN_MTC_CLI_DB_WEBRTC_TRTC_CD = 13;
+  static const int EN_MTC_CLI_DB_RTMP_WECHAT_CD = 14;
+  static const int EN_MTC_CLI_DB_SIP_CLIENT_CD = 15;
+  static const int EN_MTC_CLI_DB_SIP_SERVER_CD = 16;
+  static const int EN_MTC_CLI_DB_SIP_PSTN_CD = 17;
+  static const int EN_MTC_CLI_DB_SIP_VOLTE_CD = 18;
+  static const int EN_MTC_CLI_DB_IOT_CLIENT_CD = 19;
+  static const int EN_MTC_CLI_DB_JSMS_SERVER = 60;
+  static const int EN_MTC_CLI_DB_ACCOUNT_SERVER = 61;
+  static const int EN_MTC_CLI_DB_IOTGATEWAY_SERVER = 62;
+  static const int EN_MTC_CLI_DB_ROUTER_SERVER = 63;
+  static const int EN_MTC_CLI_DB_JSME_SERVER = 64;
+  static const int EN_MTC_CLI_DB_CALLSERVEREX_SERVER = 65;
+  static const int EN_MTC_CLI_DB_GROUP_SERVER = 66;
+  static const int EN_MTC_CLI_DB_OTHERS = 127;
+}
+
 /// @brief The profile media mode type.
 abstract class EN_MTC_PROF_MEDIA_MODE {
   /// <@brief Profile media base.
@@ -3400,6 +5706,55 @@ abstract class EN_MTC_PROF_MEDIA_MODE {
 
   /// <@brief Profile media enhance.
   static const int EN_MTC_PROF_MEDIA_ENHANCE = 1;
+}
+
+/// @brief MTC user entry reasen type.
+abstract class EN_MTC_UE_REASON_TYPE {
+  /// < @brief Account exist.
+  static const int EN_MTC_UE_REASON_ACCOUNT_EXIST = 0;
+
+  /// < @brief Account not exist.
+  static const int EN_MTC_UE_REASON_ACCOUNT_NOT_EXIST = 1;
+
+  /// < @brief Auth code is error.
+  static const int EN_MTC_UE_REASON_AUTH_CODE_ERROR = 2;
+
+  /// < @brief Auth code is expired.
+  static const int EN_MTC_UE_REASON_AUTH_CODE_EXPIRED = 3;
+
+  /// < @brief Try to auth too many times.
+  static const int EN_MTC_UE_REASON_AUTH_TOO_MANY_TIMES = 4;
+
+  /// < @brief Auth is blocked.
+  static const int EN_MTC_UE_REASON_AUTH_BLOCKED = 5;
+
+  /// < @brief Unknown reason.
+  static const int EN_MTC_UE_REASON_UNKNOWN = 6;
+
+  /// < @brief No User Entry.
+  static const int EN_MTC_UE_REASON_NO_USER_ENTRY = 7;
+  static const int EN_MTC_UE_REASON_NOT_FOUND = 8;
+
+  /// < @brief Password Error.
+  static const int EN_MTC_UE_REASON_PWD_ERROR = 9;
+
+  /// < @brief Account is banned.
+  static const int EN_MTC_UE_REASON_ACCOUNT_BANNED = 10;
+}
+
+/// @brief MTC user entry requse type.
+abstract class EN_MTC_UE_REQUEST_TYPE {
+  /// < @brief Fetch password.
+  static const int EN_MTC_UE_REQUEST_FETCH_PASSWORD = 0;
+
+  /// < @brief Reset password.
+  static const int EN_MTC_UE_REQUEST_RESET_PASSWORD = 1;
+
+  /// < @brief Create account.
+  static const int EN_MTC_UE_REQUEST_CREATE_ACCOUNT = 2;
+
+  /// < @brief Add relationship.
+  static const int EN_MTC_UE_REQUEST_ADD_RELATIONSHIP = 3;
 }
 
 /// @brief MTC user ID type.
@@ -3458,6 +5813,11 @@ abstract class EN_MTC_USER_ID_TYPE {
   /// < @brief The ID of user defined.
   static const int EN_MTC_USER_ID_UDID = 17;
 }
+
+typedef PFN_MTCSHCMD = ffi.Pointer<
+    ffi.NativeFunction<
+        ffi.Int Function(
+            ffi.Int iArgc, ffi.Pointer<ffi.Pointer<ffi.Char>> apcArgv)>>;
 
 const int MTC_REG_STATE_IDLE = 0;
 
@@ -3733,6 +6093,188 @@ const String MtcCliServerMessageReceivedNotification =
 
 const int MTC_PROV_MEDIA_MASK = 255;
 
+const String MtcUeReasonKey = 'MtcUeReasonKey';
+
+const String MtcUeReasonDetailKey = 'MtcUeReasonDetailKey';
+
+const String MtcUeMsgFailReasonKey = 'MtcImReasonKey';
+
+const String MtcUePasswordKey = 'MtcUePasswordKey';
+
+const String MtcUeAuthCodeKey = 'MtcUeAuthCodeKey';
+
+const String MtcUeAuthNonceKey = 'MtcUeAuthNonceKey';
+
+const String MtcUeUriKey = 'MtcUeUriKey';
+
+const String MtcUeRelationTypeKey = 'MtcUeRelationTypeKey';
+
+const String MtcUeRelationIdKey = 'MtcUeRelationIdKey';
+
+const String MtcUeInitialPropertyNameKey = 'MtcUeInitialPropertyNameKey';
+
+const String MtcUeInitialPropertyValueKey = 'MtcUeInitialPropertyValueKey';
+
+const String MtcUePropertyNameKey = 'MtcUePropertyNameKey';
+
+const String MtcUePropertyValueKey = 'MtcUePropertyValueKey';
+
+const String MtcUeCountKey = 'MtcUeCountKey';
+
+const String MtcUeIdTypeKey = 'MtcUeIdTypeKey';
+
+const String MtcUeIdKey = 'MtcUeIdKey';
+
+const String MtcUeStatusNameKey = 'MtcUeStatusNameKey';
+
+const String MtcUeStatusValueKey = 'MtcUeStatusValueKey';
+
+const String MtcUeSenderUriKey = 'MtcImSenderUriKey';
+
+const String MtcUeTextKey = 'MtcImTextKey';
+
+const String MtcUeTypeKey = 'MtcImTypeKey';
+
+const String MtcUeCreateOkNotification = 'MtcUeCreateOkNotification';
+
+const String MtcUeCreateDidFailNotification = 'MtcUeCreateDidFailNotification';
+
+const String MtcUeRequestAuthCodeOkNotification =
+    'MtcUeRequestAuthCodeOkNotification';
+
+const String MtcUeRequestAuthCodeDidFailNotification =
+    'MtcUeRequestAuthCodeDidFailNotification';
+
+const String MtcUeRequestClientAuthCodeOkNotification =
+    'MtcUeRequestClientAuthCodeOkNotification';
+
+const String MtcUeRequestClientAuthCodeDidFailNotification =
+    'MtcUeRequestClientAuthCodeDidFailNotification';
+
+const String MtcUeFetchPasswordOkNotification =
+    'MtcUeFetchPasswordOkNotification';
+
+const String MtcUeFetchPasswordDidFailNotification =
+    'MtcUeFetchPasswordDidFailNotification';
+
+const String MtcUeResetPasswordOkNotification =
+    'MtcUeResetPasswordOkNotification';
+
+const String MtcUeResetPasswordDidFailNotification =
+    'MtcUeResetPasswordDidFailNotification';
+
+const String MtcUeChangePasswordOkNotification =
+    'MtcUeChangePasswordOkNotification';
+
+const String MtcUeChangePasswordDidFailNotification =
+    'MtcUeChangePasswordDidFailNotification';
+
+const String MtcUeBindRelationshipOkNotification =
+    'MtcUeBindRelationshipOkNotification';
+
+const String MtcUeBindRelationshipDidFailNotification =
+    'MtcUeBindRelationshipDidFailNotification';
+
+const String MtcUeUnbindRelationshipOkNotification =
+    'MtcUeUnbindRelationshipOkNotification';
+
+const String MtcUeUnbindRelationshipDidFailNotification =
+    'MtcUeUnbindRelationshipDidFailNotification';
+
+const String MtcUeRelationshipReleasedNotification =
+    'MtcUeRelationshipReleasedNotification';
+
+const String MtcUeQueryAccountOkNotification =
+    'MtcUeQueryAccountOkNotification';
+
+const String MtcUeQueryAccountDidFailNotification =
+    'MtcUeQueryAccountDidFailNotification';
+
+const String MtcUeGetAllRelationsOkNotifcation =
+    'MtcUeGetAllRelationsOkNotifcation';
+
+const String MtcUeGetAllRelationsDidFailNotification =
+    'MtcUeGetAllRelationsDidFailNotification';
+
+const String MtcUeDeleteUserOkNotifcation = 'MtcUeDeleteUserOkNotifcation';
+
+const String MtcUeDeleteUserDidFailNotification =
+    'MtcUeDeleteUserDidFailNotification';
+
+const String MtcUeAuthorizationRequireNotification =
+    'MtcUeAuthorizationRequireNotification';
+
+const String MtcUeAuthorizationExpiredNotification =
+    'MtcUeAuthorizationExpiredNotification';
+
+const String MtcUeAuthorizationRefreshOkNotification =
+    'MtcUeAuthorizationRefreshOkNotification';
+
+const String MtcUeAuthorizationRefreshDidFailNotification =
+    'MtcUeAuthorizationRefreshDidFailNotification';
+
+const String MtcUeSetPropertyOkNotification = 'MtcUeSetPropertyOkNotification';
+
+const String MtcUeSetPropertyDidFailNotification =
+    'MtcUeSetPropertyDidFailNotification';
+
+const String MtcUeGetPropertyOkNotification = 'MtcUeGetPropertyOkNotification';
+
+const String MtcUeGetPropertyDidFailNotification =
+    'MtcUeGetPropertyDidFailNotification';
+
+const String MtcUeSetPropertiesOkNotification =
+    'MtcUeSetPropertiesOkNotification';
+
+const String MtcUeSetPropertiesDidFailNotification =
+    'MtcUeSetPropertiesDidFailNotification';
+
+const String MtcUeGetPropertiesOkNotification =
+    'MtcUeGetPropertiesOkNotification';
+
+const String MtcUeGetPropertiesDidFailNotification =
+    'MtcUeGetPropertiesDidFailNotification';
+
+const String MtcUeSetStatusOkNotification = 'MtcUeSetStatusOkNotification';
+
+const String MtcUeSetStatusDidFailNotification =
+    'MtcUeSetStatusDidFailNotification';
+
+const String MtcUeResetUsernameOkNotification =
+    'MtcUeResetUsernameOkNotification';
+
+const String MtcUeResetUsernameDidFailNotification =
+    'MtcUeResetUsernameDidFailNotification';
+
+const String MtcUeSendOnlineMessageOkNotification =
+    'MtcUeSendOnlineMessageOkNotification';
+
+const String MtcUeSendOnlineMessageDidFailNotification =
+    'MtcUeSendOnlineMessageDidFailNotification';
+
+const String MtcUeOnlineMessageDidReceiveNotification =
+    'MtcUeOnlineMessageDidReceiveNotification';
+
+const String MtcUe3rdOnlineMessageDidReceiveNotification =
+    'MtcUe3rdOnlineMessageDidReceiveNotification';
+
+const String MtcUeQueryUserIdOkNotification = 'MtcUeQueryUserIdOkNotification';
+
+const String MtcUeQueryUserIdDidFailNotification =
+    'MtcUeQueryUserIdDidFailNotification';
+
+const String MTC_UE_AUTHCODE_BYSMS = 'sms';
+
+const String MTC_UE_AUTHCODE_BYCALL = 'call';
+
+const String MTC_UE_AUTHCODE_IN_ENG = 'en';
+
+const String MTC_UE_AUTHCODE_IN_CHN = 'zh';
+
+const String MTC_UE_PROPERTY_PUBLIC_PREFIX = 'Public.';
+
+const String MTC_UE_PROPERTY_STATUS_PREFIX = 'SC.';
+
 const String MTC_USER_ID_PHONE = 'phone';
 
 const String MTC_USER_ID_EMAIL = 'email';
@@ -3764,3 +6306,67 @@ const String MTC_USER_ID_HUAWEI = 'huawei';
 const String MTC_USER_ID_ALIPAY = 'alipay';
 
 const String MTC_USER_ID_EPHONE = 'ephone';
+
+const String MtcCallParamsTraceIdKey = 'MtcCallParamsTraceIdKey';
+
+const String MtcCallParamsParentSpanIdKey = 'MtcCallParamsParentSpanIdKey';
+
+const String MTC_ERROR_NO_ENV = 'Mtc.NoEnv';
+
+const String MTC_ERROR_INV_STATE = 'Mtc.InvState';
+
+const String MTC_ERROR_IN_AUTH = 'Mtc.InAuth';
+
+const String MTC_ERROR_INV_PARM = 'Mtc.InvParm';
+
+const String MTC_ERROR_ALLOC_MEM = 'Mtc.AllocMem';
+
+const String MTC_ERROR_NEW_OBJ = 'Mtc.NewObj';
+
+const String MTC_ERROR_NO_AGENT = 'Mtc.NoAgent';
+
+const String MTC_ERROR_INV_ID = 'Mtc.InvId';
+
+const String MTC_ERROR_INV_URI = 'Mtc.InvUri';
+
+const String MTC_ERROR_NO_PWD = 'Mtc.NoPwd';
+
+const String MTC_ERROR_INV_PWD = 'Mtc.InvPwd';
+
+const String MTC_ERROR_SUB_EVNT = 'Mtc.SubEvnt';
+
+const String MTC_ERROR_PROVISION = 'Mtc.Provision';
+
+const String MTC_ERROR_AUTH_FAIL = 'Mtc.AuthFail';
+
+const String MTC_ERROR_NO_ACCOUNT = 'Mtc.NoAccount';
+
+const String MTC_ERROR_EXPIRED = 'Mtc.Expired';
+
+const String MTC_ERROR_NO_AUTH = 'Mtc.NoAuth';
+
+const String MTC_ERROR_INTERNAL = 'Mtc.Internal';
+
+const String MTC_ERROR_CALL_INIT_CONN = 'MtcCall.InitConn';
+
+const String MTC_ERROR_CALL_INIT_SESS = 'MtcCall.InitSess';
+
+const String MTC_ERROR_CALL_ADD_AUDIO_STRM = 'MtcCall.AddAudioStrm';
+
+const String MTC_ERROR_CALL_ADD_VIDEO_STRM = 'MtcCall.AddVideoStrm';
+
+const String MTC_ERROR_CALL_NO_SIP_REG = 'MtcCall.NoSipReg';
+
+const String MTC_ERROR_CALL_EXIST = 'MtcCall.Exist';
+
+const String MTC_ERROR_CALL_READ_SDP = 'MtcCall.ReadSdp';
+
+const String MTC_ERROR_CALL_FILL_SDP = 'MtcCall.FillSdp';
+
+const String MTC_ERROR_CALL_ACTION = 'MtcCall.Action';
+
+const String MTC_ERROR_CALL_NEGOTIATION = 'MtcCall.Nego';
+
+const String MTC_ERROR_CALL_TIMEOUT = 'MtcCall.Timeout';
+
+const String MTC_ERROR_NO_CALLBACK = 'MtcCall.NoCallBack';
