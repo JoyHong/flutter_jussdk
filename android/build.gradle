@@ -62,6 +62,12 @@ android {
     defaultConfig {
         minSdkVersion 19
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 dependencies {
