@@ -31,7 +31,7 @@ abstract class FlutterAccount {
   /// 注册账号, 成功返回 true, 失败则返回对应错误码(int)
   /// username: 用户名
   /// password: 密码
-  Future<dynamic> signUp({required String username, required String password});
+  Future<dynamic> signUp({required String username, required String password, Map<String, String>? props});
 
   /// 账号密码登陆, 成功返回 true, 失败则返回对应的错误码(int)
   /// username: 用户名
