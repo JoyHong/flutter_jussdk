@@ -16,8 +16,14 @@ void main() async {
   FlutterJussdk.initialize(
       appKey: '4b15dc404fff9fe1f5234097',
       router: 'udp:test.api.justalkcloud.com:8000;udp:47.101.139.97:8000;udp:148.153.45.251:8000;http:test.api.justalkcloud.com:8080;http:47.101.139.97:8080;http:148.153.45.251:8080;',
+      appName: packageInfo.appName,
       buildNumber: packageInfo.buildNumber,
       deviceId: '{YOUR DEVICE ID}',
+      deviceLang: 'en_US', // 设备的系统语言
+      deviceSWVersion: '14', // 设备的系统版本
+      deviceModel: 'SM-S9080', // 设备的型号
+      deviceManufacture: 'samsung', // 设备的牌子
+      vendor: 'googleplay', // app 的渠道
       logDir: logDir,
       profileDir: profileDir);
 
@@ -44,7 +50,7 @@ class _MyAppState extends State<MyApp> {
           spacing: 12,
           children: [
             button(text: '注册', onPressed: () async {
-              final result = await FlutterJussdk.account.signUp(username: 'test_0012', password: 'test_0012');
+              final result = await FlutterJussdk.account.signUp(username: 'test_0013', password: 'test_0013');
               if (result == true) {
                 // 注册成功
               } else if (result == FlutterAccountConstants.errorSignUpExist) {
@@ -56,7 +62,7 @@ class _MyAppState extends State<MyApp> {
               }
             }),
             button(text: '登录', onPressed: () async {
-              final result = await FlutterJussdk.account.login(username: 'test_0012', password: 'test_0012');
+              final result = await FlutterJussdk.account.login(username: 'test_0013', password: 'test_0013');
               if (result == true) {
                 // 登陆成功
               } else if (result == FlutterAccountConstants.errorLoginAuthFailed) {
@@ -74,7 +80,10 @@ class _MyAppState extends State<MyApp> {
               }
             }),
             button(text: '自动登陆', onPressed: () {
-              FlutterJussdk.account.autoLogin(username: 'test_0012', password: 'test_0012');
+              FlutterJussdk.account.autoLogin(username: 'test_0013', password: 'test_0013');
+            }),
+            button(text: '日志上报', onPressed: () {
+              FlutterJussdk.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
             }),
             button(text: '自定义测试', onPressed: () {
             })

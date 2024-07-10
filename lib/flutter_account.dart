@@ -58,6 +58,11 @@ class FlutterAccountImpl extends FlutterAccount {
   final String _router;
   final String _buildNumber;
   final String _deviceId;
+  final String _deviceLang;
+  final String _deviceSWVersion;
+  final String _deviceModel;
+  final String _deviceManufacture;
+  final String _vendor;
 
   FlutterAccountImpl(
       this._bindings,
@@ -66,6 +71,11 @@ class FlutterAccountImpl extends FlutterAccount {
       this._router,
       this._buildNumber,
       this._deviceId,
+      this._deviceLang,
+      this._deviceSWVersion,
+      this._deviceModel,
+      this._deviceManufacture,
+      this._vendor,
       StreamController<dynamic> mtcNotifyEvents) {
     mtcNotifyEvents.stream.listen((event) {
       final String name = event['name'];
@@ -194,11 +204,16 @@ class FlutterAccountImpl extends FlutterAccount {
     _bindings.Mtc_UeDbSetAppKey(_appKey.toNativeUtf8().cast());
     _bindings.Mtc_UeDbSetNetwork(_router.toNativeUtf8().cast());
 
-    // 配置设备信息
     _bindings.Mtc_CliApplyDevId(_deviceId.toNativeUtf8().cast());
+
+    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_LANGUAGE_KEY.toNativeUtf8().cast(), _deviceLang.toNativeUtf8().cast());
+    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VERSION_KEY.toNativeUtf8().cast(), _deviceSWVersion.toNativeUtf8().cast());
+    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_MODEL_KEY.toNativeUtf8().cast(), _deviceModel.toNativeUtf8().cast());
+    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VENDOR_KEY.toNativeUtf8().cast(), _deviceManufacture.toNativeUtf8().cast());
+
     _bindings.Mtc_CliCfgSetAppVer(_buildNumber.toNativeUtf8().cast());
     _bindings.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VERSION_KEY.toNativeUtf8().cast(), _buildNumber.toNativeUtf8().cast());
-    // ... 还有很多, 如有必要, 可再实现
+    _bindings.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VENDOR_KEY.toNativeUtf8().cast(), _vendor.toNativeUtf8().cast());
 
     // 将 Log.Verbose.AgentCall 从1提升为4
     _bindings.Mtc_CliDbSetAgentCallLevel(4);

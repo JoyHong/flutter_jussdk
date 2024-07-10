@@ -27,6 +27,113 @@ class FlutterMtcBindings {
           lookup)
       : _lookup = lookup;
 
+  /// @brief Archive logs and commit to server.
+  ///
+  /// @param [in] zCookie Cookie value in notification callback.
+  /// @param [in] pcInfo The parameter information in json format.
+  /// Parameters include MtcParmAcvCommitArchiveName, MtcParmAcvCommitMemo,
+  /// MtcParmAcvCommitDeviceId, MtcParmAcvCommitPaths, MtcParmAcvAppInfo.
+  ///
+  /// Schema:
+  /// {
+  /// "name": "MtcAcvCommit",
+  /// "properties": {
+  /// "Memo": {
+  /// "type"         : "string",
+  /// "description"  : "Memo information in commit message",
+  /// "require"      : true
+  /// },
+  /// "DeviceId": {
+  /// "type"         : "string",
+  /// "description"  : "Device ID in commit message",
+  /// "require"      : true
+  /// },
+  /// "ArchiveName": {
+  /// "type"         : "string",
+  /// "description"  : "Achive file name",
+  /// },
+  /// "Paths": {
+  /// "type"         : "array",
+  /// "description"  : "The path name of files or directoires to be archived.",
+  /// "items"        : { "type": "string" },
+  /// "minItems"     : 1,
+  /// "uniqueItems"  : true
+  /// }
+  /// }
+  /// }
+  ///
+  /// Example:
+  /// {
+  /// "Memo"         : "exmaple",
+  /// "DeviceId"     : "JUPHOONDEVCIEID01",
+  /// "ArchiveName"  : "example-20140420.tgz", or "example-20140420.bz2",
+  /// "Paths"        : ["example/dir/file1", "example/dir/file2", "exmaple/dir2"],
+  /// "AppInfo"      : {"AppVersion" : "1.0",...}
+  /// }
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with MtcAcvCommitOkNotification or MtcAcvCommitDidFailNotification.
+  /// @retval 1 on invoke this interface failed. There will be no
+  /// notification.
+  int Mtc_AcvCommitJ(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+    bool enforced,
+  ) {
+    return _Mtc_AcvCommitJ(
+      zCookie,
+      pcInfo,
+      enforced,
+    );
+  }
+
+  late final _Mtc_AcvCommitJPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size, ffi.Pointer<ffi.Char>, ffi.Bool)>>('Mtc_AcvCommitJ');
+  late final _Mtc_AcvCommitJ = _Mtc_AcvCommitJPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, bool)>();
+
+  /// @brief MTC archive files locally.
+  ///
+  /// @param [in] pcArchive The archived file name.
+  /// @param [in] pcPaths The path name in json format.
+  /// Parameters include MtcParmAcvCommitPaths.
+  /// @retval 1 on invoke this interface failed.
+  /// @retval 0 archive file is saved locally.
+  ///
+  /// Schema:
+  /// {
+  /// "Paths": {
+  /// "type"         : "array",
+  /// "description"  : "The path name of files or directoires to be archived.",
+  /// "items"        : { "type": "string" },
+  /// "minItems"     : 1,
+  /// "uniqueItems"  : true
+  /// }
+  /// }
+  ///
+  /// Example:
+  /// {
+  /// "Paths" : ["example/dir/file1", "example/dir/file2", "exmaple/dir2"]
+  /// }
+  int Mtc_AcvPack(
+    ffi.Pointer<ffi.Char> pcArchive,
+    ffi.Pointer<ffi.Char> pcPaths,
+  ) {
+    return _Mtc_AcvPack(
+      pcArchive,
+      pcPaths,
+    );
+  }
+
+  late final _Mtc_AcvPackPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>>('Mtc_AcvPack');
+  late final _Mtc_AcvPack = _Mtc_AcvPackPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
   /// @brief Initialize Client Resource.
   ///
   /// @param [in] pcProfDir Profile directory
@@ -5818,6 +5925,23 @@ typedef PFN_MTCSHCMD = ffi.Pointer<
     ffi.NativeFunction<
         ffi.Int Function(
             ffi.Int iArgc, ffi.Pointer<ffi.Pointer<ffi.Char>> apcArgv)>>;
+
+const String MtcAcvCommitOkNotification = 'MtcAcvCommitOkNotification';
+
+const String MtcAcvCommitDidFailNotification =
+    'MtcAcvCommitDidFailNotification';
+
+const String MtcParmAcvCommitMemo = 'Memo';
+
+const String MtcParmAcvCommitDeviceId = 'DeviceId';
+
+const String MtcParmAcvCommitArchiveName = 'ArchiveName';
+
+const String MtcParmAcvCommitPaths = 'Paths';
+
+const String MtcParmAcvAppInfo = 'AppInfo';
+
+const String MtcParmAcvAppKey = 'AppKey';
 
 const int MTC_REG_STATE_IDLE = 0;
 

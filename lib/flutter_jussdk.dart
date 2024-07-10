@@ -42,22 +42,32 @@ class FlutterJussdk {
   /// 初始化 Sdk
   /// appKey: Juphoon sdk 的 app key
   /// router: router 地址
+  /// appName: 应用的 app name
   /// buildNumber: 应用的构建版本号(对应 Android 的 versionCode)
   /// deviceId: 设备 ID
+  /// deviceLang: 设备系统语言
+  /// deviceSWVersion: 设备的系统版本
+  /// deviceModel: 设备型号
+  /// deviceManufacture: 设备品牌
+  /// vendor: app 的渠道名
   /// logDir: sdk 内部日志输出目录
   /// profileDir: 用户配置文件的目录
-  /// fixedUserType: 如果该值不为空, 则后续接口的 userType 都为该值
   static void initialize(
       {required String appKey,
       required String router,
+      required String appName,
       required String buildNumber,
       required String deviceId,
+      required String deviceLang,
+      required String deviceSWVersion,
+      required String deviceModel,
+      required String deviceManufacture,
+      required String vendor,
       required Directory logDir,
-      required Directory profileDir,
-      String? fixedUserType}) {
+      required Directory profileDir}) {
     final StreamController<dynamic> mtcNotifyEvents = StreamController<dynamic>();
-    logger = FlutterLogger(_mtcBindings);
-    account = FlutterAccountImpl(_mtcBindings, logger, appKey, router, buildNumber, deviceId, mtcNotifyEvents);
+    logger = FlutterLogger(_mtcBindings, appName, buildNumber, deviceId, logDir);
+    account = FlutterAccountImpl(_mtcBindings, logger, appKey, router, buildNumber, deviceId, deviceLang, deviceSWVersion, deviceModel, deviceManufacture, vendor, mtcNotifyEvents);
     message = FlutterMessage();
     _mtcBindings.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
     if (Platform.isWindows) {
