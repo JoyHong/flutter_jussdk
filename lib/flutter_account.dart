@@ -111,7 +111,10 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  Future<dynamic> signUp({required String username, required String password}) async {
+  Future<dynamic> signUp(
+      {required String username,
+      required String password,
+      Map<String, String>? props}) async {
     _logger.i(tag: _tag, message: 'signUp($username, $password)');
     dynamic result = _cliOpen(_defUserType, username) == FlutterJussdkConstants.ZOK;
     if (!result) {
@@ -128,11 +131,12 @@ class FlutterAccountImpl extends FlutterAccount {
       _logger.e(tag: _tag, message: 'signUp failed when provisionOkTransformer');
       return result;
     }
-    return _Mtc_UeCreate2(_defUserType, username, password);
+    return _Mtc_UeCreate2(_defUserType, username, password, props: props);
   }
 
   @override
-  Future<dynamic> login({required String username, required String password}) async {
+  Future<dynamic> login(
+      {required String username, required String password}) async {
     _logger.i(tag: _tag, message: 'login($username, $password)');
     bool result = _cliOpen(_defUserType, username, password: password) == FlutterJussdkConstants.ZOK;
     if (!result) {
@@ -229,7 +233,9 @@ class FlutterAccountImpl extends FlutterAccount {
 
   static final List<Function(dynamic)> _loginCallbacks = [];
 
-  Future<dynamic> _Mtc_UeCreate2(String userType, String username, String password) {
+  Future<dynamic> _Mtc_UeCreate2(
+      String userType, String username, String password,
+      {Map<String, String>? props}) {
     Completer<dynamic> completer = Completer();
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
       FlutterNotify.removeCookie(cookie);
@@ -243,12 +249,19 @@ class FlutterAccountImpl extends FlutterAccount {
         completer.complete(reason);
       }
     });
+    List<Map<String, String>>? propList;
+    if (props != null) {
+      propList = [];
+      props.forEach((key, value) {
+        propList!.add({MtcUeInitialPropertyNameKey: key, MtcUeInitialPropertyValueKey: value});
+      });
+    }
     if (_bindings.Mtc_UeCreate2(
         cookie,
         jsonEncode([{MtcUeRelationTypeKey: userType, MtcUeRelationIdKey: username}]).toNativeUtf8().cast(),
         password.toNativeUtf8().cast(),
         true,
-        nullptr) != FlutterJussdkConstants.ZOK) {
+        propList != null ? jsonEncode(propList).toNativeUtf8().cast() : nullptr) != FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'Mtc_UeCreate2 call failed');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
