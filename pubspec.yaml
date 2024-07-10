@@ -1,6 +1,6 @@
 name: flutter_jussdk
 description: "Flutter plugin for juphoon sdk & PGM"
-version: 0.0.1
+version: 0.0.2
 homepage:
 
 environment:
