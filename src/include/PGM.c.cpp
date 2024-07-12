@@ -103,120 +103,119 @@ void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGro
         c_s_updatePropsCbConverter, c_s_insertMsgsCbConverter, c_s_getTicksCb!=NULL ? c_s_getTicksCbConverter : NULL);
 }
 
-bool pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr)
+int pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr)
 {
     StrStrMap cfgs;
     String err;
     if (c_s_Json2StrStrMap(pcCfgs, cfgs, err)
         && pgm_set_cfgs(cfgs, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_logined(const char* pcCookie, char* pcErr)
+int pgm_c_logined(const char* pcCookie, char* pcErr)
 {
     String err;
     if (pgm_logined(pcCookie, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_get_cur_time(int64_t* plCurTimeMs)
+int pgm_c_get_cur_time(int64_t* plCurTimeMs)
 {
     return pgm_get_cur_time(*plCurTimeMs);
 }
 
-bool pgm_c_record_err(const JStrStrMap* pcErrRecord)
+int pgm_c_record_err(const JStrStrMap* pcErrRecord)
 {
     StrStrMap errRecord;
     String err;
-    return c_s_Json2StrStrMap(pcErrRecord, errRecord, err)
-        && pgm_record_err(errRecord);
+    return c_s_Json2StrStrMap(pcErrRecord, errRecord, err) && pgm_record_err(errRecord) ? 0 : -1;
 }
 
-bool pgm_c_flush_data(char* pcErr)
+int pgm_c_flush_data(char* pcErr)
 {
     String err;
     if (pgm_flush_data(err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_refresh_main(const char* pcCookie, char* pcErr)
+int pgm_c_refresh_main(const char* pcCookie, char* pcErr)
 {
     String err;
     if (pgm_refresh_main(pcCookie, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_refresh_org(const char* pcCookie, const char* pcOrgId, char* pcErr)
+int pgm_c_refresh_org(const char* pcCookie, const char* pcOrgId, char* pcErr)
 {
     String err;
     if (pgm_refresh_org(pcCookie, pcOrgId, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_add_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcAdded, char* pcErr)
+int pgm_c_add_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcAdded, char* pcErr)
 {
     Group::RelationsMap added;
     String err;
     if (c_s_Json2RelationsMap(pcAdded, added, err)
         && pgm_add_relations(pcCookie, pcGroupId, added, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_change_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcChanged, char* pcErr)
+int pgm_c_change_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcChanged, char* pcErr)
 {
     Group::RelationsMap changed;
     String err;
     if (c_s_Json2RelationsMap(pcChanged, changed, err)
         && pgm_change_relations(pcCookie, pcGroupId, changed, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* pcChangedId, const JRelation* pcChangedRel, char* pcErr)
+int pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* pcChangedId, const JRelation* pcChangedRel, char* pcErr)
 {
     Group::Relation changedRel;
     String err;
     if (c_s_Json2Relation(pcChangedRel, changedRel, err)
         && pgm_nowait_ack_change_relation(pcGroupId, pcChangedId, changedRel, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_remove_relations(const char* pcCookie, const char* pcGroupId, const JStrSet* pcRemoved, char* pcErr)
+int pgm_c_remove_relations(const char* pcCookie, const char* pcGroupId, const JStrSet* pcRemoved, char* pcErr)
 {
     StrSet removed;
     String err;
     if (c_s_Json2StrSet(pcRemoved, removed, err)
         && pgm_remove_relations(pcCookie, pcGroupId, removed, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_check_relation(const char* pcCookie, const char* pcPeerUid, char* pcErr)
+int pgm_c_check_relation(const char* pcCookie, const char* pcPeerUid, char* pcErr)
 {
     String err;
     if (pgm_check_relation(pcCookie, pcPeerUid, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_apply_relation(const char* pcCookie, const char* pcGroupId, const char* pcTargetId, int iTargetType, const char* pcDesc, const JRelation* pcSyncRelation, const JStrStrMap* pcInParams, char* pcErr)
+int pgm_c_apply_relation(const char* pcCookie, const char* pcGroupId, const char* pcTargetId, int iTargetType, const char* pcDesc, const JRelation* pcSyncRelation, const JStrStrMap* pcInParams, char* pcErr)
 {
     Group::Relation syncRelation;
     StrStrMap inParams;
@@ -224,24 +223,24 @@ bool pgm_c_apply_relation(const char* pcCookie, const char* pcGroupId, const cha
     if (c_s_Json2Relation(pcSyncRelation, syncRelation, err)
         && c_s_Json2StrStrMap(pcInParams, inParams, err)
         && pgm_apply_relation(pcCookie, pcGroupId, pcTargetId, (Group::RelationType)iTargetType, pcDesc, syncRelation, inParams, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_accept_relation(const char* pcCookie, int64_t lMsgIdx, const char* pcTargetTagName, const char* pcTargetTag, const JStrStrMap* pcTargetCfgs, const JStrStrMap* pcInParams, char* pcErr)
+int pgm_c_accept_relation(const char* pcCookie, int64_t lMsgIdx, const char* pcTargetTagName, const char* pcTargetTag, const JStrStrMap* pcTargetCfgs, const JStrStrMap* pcInParams, char* pcErr)
 {
     StrStrMap targetCfgs, inParams;
     String err;
     if (c_s_Json2StrStrMap(pcTargetCfgs, targetCfgs, err)
         && c_s_Json2StrStrMap(pcInParams, inParams, err)
         && pgm_accept_relation(pcCookie, lMsgIdx, pcTargetTagName, pcTargetTag, targetCfgs, inParams, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_create_org(const char* pcCookie, const JRelationsMap* pcRelations, const JStrStrMap* pcOrgProps, char* pcErr)
+int pgm_c_create_org(const char* pcCookie, const JRelationsMap* pcRelations, const JStrStrMap* pcOrgProps, char* pcErr)
 {
     Group::RelationsMap relations;
     StrStrMap orgProps;
@@ -249,63 +248,63 @@ bool pgm_c_create_org(const char* pcCookie, const JRelationsMap* pcRelations, co
     if (c_s_Json2RelationsMap(pcRelations, relations, err)
         && c_s_Json2StrStrMap(pcOrgProps, orgProps, err)
         && pgm_create_org(pcCookie, relations, orgProps, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_disband_org(const char* pcCookie, const char* pcOrgId, char* pcErr)
+int pgm_c_disband_org(const char* pcCookie, const char* pcOrgId, char* pcErr)
 {
     String err;
     if (pgm_disband_org(pcCookie, pcOrgId, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_set_status_to_peer(const char* pcCookie, const char* pcPeerUid, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr)
+int pgm_c_set_status_to_peer(const char* pcCookie, const char* pcPeerUid, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr)
 {
     String err;
     if (pgm_set_status_to_peer(pcCookie, pcPeerUid, pcType, pcValue, lTimeStamp, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_nowait_ack_set_status(const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr)
+int pgm_c_nowait_ack_set_status(const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr)
 {
     String err;
     if (pgm_nowait_ack_set_status(pcGroupId, pcTargetId, pcType, pcValue, lTimeStamp, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_nowait_ack_set_props(const char* pcGroupId, const JStrStrMap* pcDiffProps, char* pcErr)
+int pgm_c_nowait_ack_set_props(const char* pcGroupId, const JStrStrMap* pcDiffProps, char* pcErr)
 {
     StrStrMap diffProps;
     String err;
     if (c_s_Json2StrStrMap(pcDiffProps, diffProps, err)
         && pgm_nowait_ack_set_props(pcGroupId, diffProps, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_c_get_props(const char* pcCookie, const char* pcGroupId, const JStrSet* pcPrefixs, char* pcErr)
+int pgm_c_get_props(const char* pcCookie, const char* pcGroupId, const JStrSet* pcPrefixs, char* pcErr)
 {
     StrSet prefixs;
     String err;
     if (c_s_Json2StrSet(pcPrefixs, prefixs, err)
         && pgm_get_props(pcCookie, pcGroupId, prefixs, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool pgm_c_send_p2p_msg(const char* pcCookie, const char* pcPeerUid, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr)
+int pgm_c_send_p2p_msg(const char* pcCookie, const char* pcPeerUid, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr)
 {
     Message::MsgContent content;
     StrStrMap inParams;
@@ -313,12 +312,12 @@ bool pgm_c_send_p2p_msg(const char* pcCookie, const char* pcPeerUid, const JMsgC
     if (c_s_Json2MsgContent(pcContent, content, err)
         && c_s_Json2StrStrMap(pcInParams, inParams, err)
         && pgm_send_p2p_msg(pcCookie, pcPeerUid, content, inParams, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }
 
-bool pgm_send_org_msg(const char* pcCookie, const char* pcOrgId, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr)
+int pgm_c_send_org_msg(const char* pcCookie, const char* pcOrgId, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr)
 {
     Message::MsgContent content;
     StrStrMap inParams;
@@ -326,7 +325,7 @@ bool pgm_send_org_msg(const char* pcCookie, const char* pcOrgId, const JMsgConte
     if (c_s_Json2MsgContent(pcContent, content, err)
         && c_s_Json2StrStrMap(pcInParams, inParams, err)
         && pgm_send_org_msg(pcCookie, pcOrgId, content, inParams, err))
-        return true;
+        return 0;
     strncpy(pcErr, err.c_str(), 256);
-    return false;
+    return -1;
 }

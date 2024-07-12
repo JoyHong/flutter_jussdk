@@ -663,14 +663,14 @@ class FlutterMtcBindings {
 
   /// 1. 在群消息中, MsgContent::_params[Message::K_MSG_REMIND] = "9999_1;9999_2" 表示需要无视这些人在群列表中Relation::cfgs[Group::K_CFG_IM_PUSH]的配置, 发push
   /// 使用它来实现@功能
-  int pgm_send_org_msg(
+  int pgm_c_send_org_msg(
     ffi.Pointer<ffi.Char> pcCookie,
     ffi.Pointer<ffi.Char> pcOrgId,
     ffi.Pointer<JMsgContent> pcContent,
     ffi.Pointer<JStrStrMap> pcInParams,
     ffi.Pointer<ffi.Char> pcErr,
   ) {
-    return _pgm_send_org_msg(
+    return _pgm_c_send_org_msg(
       pcCookie,
       pcOrgId,
       pcContent,
@@ -679,15 +679,15 @@ class FlutterMtcBindings {
     );
   }
 
-  late final _pgm_send_org_msgPtr = _lookup<
+  late final _pgm_c_send_org_msgPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int Function(
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<JMsgContent>,
               ffi.Pointer<JStrStrMap>,
-              ffi.Pointer<ffi.Char>)>>('pgm_send_org_msg');
-  late final _pgm_send_org_msg = _pgm_send_org_msgPtr.asFunction<
+              ffi.Pointer<ffi.Char>)>>('pgm_c_send_org_msg');
+  late final _pgm_c_send_org_msg = _pgm_c_send_org_msgPtr.asFunction<
       int Function(
           ffi.Pointer<ffi.Char>,
           ffi.Pointer<ffi.Char>,

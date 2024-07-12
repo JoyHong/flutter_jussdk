@@ -3913,7 +3913,7 @@ GroupListPtr PGM::__getGroup(String& groupId, String& err)
 
 String pgm_version()
 {
-    return "cf8d39d";
+    return "f054e70";
 }
 
 void pgm_init(PGM_EVENT_PROCESSOR eventProcessorCb, PGM_LOAD_GROUP loadGroupCb, PGM_UPDATE_GROUP updateGroupCb, PGM_UPDATE_STATUSES updateStatusesCb, PGM_UPDATE_RPOPS updatePropsCb, PGM_INSERT_MSGS insertMsgsCb, PGM_GET_TICKS getTicksCb)

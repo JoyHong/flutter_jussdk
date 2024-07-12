@@ -29,7 +29,7 @@ typedef char JSortedMsgs;   // vector<[lIdx, lTime, pcSender, JMsgContent]>
 extern "C" {
 #endif
 
-typedef int(*PGM_C_EVENT_PROCESSOR)(PGM_EVENT event, const JStrStrMap* pcParams);
+typedef int(*PGM_C_EVENT_PROCESSOR)(enum PGM_EVENT event, const JStrStrMap* pcParams);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -128,37 +128,37 @@ void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGro
 /*
   控制库的内部参数, 暂时未用
 */
-bool pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr);
+int pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr);
 
 /*
   1. 在sdk的login succ回调之后调用, pgm_logined以下声明的函数, 都必须晚于pgm_logined调用
   2. logout再login succ后需重新调用
   3. MtcCliReconnectOkNotification回调无需调用
 */
-bool pgm_c_logined(const char* pcCookie, char* pcErr);
+int pgm_c_logined(const char* pcCookie, char* pcErr);
 
-bool pgm_c_get_cur_time(int64_t* plCurTimeMs);
+int pgm_c_get_cur_time(int64_t* plCurTimeMs);
 
 /*
   异常实时上报
   SELF_USER_ID RECORD_TIME内部自动添加, 不需要传入
 */
-bool pgm_c_record_err(const JStrStrMap* pcErrRecord);
+int pgm_c_record_err(const JStrStrMap* pcErrRecord);
 
 /*
   flush db异常恢复后, 调用pgm_flush_all清空待写队列
 */
-bool pgm_c_flush_data(char* pcErr);
+int pgm_c_flush_data(char* pcErr);
 
 /* 以下接口当cookie重复/请求过频/未登录/入参本地检查有误时返回false. rpc的异步结果通过CookieEnd事件回调 */
-bool pgm_c_refresh_main(const char* pcCookie, char* pcErr);
+int pgm_c_refresh_main(const char* pcCookie, char* pcErr);
 
 /*
   1. 调用时会追加检查orgId是否是存在于自己的个人列表中, 不存在会直接报错
   2. 如若刷新的同时刚好被踢出组织/另一台登录设备退出组织, 请求发出的同时本地还未更新到该变化, 将通过CookieEnd回调permission-denied:not_in_group
 除此之外, cookieEnd只会回调succ
 */
-bool pgm_c_refresh_org(const char* pcCookie, const char* pcOrgId, char* pcErr);
+int pgm_c_refresh_org(const char* pcCookie, const char* pcOrgId, char* pcErr);
 
 /*
   1. 列表修改flush local db是一个异步行为, 存在极端情况, 库已经感知到列表变化但尚未flush到db中被上层所感知. 故即使上层逻辑无误, add/change/remove接口仍然可能返回false,out @err为'added_exist'/'changed_nonexist'/'removed_nonexist'
@@ -175,7 +175,7 @@ bool pgm_c_refresh_org(const char* pcCookie, const char* pcOrgId, char* pcErr);
   3. CookieEnd 'added_exist'时,表示同时间点发生了异源修改,比如 自己两台正在登录的设备, 同时添加同一个人
     接口保证 会先将这样的列表异源修改flush db, 再回调CookieEnd err!
 */
-bool pgm_c_add_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcAdded, char* pcErr);
+int pgm_c_add_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcAdded, char* pcErr);
 
 /*
   1. 调用方式: @groupId是节点所属的列表id, @changed是修改节点id及内容的集合. 比如
@@ -184,7 +184,7 @@ bool pgm_c_add_relations(const char* pcCookie, const char* pcGroupId, const JRel
   3. CookieEnd 'changed_nonexist'时, 表示同时间点发生了异源修改, 比如 修改自己的群内备注名时刚好群主把自己踢了
     接口保证 会先将这样的他源列表修改flush db, 再回调CookieEnd err!
 */
-bool pgm_c_change_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcChanged, char* pcErr);
+int pgm_c_change_relations(const char* pcCookie, const char* pcGroupId, const JRelationsMap* pcChanged, char* pcErr);
 
 /*
   1. 即时生效修改. 不等待后端确认. 若后端修改失败, 库内部保证最终重试成功
@@ -192,7 +192,7 @@ bool pgm_c_change_relations(const char* pcCookie, const char* pcGroupId, const J
   3. 尽量只用该接口修改只与显示相关的次要元素, 若用来修改组织消息免打扰,当rpc最终成功前, 可能导致ui效果与实际效果不一致的问题
   4. 调用方式: @groupId是节点所属列表id, @changedId是节点id, changedRel是修改后的节点完整内容
 */
-bool pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* pcChangedId, const JRelation* pcChangedRel, char* pcErr);
+int pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* pcChangedId, const JRelation* pcChangedRel, char* pcErr);
 
 /*
   1. 调用方式:
@@ -204,12 +204,12 @@ bool pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* pcChang
     b. rpc发生了单通+重传. 首次调用写成功但response丢失, 导致自动重传, 重传时判定'removed_nonexist'
       目前接口自己无法区分这两种情况. 但上层大部分情况下能够依靠前后短时间内有无Group.Update通知来判定(异源修改都会有通知, 只要网络是通畅的)
 */
-bool pgm_c_remove_relations(const char* pcCookie, const char* pcGroupId, const JStrSet* pcRemoved, char* pcErr);
+int pgm_c_remove_relations(const char* pcCookie, const char* pcGroupId, const JStrSet* pcRemoved, char* pcErr);
 
 /*
   查询自己在对方列表中的身份级别. CookieEnd value为String(Group::RelationType), 比如13表示Contact,15表示Strange. 其他非整数值表示失败reason
 */
-bool pgm_c_check_relation(const char* pcCookie, const char* pcPeerUid, char* pcErr);
+int pgm_c_check_relation(const char* pcCookie, const char* pcPeerUid, char* pcErr);
 
 /*
   1. 调用方式:
@@ -221,7 +221,7 @@ bool pgm_c_check_relation(const char* pcCookie, const char* pcPeerUid, char* pcE
       @syncRelation为获同意后, AOrB 个人列表 orgIdC的同步added节点
   2. 调用成功后,所有相关方都将回调P2PApply/OrgApply/OrgInvite event
 */
-bool pgm_c_apply_relation(const char* pcCookie, const char* pcGroupId, const char* pcTargetId, int iTargetType, const char* pcDesc, const JRelation* pcSyncRelation, const JStrStrMap* pcInParams, char* pcErr);
+int pgm_c_apply_relation(const char* pcCookie, const char* pcGroupId, const char* pcTargetId, int iTargetType, const char* pcDesc, const JRelation* pcSyncRelation, const JStrStrMap* pcInParams, char* pcErr);
 
 /*
   1. 调用方式:
@@ -230,34 +230,34 @@ bool pgm_c_apply_relation(const char* pcCookie, const char* pcGroupId, const cha
     c. 组织申请: C Owner/任一Manager pgm_accept_relation(cookie, msgIdx, tagNameAOrB, tagAOrB, nullCfgs, notifyParams, err)
   2. 调用成功后,所有相关方都将回调P2PApplyResponse/OrgApplyResponse/OrgInviteResponse event
 */
-bool pgm_c_accept_relation(const char* pcCookie, int64_t lMsgIdx, const char* pcTargetTagName, const char* pcTargetTag, const JStrStrMap* pcTargetCfgs, const JStrStrMap* pcInParams, char* pcErr);
+int pgm_c_accept_relation(const char* pcCookie, int64_t lMsgIdx, const char* pcTargetTagName, const char* pcTargetTag, const JStrStrMap* pcTargetCfgs, const JStrStrMap* pcInParams, char* pcErr);
 
 /*
   @relations为初始成员, 必须包含自己作为Owner
   @orgProps群属性
 */
-bool pgm_c_create_org(const char* pcCookie, const JRelationsMap* pcRelations, const JStrStrMap* pcOrgProps, char* pcErr);
+int pgm_c_create_org(const char* pcCookie, const JRelationsMap* pcRelations, const JStrStrMap* pcOrgProps, char* pcErr);
 
-bool pgm_c_disband_org(const char* pcCookie, const char* pcOrgId, char* pcErr);
+int pgm_c_disband_org(const char* pcCookie, const char* pcOrgId, char* pcErr);
 
 /*
   1. 设置对方看到的自己的状态. 比如 A设置 正在编辑 之于B: A pgm_set_status_to_peer(cookie, uidB, 'Editing', '1', err)
   2. @timeStamp为状态版本, 在并发乱序情况下, 状态写只会由低版本更新为高版本
     需要在多个同时登录设备之间维护版本才需要填. 否则一般填-1, 此时pgm库默认使用粗校后的本地时间作为状态版本. pgm_set_org_status同
 */
-bool pgm_c_set_status_to_peer(const char* pcCookie, const char* pcPeerUid, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
+int pgm_c_set_status_to_peer(const char* pcCookie, const char* pcPeerUid, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
 
 /*
   1. 设置组织中某节点(可能是自己也可能是他人)的状态. 比如 A设置自己在组织C中的状态为繁忙: A pgm_nowait_ack_set_status(cookie, orgIdC, uidA, 'Busy', '1', err)
   2. 设置self列表中他人的状态, 供其他设备登录时读取. A pgm_nowait_ack_set_status(cookie, uidA, uidB, '...', '1', err), 暂无明确的应用场景
 */
-bool pgm_c_nowait_ack_set_status(const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
+int pgm_c_nowait_ack_set_status(const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
 
 /*
 1. 设置自己/组织属性(会有组织权限检查), @props传diff
 2. 设置成功后将回调PGM_UPDATE_RPOPS
 */
-bool pgm_c_nowait_ack_set_props(const char* pcGroupId, const JStrStrMap* pcDiffProps, char* pcErr);
+int pgm_c_nowait_ack_set_props(const char* pcGroupId, const JStrStrMap* pcDiffProps, char* pcErr);
 
 /*
   1. 读取任何人/任何组织的属性, 包括但不限于自己的好友/加入的组织
@@ -268,17 +268,17 @@ bool pgm_c_nowait_ack_set_props(const char* pcGroupId, const JStrStrMap* pcDiffP
       2 表示offline(未注册push模版)
     其他正整数表示offlinePush,正整数的值是offlinePush的毫秒时间戳
 */
-bool pgm_c_get_props(const char* pcCookie, const char* pcGroupId, const JStrSet* pcPrefixs, char* pcErr);
+int pgm_c_get_props(const char* pcCookie, const char* pcGroupId, const JStrSet* pcPrefixs, char* pcErr);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool pgm_c_send_p2p_msg(const char* pcCookie, const char* pcPeerUid, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr);
+int pgm_c_send_p2p_msg(const char* pcCookie, const char* pcPeerUid, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr);
 
 /*
   1. 在群消息中, MsgContent::_params[Message::K_MSG_REMIND] = "9999_1;9999_2" 表示需要无视这些人在群列表中Relation::cfgs[Group::K_CFG_IM_PUSH]的配置, 发push
     使用它来实现@功能
 */
-bool pgm_send_org_msg(const char* pcCookie, const char* pcOrgId, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr);
+int pgm_c_send_org_msg(const char* pcCookie, const char* pcOrgId, const JMsgContent* pcContent, const JStrStrMap* pcInParams, char* pcErr);
 
 #ifdef __cplusplus
 }
