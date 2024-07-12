@@ -47,6 +47,7 @@ class GlobalTime : public AgentAsync,
 public:
     GlobalTime(const Client::ClientPtr& client, Long syncCostTimeThreshold);
     Long __get();
+    void __close();
 private:
     void cmdResult(int rslt, const IputStreamPtr& iput, const ObjectPtr& userdata);
     void onTimeout(const TimerPtr& timer);

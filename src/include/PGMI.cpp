@@ -1,4 +1,10 @@
-﻿#ifdef _MSC_VER
+﻿#include "PGMI.h"
+#include "PGM.h"
+#include "PGM.c.h"
+
+#include "PGMCrypto.h"
+
+#ifdef _MSC_VER
 #include "windows.h"
 extern void* Mtc_CliGetClient();
 #include "../Group/GroupPublic.h"
@@ -10,12 +16,8 @@ extern void* Mtc_CliGetClient();
 #include "Status/StatusPublic.h"
 #include "Message/MessagePublic.h"
 #endif
+#include "Common/Reason.h"
 
-#include "PGMI.h"
-#include "PGM.h"
-#include "PGM.c.h"
-
-#include "PGMCrypto.h"
 
 #define ERR_BREAK_IF(condition, e) \
     { \
@@ -137,8 +139,8 @@ GlobalTime::GlobalTime(const Client::ClientPtr& client, Long syncCostTimeThresho
 
 void GlobalTime::cmdResult(int rslt, const IputStreamPtr& iput, const ObjectPtr& userdata)
 {
-    int nextSyncTime = 60000;
     Long globalTime;
+    RecLock lock(this);
     if (Global::GlobalTimeAgent::globalTime_end(rslt, iput, globalTime))
     {
         Long syncEndTime = s_getTicksCb();
@@ -148,28 +150,35 @@ void GlobalTime::cmdResult(int rslt, const IputStreamPtr& iput, const ObjectPtr&
             _minSyncCostTime = syncCostTime;
             _globalTimeOffset = globalTime - (_syncBeginTime + syncEndTime) / 2;
             if (syncCostTime <= _syncCostTimeThreshold)
-            {
-                nextSyncTime = 3600000;
-                _minSyncCostTime = 1000;
-            }
+                return;
         }
     }
-    _syncTimer->start(nextSyncTime);
+    _syncTimer->start(60000);
 }
 
 void GlobalTime::onTimeout(const TimerPtr& timer)
 {
+    RecLock lock(this);
     _syncBeginTime = s_getTicksCb();
     _timeAgent.globalTime_begin(this);
 }
 
 Long GlobalTime::__get()
 {
+    RecLock lock(this);
     Long time = s_getTicksCb() + _globalTimeOffset;
     if (_lastGetTime >= time)
         return _lastGetTime;
     _lastGetTime = time;
     return time;
+}
+
+void GlobalTime::__close()
+{
+    RecLock lock(this);
+    _timeAgent = 0;
+    _syncTimer->stop();
+    _syncTimer = 0;
 }
 
 
@@ -3298,10 +3307,12 @@ void PGM::__close()
     _client->removeMessageReceiver(Group::GROUP_UPDATE_NOTIFY);
     _client->removeMessageReceiver(Group::MESSAGE_UPDATE_NOTIFY);
     _client->removeMessageReceiver(Group::STATUS_UPDATE_NOTIFY),
+    _client = 0;
 
     _magic.clear();
+    _globalTime->__close();
     _globalTime = 0;
-    _client = 0;
+
     _selfGroup->__clear();
     _selfGroup = 0;
     map<String, OrgGroupPtr>::const_iterator it = _orgGroups.begin();
@@ -3913,7 +3924,7 @@ GroupListPtr PGM::__getGroup(String& groupId, String& err)
 
 String pgm_version()
 {
-    return "f054e70";
+    return "5e5df6c";
 }
 
 void pgm_init(PGM_EVENT_PROCESSOR eventProcessorCb, PGM_LOAD_GROUP loadGroupCb, PGM_UPDATE_GROUP updateGroupCb, PGM_UPDATE_STATUSES updateStatusesCb, PGM_UPDATE_RPOPS updatePropsCb, PGM_INSERT_MSGS insertMsgsCb, PGM_GET_TICKS getTicksCb)

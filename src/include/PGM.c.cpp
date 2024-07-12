@@ -125,7 +125,7 @@ int pgm_c_logined(const char* pcCookie, char* pcErr)
 
 int pgm_c_get_cur_time(int64_t* plCurTimeMs)
 {
-    return pgm_get_cur_time(*plCurTimeMs);
+    return pgm_get_cur_time(*(Long*)plCurTimeMs);
 }
 
 int pgm_c_record_err(const JStrStrMap* pcErrRecord)
