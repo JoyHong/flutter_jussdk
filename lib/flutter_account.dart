@@ -41,6 +41,9 @@ abstract class FlutterAccount {
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
   void autoLogin({required String username, required String password});
 
+  /// 获取当前用户登陆的 uid
+  String getLoginUid();
+
 }
 
 class FlutterAccountImpl extends FlutterAccount {
@@ -177,6 +180,11 @@ class FlutterAccountImpl extends FlutterAccount {
     if (_login(MTC_LOGIN_OPTION_NONE) != FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'autoLogin failed when login(MTC_LOGIN_OPTION_NONE)');
     }
+  }
+
+  @override
+  String getLoginUid() {
+    return _bindings.Mtc_UeGetUid().cast<Utf8>().toDartString();
   }
 
   int _cliOpen(String userType, String username, {String? password}) {

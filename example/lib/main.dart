@@ -64,7 +64,8 @@ class _MyAppState extends State<MyApp> {
             button(text: '登录', onPressed: () async {
               final result = await FlutterJussdk.account.login(username: 'test_0013', password: 'test_0013');
               if (result == true) {
-                // 登陆成功
+                // 登陆成功, 此时可以保存 uid
+                // FlutterJussdk.account.getLoginUid();
               } else if (result == FlutterAccountConstants.errorLoginAuthFailed) {
                 // 登陆失败, 账号密码错误
               } else if (result == FlutterAccountConstants.errorLoginDeleted) {
