@@ -13,8 +13,10 @@ class FlutterAccountConstants {
 
   static const int errorDevIntegration = FlutterJussdkConstants.errorDevIntegration;
   static const int errorFailNotification = FlutterJussdkConstants.errorFailNotification;
+
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
+
   /// 登陆失败, 账号密码错误
   static const int errorLoginAuthFailed = MTC_CLI_REG_ERR_AUTH_FAILED;
   /// 登陆失败, 账号已删除
@@ -23,6 +25,9 @@ class FlutterAccountConstants {
   static const int errorLoginInvalid = MTC_CLI_REG_ERR_INVALID_USER;
   /// 登陆失败, 账号已被封禁
   static const int errorLoginBanned = MTC_CLI_REG_ERR_BANNED;
+
+  /// 修改密码失败, 输入的原密码错误
+  static const int errorChangePasswordWrongPWD = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_PWD_ERROR;
 
 }
 
@@ -43,6 +48,11 @@ abstract class FlutterAccount {
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
+
+  /// 修改密码
+  /// oldPassword: 原密码
+  /// newPassword: 新密码
+  Future<dynamic> changePassword({required String oldPassword, required String newPassword});
 
 }
 
@@ -187,6 +197,30 @@ class FlutterAccountImpl extends FlutterAccount {
     return _bindings.Mtc_UeGetUid().cast<Utf8>().toDartString();
   }
 
+  @override
+  Future<dynamic> changePassword({required String oldPassword, required String newPassword}) {
+    _logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
+    Completer<dynamic> completer = Completer();
+    int cookie = FlutterNotify.addCookie((cookie, name, info) {
+      FlutterNotify.removeCookie(cookie);
+      if (name == MtcUeChangePasswordOkNotification) {
+        completer.complete(true);
+      } else {
+        completer.complete(_parseUeReason(info));
+      }
+    });
+    if (_bindings.Mtc_UeChangePassword(
+            cookie,
+            oldPassword.toNativeUtf8().cast(),
+            newPassword.toNativeUtf8().cast()) !=
+        FlutterJussdkConstants.ZOK) {
+      _logger.e(tag: _tag, message: 'Mtc_UeChangePassword call failed');
+      FlutterNotify.removeCookie(cookie);
+      completer.complete(FlutterAccountConstants.errorDevIntegration);
+    }
+    return completer.future;
+  }
+
   int _cliOpen(String userType, String username, {String? password}) {
     String clientUser = '$userType)$username';
     int result = _bindings.Mtc_CliOpen(clientUser.toNativeUtf8().cast());
@@ -265,11 +299,7 @@ class FlutterAccountImpl extends FlutterAccount {
       if (name == MtcUeCreateOkNotification) {
         completer.complete(true);
       } else {
-        int reason = FlutterAccountConstants.errorFailNotification;
-        try {
-          reason = jsonDecode(info)[MtcUeReasonKey];
-        } catch (ignored) {}
-        completer.complete(reason);
+        completer.complete(_parseUeReason(info));
       }
     });
     List<Map<String, String>>? propList;
@@ -290,6 +320,14 @@ class FlutterAccountImpl extends FlutterAccount {
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
     return completer.future;
+  }
+
+  static int _parseUeReason(String info) {
+    int reason = FlutterAccountConstants.errorFailNotification;
+    try {
+      reason = jsonDecode(info)[MtcUeReasonKey];
+    } catch (ignored) {}
+    return reason;
   }
 
 }
