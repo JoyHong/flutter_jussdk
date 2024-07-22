@@ -204,6 +204,7 @@ class FlutterAccountImpl extends FlutterAccount {
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
       FlutterNotify.removeCookie(cookie);
       if (name == MtcUeChangePasswordOkNotification) {
+        _bindings.Mtc_ProfSaveProvision();
         completer.complete(true);
       } else {
         completer.complete(_parseUeReason(info));
