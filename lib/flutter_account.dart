@@ -44,7 +44,7 @@ abstract class FlutterAccount {
   Future<dynamic> login({required String username, required String password});
 
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
-  void autoLogin({required String username, required String password});
+  void autoLogin({required String username});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -180,9 +180,9 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  void autoLogin({required String username, required String password}) {
-    _logger.i(tag: _tag, message: 'autoLogin($username, $password)');
-    bool result = _cliOpen(_defUserType, username, password: password) == FlutterJussdkConstants.ZOK;
+  void autoLogin({required String username}) {
+    _logger.i(tag: _tag, message: 'autoLogin($username)');
+    bool result = _cliOpen(_defUserType, username) == FlutterJussdkConstants.ZOK;
     if (!result) {
       _logger.e(tag: _tag, message: 'autoLogin failed when cliOpen');
       return;

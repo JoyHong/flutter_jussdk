@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> {
               }
             }),
             button(text: '自动登陆', onPressed: () {
-              FlutterJussdk.account.autoLogin(username: 'test_0013', password: 'test_0013');
+              FlutterJussdk.account.autoLogin(username: 'test_0013');
             }),
             button(text: '日志上报', onPressed: () {
               FlutterJussdk.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
