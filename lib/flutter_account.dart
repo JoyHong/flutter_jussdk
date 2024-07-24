@@ -54,6 +54,9 @@ abstract class FlutterAccount {
   /// newPassword: 新密码
   Future<dynamic> changePassword({required String oldPassword, required String newPassword});
 
+  /// 删除账号, 成功返回 true, 失败则返回对应的错误码(int)
+  Future<dynamic> delete();
+
 }
 
 class FlutterAccountImpl extends FlutterAccount {
@@ -216,6 +219,26 @@ class FlutterAccountImpl extends FlutterAccount {
             newPassword.toNativeUtf8().cast()) !=
         FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'Mtc_UeChangePassword call failed');
+      FlutterNotify.removeCookie(cookie);
+      completer.complete(FlutterAccountConstants.errorDevIntegration);
+    }
+    return completer.future;
+  }
+
+  @override
+  Future<dynamic> delete() {
+    _logger.i(tag: _tag, message: 'delete');
+    Completer<dynamic> completer = Completer();
+    int cookie = FlutterNotify.addCookie((cookie, name, info) {
+      FlutterNotify.removeCookie(cookie);
+      if (name == MtcUeDeleteUserOkNotifcation) {
+        completer.complete(true);
+      } else {
+        completer.complete(_parseUeReason(info));
+      }
+    });
+    if (_bindings.Mtc_UeDeleteUser(cookie, 0) != FlutterJussdkConstants.ZOK) {
+      _logger.e(tag: _tag, message: 'Mtc_UeDeleteUser call failed');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
