@@ -14,6 +14,9 @@ class FlutterAccountConstants {
   static const int errorDevIntegration = FlutterJussdkConstants.errorDevIntegration;
   static const int errorFailNotification = FlutterJussdkConstants.errorFailNotification;
 
+  /// 账号删除失败, 密码错误
+  static const int errorDeleteWrongPWD = FlutterJussdkConstants.errorBaseCode - 1;
+
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
 
@@ -55,7 +58,8 @@ abstract class FlutterAccount {
   Future<dynamic> changePassword({required String oldPassword, required String newPassword});
 
   /// 删除账号, 成功返回 true, 失败则返回对应的错误码(int)
-  Future<dynamic> delete();
+  /// 注: 需要在登陆成功的状态下才能进行删除操作
+  Future<dynamic> delete({required String password});
 
 }
 
@@ -226,8 +230,11 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  Future<dynamic> delete() {
-    _logger.i(tag: _tag, message: 'delete');
+  Future<dynamic> delete({required String password}) {
+    _logger.i(tag: _tag, message: 'delete($password)');
+    if (password != _bindings.Mtc_UeDbGetPassword().cast<Utf8>().toDartString()) {
+      return Future.value(FlutterAccountConstants.errorDeleteWrongPWD);
+    }
     Completer<dynamic> completer = Completer();
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
       FlutterNotify.removeCookie(cookie);
