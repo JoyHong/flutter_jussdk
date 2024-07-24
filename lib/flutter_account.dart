@@ -61,6 +61,9 @@ abstract class FlutterAccount {
   /// 注: 需要在登陆成功的状态下才能进行删除操作
   Future<dynamic> delete({required String password});
 
+  /// 退出登陆
+  Future logout();
+
 }
 
 class FlutterAccountImpl extends FlutterAccount {
@@ -137,6 +140,18 @@ class FlutterAccountImpl extends FlutterAccount {
         _loginCallbacks.clear();
         return;
       }
+      if (name == MtcCliServerDidLogoutNotification) { // 主动登出
+        _logoutOk();
+        for (var callback in _didLogoutCallbacks) {
+          callback.call();
+        }
+        _didLogoutCallbacks.clear();
+        return;
+      }
+      if (name == MtcCliServerLogoutedNotification) { // 被登出
+
+        return;
+      }
     });
   }
 
@@ -145,7 +160,7 @@ class FlutterAccountImpl extends FlutterAccount {
       {required String username,
       required String password,
       Map<String, String>? props}) async {
-    _logger.i(tag: _tag, message: 'signUp($username, $password)');
+    _logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
     dynamic result = _cliOpen(_defUserType, username) == FlutterJussdkConstants.ZOK;
     if (!result) {
       _logger.e(tag: _tag, message: 'signUp failed when cliOpen');
@@ -201,6 +216,7 @@ class FlutterAccountImpl extends FlutterAccount {
 
   @override
   String getLoginUid() {
+    _logger.i(tag: _tag, message: 'getLoginUid()');
     return _bindings.Mtc_UeGetUid().cast<Utf8>().toDartString();
   }
 
@@ -248,6 +264,22 @@ class FlutterAccountImpl extends FlutterAccount {
       _logger.e(tag: _tag, message: 'Mtc_UeDeleteUser call failed');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
+    }
+    return completer.future;
+  }
+
+  @override
+  Future logout() async {
+    _logger.i(tag: _tag, message: 'logout()');
+    Completer<dynamic> completer = Completer();
+    callback() {
+      completer.complete();
+    }
+    _didLogoutCallbacks.add(callback);
+    if (_bindings.Mtc_CliLogout() != FlutterJussdkConstants.ZOK) {
+      _logoutOk();
+      _didLogoutCallbacks.remove(callback);
+      completer.complete();
     }
     return completer.future;
   }
@@ -305,6 +337,11 @@ class FlutterAccountImpl extends FlutterAccount {
     return result;
   }
 
+  /// 退出登陆后的统一逻辑处理
+  void _logoutOk() {
+    _bindings.Mtc_CliStop();
+  }
+
   static final List<Function(dynamic)> _provisionCallbacks = [];
 
   Future<dynamic> _provisionOkTransformer() {
@@ -320,6 +357,8 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   static final List<Function(dynamic)> _loginCallbacks = [];
+
+  static final List<Function> _didLogoutCallbacks = [];
 
   Future<dynamic> _Mtc_UeCreate2(
       String userType, String username, String password,
