@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_jussdk.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_notify.dart';
@@ -77,6 +78,7 @@ class FlutterAccountImpl extends FlutterAccount {
 
   final FlutterMtcBindings _bindings;
   final FlutterLogger _logger;
+  final FlutterConnectivity _connectivity;
   final String _appKey;
   final String _router;
   final String _buildNumber;
@@ -90,6 +92,7 @@ class FlutterAccountImpl extends FlutterAccount {
   FlutterAccountImpl(
       this._bindings,
       this._logger,
+      this._connectivity,
       this._appKey,
       this._router,
       this._buildNumber,
@@ -152,6 +155,9 @@ class FlutterAccountImpl extends FlutterAccount {
 
         return;
       }
+    });
+    _connectivity.addOnConnectivityChangedListener((oldType, newType) {
+      
     });
   }
 

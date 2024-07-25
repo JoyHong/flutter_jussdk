@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
@@ -34,6 +35,8 @@ class FlutterJussdk {
 
   /// 日志模块对象
   static late FlutterLogger logger;
+  /// 网络模块对象
+  static late FlutterConnectivity connectivity;
   /// 账号模块对象
   static late FlutterAccount account;
   /// 消息模块对象
@@ -67,7 +70,8 @@ class FlutterJussdk {
       required Directory profileDir}) {
     final StreamController<dynamic> mtcNotifyEvents = StreamController<dynamic>();
     logger = FlutterLogger(_mtcBindings, appName, buildNumber, deviceId, logDir);
-    account = FlutterAccountImpl(_mtcBindings, logger, appKey, router, buildNumber, deviceId, deviceLang, deviceSWVersion, deviceModel, deviceManufacture, vendor, mtcNotifyEvents);
+    connectivity = FlutterConnectivity(_mtcBindings, logger);
+    account = FlutterAccountImpl(_mtcBindings, logger, connectivity, appKey, router, buildNumber, deviceId, deviceLang, deviceSWVersion, deviceModel, deviceManufacture, vendor, mtcNotifyEvents);
     message = FlutterMessage();
     _mtcBindings.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
     if (Platform.isWindows) {
