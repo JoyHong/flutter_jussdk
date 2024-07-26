@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 
+import 'package:cancellation_token/cancellation_token.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_jussdk.dart';
@@ -29,9 +30,22 @@ class FlutterAccountConstants {
   static const int errorLoginInvalid = MTC_CLI_REG_ERR_INVALID_USER;
   /// 登陆失败, 账号已被封禁
   static const int errorLoginBanned = MTC_CLI_REG_ERR_BANNED;
+  /// 登陆失败, 其它设备端已登陆
+  static const int errorLoginAnotherDeviceLogged = MTC_CLI_REG_ERR_DEACTED;
 
   /// 修改密码失败, 输入的原密码错误
   static const int errorChangePasswordWrongPWD = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_PWD_ERROR;
+
+  /// 默认状态
+  static const int stateInit = 0;
+  /// 正在登陆中
+  static const int stateLoggingIn = 1;
+  /// 登陆失败
+  static const int stateLoginFailed = 2;
+  /// 已登陆
+  static const int stateLoggedIn = 3;
+  /// 已登出
+  static const int stateLoggedOut = 4;
 
 }
 
@@ -65,6 +79,8 @@ abstract class FlutterAccount {
   /// 退出登陆
   Future logout();
 
+  late Stream<dynamic> stateUpdated;
+
 }
 
 class FlutterAccountImpl extends FlutterAccount {
@@ -75,6 +91,14 @@ class FlutterAccountImpl extends FlutterAccount {
 
   String _clientUser = '';
   bool _clientUserProvisionOk = false;
+  int _state = FlutterAccountConstants.stateInit;
+  bool _autoLogging = false;
+  int _reLoggingTimeout = 2;
+  CancellationToken? _reLoggingTimeoutToken;
+
+  final StreamController<dynamic> _stateEvents = StreamController<dynamic>();
+  @override
+  Stream get stateUpdated => _stateEvents.stream;
 
   final FlutterMtcBindings _bindings;
   final FlutterLogger _logger;
@@ -130,6 +154,7 @@ class FlutterAccountImpl extends FlutterAccount {
           callback.call(true);
         }
         _loginCallbacks.clear();
+        _loginOk();
         return;
       }
       if (name == MtcCliServerLoginDidFailNotification) { // 登陆失败的回调
@@ -141,23 +166,46 @@ class FlutterAccountImpl extends FlutterAccount {
           callback.call(reason);
         }
         _loginCallbacks.clear();
+        if (_autoLogging) { // 是自动登陆, 如出现以下错误原因, 表明自动登陆失败，无法继续尝试自动登陆
+          if (reason == MTC_CLI_REG_ERR_DEACTED ||      // 其它设备已登录, 被踢出
+              reason == MTC_CLI_REG_ERR_AUTH_FAILED ||  // 账号密码错误, 比如被修改
+              reason == MTC_CLI_REG_ERR_BANNED ||       // 账号被封禁
+              reason == MTC_CLI_REG_ERR_DELETED ||      // 账号被删除
+              reason == MTC_CLI_REG_ERR_INVALID_USER) { // 账号不存在等
+            _logoutOk(reason, false);
+            return;
+          }
+        }
+        _loginFailed(reason);
         return;
       }
       if (name == MtcCliServerDidLogoutNotification) { // 主动登出
-        _logoutOk();
         for (var callback in _didLogoutCallbacks) {
           callback.call();
         }
         _didLogoutCallbacks.clear();
+        _logoutOk(0, true);
         return;
       }
       if (name == MtcCliServerLogoutedNotification) { // 被登出
-
+        int reason = FlutterAccountConstants.errorFailNotification;
+        try {
+          reason = jsonDecode(info)[MtcCliStatusCodeKey];
+        } catch (ignored) {}
+        _logoutOk(reason, false);
         return;
       }
     });
     _connectivity.addOnConnectivityChangedListener((oldType, newType) {
-      
+      if (oldType == FlutterConnectivityConstants.typeUnavailable &&
+          _state == FlutterAccountConstants.stateLoginFailed &&
+          _autoLogging) {
+        // 从没有网络到有网络, 且上一次自动登陆失败, 则继续重试自动登陆
+        _reLoggingTimeoutToken?.cancel();
+        _reLoggingTimeoutToken = null;
+        _login(MTC_LOGIN_OPTION_NONE);
+        _loggingIn(true);
+      }
     });
   }
 
@@ -203,6 +251,8 @@ class FlutterAccountImpl extends FlutterAccount {
       _logger.e(tag: _tag, message: 'login failed when login(MTC_LOGIN_OPTION_PREEMPTIVE)');
       _loginCallbacks.remove(callback);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
+    } else {
+      _loggingIn(false);
     }
     return completer.future;
   }
@@ -217,6 +267,8 @@ class FlutterAccountImpl extends FlutterAccount {
     }
     if (_login(MTC_LOGIN_OPTION_NONE) != FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'autoLogin failed when login(MTC_LOGIN_OPTION_NONE)');
+    } else {
+      _loggingIn(true);
     }
   }
 
@@ -283,7 +335,7 @@ class FlutterAccountImpl extends FlutterAccount {
     }
     _didLogoutCallbacks.add(callback);
     if (_bindings.Mtc_CliLogout() != FlutterJussdkConstants.ZOK) {
-      _logoutOk();
+      _logoutOk(0, true);
       _didLogoutCallbacks.remove(callback);
       completer.complete();
     }
@@ -343,9 +395,41 @@ class FlutterAccountImpl extends FlutterAccount {
     return result;
   }
 
+  void _loggingIn(bool auto) {
+    _state = FlutterAccountConstants.stateLoggingIn;
+    _autoLogging = auto;
+    _stateEvents.sink.add({'state': _state});
+  }
+
+  /// 登陆成功后的统一逻辑处理
+  void _loginOk() {
+    _state = FlutterAccountConstants.stateLoggedIn;
+    _stateEvents.sink.add({'state': _state});
+  }
+
+  /// 登陆失败的逻辑处理
+  void _loginFailed(int reason) {
+    _state = FlutterAccountConstants.stateLoginFailed;
+    if (_autoLogging && _connectivity.getType() != FlutterConnectivityConstants.typeUnavailable) {
+      _reLoggingTimeoutToken = CancellationToken();
+      CancellableFuture.delayed(Duration(seconds: _reLoggingTimeout), _reLoggingTimeoutToken, () {
+        _login(MTC_LOGIN_OPTION_NONE);
+        _loggingIn(true);
+      }).onError((error, stackTrace) => null);
+      if (_reLoggingTimeout < 120) {
+        _reLoggingTimeout *= 2;
+      }
+    }
+    _stateEvents.sink.add({'state': _state, 'reason': reason});
+  }
+
   /// 退出登陆后的统一逻辑处理
-  void _logoutOk() {
+  void _logoutOk(int reason, bool manual) {
+    _state = FlutterAccountConstants.stateLoggedOut;
+    _autoLogging = false;
+    _reLoggingTimeout = 2;
     _bindings.Mtc_CliStop();
+    _stateEvents.sink.add({'state': _state, 'reason': reason, 'manual': manual});
   }
 
   static final List<Function(dynamic)> _provisionCallbacks = [];
