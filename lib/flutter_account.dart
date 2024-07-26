@@ -99,7 +99,7 @@ class FlutterAccountImpl extends FlutterAccount {
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
 
-  final StreamController<dynamic> _stateEvents = StreamController<dynamic>();
+  final StreamController<dynamic> _stateEvents = StreamController.broadcast();
   @override
   Stream get stateUpdated => _stateEvents.stream;
 
@@ -407,13 +407,13 @@ class FlutterAccountImpl extends FlutterAccount {
   void _loggingIn(bool auto) {
     _state = FlutterAccountConstants.stateLoggingIn;
     _autoLogging = auto;
-    _stateEvents.sink.add({'state': _state});
+    _stateEvents.add({'state': _state});
   }
 
   /// 登陆成功后的统一逻辑处理
   void _loginOk() {
     _state = FlutterAccountConstants.stateLoggedIn;
-    _stateEvents.sink.add({'state': _state});
+    _stateEvents.add({'state': _state});
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }
@@ -433,7 +433,7 @@ class FlutterAccountImpl extends FlutterAccount {
         _reLoggingTimeout *= 2;
       }
     }
-    _stateEvents.sink.add({'state': _state, 'reason': reason});
+    _stateEvents.add({'state': _state, 'reason': reason});
   }
 
   /// 退出登陆后的统一逻辑处理
@@ -442,7 +442,7 @@ class FlutterAccountImpl extends FlutterAccount {
     _autoLogging = false;
     _reLoggingTimeout = 2;
     _bindings.Mtc_CliStop();
-    _stateEvents.sink.add({'state': _state, 'reason': reason, 'manual': manual});
+    _stateEvents.add({'state': _state, 'reason': reason, 'manual': manual});
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];
