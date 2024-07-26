@@ -65,9 +65,6 @@ abstract class FlutterAccount {
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
   void autoLogin({required String username});
 
-  /// 获取当前用户登陆的 uid
-  String getLoginUid();
-
   /// 修改密码
   /// oldPassword: 原密码
   /// newPassword: 新密码
@@ -80,8 +77,13 @@ abstract class FlutterAccount {
   /// 退出登陆
   Future logout();
 
-  late Stream<dynamic> stateUpdated;
+  /// 获取当前用户登陆的 uid
+  String getLoginUid();
 
+  /// 获取当前的状态
+  int getState();
+
+  late Stream<dynamic> stateUpdated;
 }
 
 class FlutterAccountImpl extends FlutterAccount {
@@ -266,12 +268,6 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  String getLoginUid() {
-    _logger.i(tag: _tag, message: 'getLoginUid()');
-    return _bindings.Mtc_UeGetUid().cast<Utf8>().toDartString();
-  }
-
-  @override
   Future<dynamic> changePassword({required String oldPassword, required String newPassword}) async {
     _logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
     if (!(await _connectOkTransformer())) {
@@ -342,6 +338,17 @@ class FlutterAccountImpl extends FlutterAccount {
       completer.complete();
     }
     return completer.future;
+  }
+
+  @override
+  String getLoginUid() {
+    _logger.i(tag: _tag, message: 'getLoginUid()');
+    return _bindings.Mtc_UeGetUid().cast<Utf8>().toDartString();
+  }
+
+  @override
+  int getState() {
+    return _state;
   }
 
   int _cliOpen(String userType, String username, {String? password}) {
