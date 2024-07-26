@@ -15,9 +15,10 @@ class FlutterAccountConstants {
 
   static const int errorDevIntegration = FlutterJussdkConstants.errorDevIntegration;
   static const int errorFailNotification = FlutterJussdkConstants.errorFailNotification;
+  static const int errorNotConnected = FlutterJussdkConstants.errorBaseCode - 1;
 
   /// 账号删除失败, 密码错误
-  static const int errorDeleteWrongPWD = FlutterJussdkConstants.errorBaseCode - 1;
+  static const int errorDeleteWrongPWD = FlutterJussdkConstants.errorBaseCode - 2;
 
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
@@ -139,12 +140,8 @@ class FlutterAccountImpl extends FlutterAccount {
         return;
       }
       if (name == MtcCliProvisionDidFailNotification) {
-        int reason = FlutterAccountConstants.errorFailNotification;
-        try {
-          reason = jsonDecode(info)[MtcCliStatusCodeKey];
-        } catch (ignored) {}
         for (var callback in _provisionCallbacks) {
-          callback.call(reason);
+          callback.call(false);
         }
         _provisionCallbacks.clear();
         return;
@@ -210,36 +207,32 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  Future<dynamic> signUp(
-      {required String username,
-      required String password,
-      Map<String, String>? props}) async {
+  Future<dynamic> signUp({required String username, required String password, Map<String, String>? props}) async {
     _logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
     dynamic result = _cliOpen(_defUserType, username) == FlutterJussdkConstants.ZOK;
     if (!result) {
-      _logger.e(tag: _tag, message: 'signUp failed when cliOpen');
+      _logger.e(tag: _tag, message: 'signUp fail, cliOpen did fail');
       return FlutterAccountConstants.errorDevIntegration;
     }
     result = _cliStart() == FlutterJussdkConstants.ZOK;
     if (!result) {
-      _logger.e(tag: _tag, message: 'signUp failed when cliStart');
+      _logger.e(tag: _tag, message: 'signUp fail, cliStart did fail');
       return FlutterAccountConstants.errorDevIntegration;
     }
     result = await _provisionOkTransformer();
     if (result != true) {
-      _logger.e(tag: _tag, message: 'signUp failed when provisionOkTransformer');
+      _logger.e(tag: _tag, message: 'signUp fail, provision did fail');
       return result;
     }
     return _Mtc_UeCreate2(_defUserType, username, password, props: props);
   }
 
   @override
-  Future<dynamic> login(
-      {required String username, required String password}) async {
+  Future<dynamic> login({required String username, required String password}) async {
     _logger.i(tag: _tag, message: 'login($username, $password)');
     bool result = _cliOpen(_defUserType, username, password: password) == FlutterJussdkConstants.ZOK;
     if (!result) {
-      _logger.e(tag: _tag, message: 'login failed when cliOpen');
+      _logger.e(tag: _tag, message: 'login fail, cliOpen did fail');
       return FlutterAccountConstants.errorDevIntegration;
     }
     Completer<dynamic> completer = Completer();
@@ -248,7 +241,7 @@ class FlutterAccountImpl extends FlutterAccount {
     }
     _loginCallbacks.add(callback);
     if (_login(MTC_LOGIN_OPTION_PREEMPTIVE) != FlutterJussdkConstants.ZOK) {
-      _logger.e(tag: _tag, message: 'login failed when login(MTC_LOGIN_OPTION_PREEMPTIVE)');
+      _logger.e(tag: _tag, message: 'login fail, login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail');
       _loginCallbacks.remove(callback);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     } else {
@@ -262,11 +255,11 @@ class FlutterAccountImpl extends FlutterAccount {
     _logger.i(tag: _tag, message: 'autoLogin($username)');
     bool result = _cliOpen(_defUserType, username) == FlutterJussdkConstants.ZOK;
     if (!result) {
-      _logger.e(tag: _tag, message: 'autoLogin failed when cliOpen');
+      _logger.e(tag: _tag, message: 'autoLogin fail, cliOpen did fail');
       return;
     }
     if (_login(MTC_LOGIN_OPTION_NONE) != FlutterJussdkConstants.ZOK) {
-      _logger.e(tag: _tag, message: 'autoLogin failed when login(MTC_LOGIN_OPTION_NONE)');
+      _logger.e(tag: _tag, message: 'autoLogin fail, login(MTC_LOGIN_OPTION_NONE) did fail');
     } else {
       _loggingIn(true);
     }
@@ -279,8 +272,12 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  Future<dynamic> changePassword({required String oldPassword, required String newPassword}) {
+  Future<dynamic> changePassword({required String oldPassword, required String newPassword}) async {
     _logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
+    if (!(await _connectOkTransformer())) {
+      _logger.i(tag: _tag, message: 'changePassword fail, not connected');
+      return FlutterAccountConstants.errorNotConnected;
+    }
     Completer<dynamic> completer = Completer();
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
       FlutterNotify.removeCookie(cookie);
@@ -296,7 +293,7 @@ class FlutterAccountImpl extends FlutterAccount {
             oldPassword.toNativeUtf8().cast(),
             newPassword.toNativeUtf8().cast()) !=
         FlutterJussdkConstants.ZOK) {
-      _logger.e(tag: _tag, message: 'Mtc_UeChangePassword call failed');
+      _logger.e(tag: _tag, message: 'changePassword fail, call Mtc_UeChangePassword did fail');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
@@ -304,10 +301,15 @@ class FlutterAccountImpl extends FlutterAccount {
   }
 
   @override
-  Future<dynamic> delete({required String password}) {
+  Future<dynamic> delete({required String password}) async {
     _logger.i(tag: _tag, message: 'delete($password)');
     if (password != _bindings.Mtc_UeDbGetPassword().cast<Utf8>().toDartString()) {
-      return Future.value(FlutterAccountConstants.errorDeleteWrongPWD);
+      _logger.i(tag: _tag, message: 'delete fail, wrong password');
+      return FlutterAccountConstants.errorDeleteWrongPWD;
+    }
+    if (!(await _connectOkTransformer())) {
+      _logger.i(tag: _tag, message: 'delete fail, not connected');
+      return FlutterAccountConstants.errorNotConnected;
     }
     Completer<dynamic> completer = Completer();
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
@@ -319,7 +321,7 @@ class FlutterAccountImpl extends FlutterAccount {
       }
     });
     if (_bindings.Mtc_UeDeleteUser(cookie, 0) != FlutterJussdkConstants.ZOK) {
-      _logger.e(tag: _tag, message: 'Mtc_UeDeleteUser call failed');
+      _logger.e(tag: _tag, message: 'delete fail, call Mtc_UeDeleteUser did fail');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
@@ -405,6 +407,10 @@ class FlutterAccountImpl extends FlutterAccount {
   void _loginOk() {
     _state = FlutterAccountConstants.stateLoggedIn;
     _stateEvents.sink.add({'state': _state});
+    for (var cancellationToken in _connectCancellationTokens) {
+      cancellationToken.cancel();
+    }
+    _connectCancellationTokens.clear();
   }
 
   /// 登陆失败的逻辑处理
@@ -432,10 +438,13 @@ class FlutterAccountImpl extends FlutterAccount {
     _stateEvents.sink.add({'state': _state, 'reason': reason, 'manual': manual});
   }
 
-  static final List<Function(dynamic)> _provisionCallbacks = [];
+  static final List<Function(bool)> _provisionCallbacks = [];
+  static final List<Function(dynamic)> _loginCallbacks = [];
+  static final List<Function> _didLogoutCallbacks = [];
+  static final List<CancellationToken> _connectCancellationTokens = [];
 
-  Future<dynamic> _provisionOkTransformer() {
-    Completer<dynamic> completer = Completer();
+  Future<bool> _provisionOkTransformer() {
+    Completer<bool> completer = Completer();
     if (_clientUserProvisionOk) {
       completer.complete(true);
     } else {
@@ -446,13 +455,30 @@ class FlutterAccountImpl extends FlutterAccount {
     return completer.future;
   }
 
-  static final List<Function(dynamic)> _loginCallbacks = [];
+  Future<bool> _connectOkTransformer() {
+    Future<bool> impl() {
+      Completer<bool> completer = Completer();
+      if (_state == FlutterAccountConstants.stateLoggedIn) {
+        completer.complete(true);
+      } else {
+        _loginCallbacks.add((result) {
+          if (result == true) {
+            completer.complete(true);
+          }
+        });
+      }
+      return completer.future;
+    }
+    CancellationToken cancellationToken = CancellationToken();
+    _connectCancellationTokens.add(cancellationToken);
+    return impl()
+        .timeout(const Duration(seconds: 30))
+        .asCancellable(cancellationToken)
+        .onError((error, stackTrace) => false)
+        .whenComplete(() => _connectCancellationTokens.remove(cancellationToken));
+  }
 
-  static final List<Function> _didLogoutCallbacks = [];
-
-  Future<dynamic> _Mtc_UeCreate2(
-      String userType, String username, String password,
-      {Map<String, String>? props}) {
+  Future<dynamic> _Mtc_UeCreate2(String userType, String username, String password, {Map<String, String>? props}) {
     Completer<dynamic> completer = Completer();
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
       FlutterNotify.removeCookie(cookie);
@@ -475,7 +501,6 @@ class FlutterAccountImpl extends FlutterAccount {
         password.toNativeUtf8().cast(),
         true,
         propList != null ? jsonEncode(propList).toNativeUtf8().cast() : nullptr) != FlutterJussdkConstants.ZOK) {
-      _logger.e(tag: _tag, message: 'Mtc_UeCreate2 call failed');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
