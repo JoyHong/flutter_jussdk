@@ -333,8 +333,8 @@ class FlutterAccountImpl extends FlutterAccount {
     }
     _didLogoutCallbacks.add(callback);
     if (_bindings.Mtc_CliLogout() != FlutterJussdkConstants.ZOK) {
-      _logoutOk(0, true);
       _didLogoutCallbacks.remove(callback);
+      _logoutOk(0, true);
       completer.complete();
     }
     return completer.future;
