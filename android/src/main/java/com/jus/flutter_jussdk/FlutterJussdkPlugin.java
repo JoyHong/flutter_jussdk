@@ -18,9 +18,20 @@ public class FlutterJussdkPlugin implements FlutterPlugin, EventChannel.StreamHa
 
     private static final String sEventChannelName = "com.jus.flutter_jusdk.MtcNotify";
     private static EventChannel.EventSink sEvents;
+    private static boolean sInitialized = false;
+
+    private EventChannel eventChannel;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+        eventChannel = new EventChannel(binding.getBinaryMessenger(), sEventChannelName);
+        eventChannel.setStreamHandler(this);
+
+        if (sInitialized) {
+            return;
+        }
+        sInitialized = true;
+
         System.loadLibrary("zmf");
         System.loadLibrary("mtc");
 
@@ -29,14 +40,12 @@ public class FlutterJussdkPlugin implements FlutterPlugin, EventChannel.StreamHa
         MtcCliCfg.Mtc_CliCfgSetContext(context);
         ZpandTimer.init(context, context.getPackageName());
         ZpandTimer.setWakeup(false);
-
-        new EventChannel(binding.getBinaryMessenger(), sEventChannelName)
-                .setStreamHandler(this);
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-
+        eventChannel.setStreamHandler(null);
+        eventChannel = null;
     }
 
     @Override
