@@ -13,20 +13,20 @@ class FlutterConnectivity {
 
   static const String _tag = 'FlutterConnectivity';
 
-  final FlutterMtcBindings _bindings;
+  final FlutterMtcBindings _mtc;
   final FlutterLogger _logger;
   final List<Function(int, int)> _onConnectivityChangedListeners = [];
 
   int _type = FlutterConnectivityConstants.typeUnknown;
 
-  FlutterConnectivity(this._bindings, this._logger);
+  FlutterConnectivity(this._mtc, this._logger);
 
   void notifyChanged(int type) {
     if (_type != type) {
       _logger.i(tag: _tag, message: 'notifyChanged:${type.toConnectivityName()}');
       int oldType = _type;
       _type = type;
-      _bindings.Mtc_CliNetworkChanged(type);
+      _mtc.Mtc_CliNetworkChanged(type);
       for (var listener in _onConnectivityChangedListeners) {
         listener.call(oldType, type);
       }

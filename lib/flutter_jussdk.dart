@@ -4,12 +4,12 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_jussdk/flutter_account.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_notify.dart';
-import 'package:flutter_jussdk/flutter_account.dart';
 
 class FlutterJussdkConstants {
 
@@ -69,16 +69,16 @@ class FlutterJussdk {
       required Directory logDir,
       required Directory profileDir}) {
     final StreamController<dynamic> mtcNotifyEvents = StreamController<dynamic>();
-    logger = FlutterLogger(_mtcBindings, appName, buildNumber, deviceId, logDir);
-    connectivity = FlutterConnectivity(_mtcBindings, logger);
-    account = FlutterAccountImpl(_mtcBindings, logger, connectivity, appKey, router, buildNumber, deviceId, deviceLang, deviceSWVersion, deviceModel, deviceManufacture, vendor, mtcNotifyEvents);
+    logger = FlutterLogger(_mtc, appName, buildNumber, deviceId, logDir);
+    connectivity = FlutterConnectivity(_mtc, logger);
+    account = FlutterAccountImpl(_mtc, logger, connectivity, appKey, router, buildNumber, deviceId, deviceLang, deviceSWVersion, deviceModel, deviceManufacture, vendor, mtcNotifyEvents);
     message = FlutterMessage();
-    _mtcBindings.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
+    _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
     if (Platform.isWindows) {
       // final myUiEventCallable = NativeCallable<MyUiEvent>.listener(myUiEvent);
-      // _mtcBindings.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), myUiEventCallable.nativeFunction.cast<Void>());
+      // _mtc.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), myUiEventCallable.nativeFunction.cast<Void>());
     } else {
-      _mtcBindings.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), nullptr);
+      _mtc.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), nullptr);
     }
     if (Platform.isAndroid) {
       const EventChannel('com.jus.flutter_jusdk.MtcNotify')
@@ -92,14 +92,13 @@ class FlutterJussdk {
             }
       });
     } else {
-      // _mtcBindings.Mtc_CliCbSetNotify(Pointer.fromFunction(mtcNotify, 0));
+      // _mtc.Mtc_CliCbSetNotify(Pointer.fromFunction(mtcNotify, 0));
     }
   }
 
 }
 
-final FlutterMtcBindings _mtcBindings = FlutterMtcBindings(() {
-  String libName = 'mtc';
+DynamicLibrary _openLibrary(String libName) {
   if (Platform.isMacOS || Platform.isIOS) {
     return DynamicLibrary.open('$libName.framework/$libName');
   }
@@ -110,7 +109,9 @@ final FlutterMtcBindings _mtcBindings = FlutterMtcBindings(() {
     return DynamicLibrary.open('$libName.dll');
   }
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
-}());
+}
+
+final FlutterMtcBindings _mtc = FlutterMtcBindings(_openLibrary('mtc'));
 
 // typedef MyUiEvent = Void Function(Pointer<Void> zEvntId);
 // typedef MyUiEventPtr = Pointer<NativeFunction<MyUiEvent>>;
@@ -118,7 +119,7 @@ final FlutterMtcBindings _mtcBindings = FlutterMtcBindings(() {
 // void myUiEvent(Pointer<Void> zEvntId) {
 //   // 发送到 ui 线程去执行 CliDrive
 //   // SchedulerBinding.instance.addPostFrameCallback((_) {
-//   _mtcBindings.Mtc_CliDrive(zEvntId);
+//   _mtc.Mtc_CliDrive(zEvntId);
 //   // });
 //   // return 0;
 // }

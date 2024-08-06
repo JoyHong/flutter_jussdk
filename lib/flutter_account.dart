@@ -103,7 +103,7 @@ class FlutterAccountImpl extends FlutterAccount {
   @override
   Stream get stateUpdated => _stateEvents.stream;
 
-  final FlutterMtcBindings _bindings;
+  final FlutterMtcBindings _mtc;
   final FlutterLogger _logger;
   final FlutterConnectivity _connectivity;
   final String _appKey;
@@ -117,7 +117,7 @@ class FlutterAccountImpl extends FlutterAccount {
   final String _vendor;
 
   FlutterAccountImpl(
-      this._bindings,
+      this._mtc,
       this._logger,
       this._connectivity,
       this._appKey,
@@ -278,13 +278,13 @@ class FlutterAccountImpl extends FlutterAccount {
     int cookie = FlutterNotify.addCookie((cookie, name, info) {
       FlutterNotify.removeCookie(cookie);
       if (name == MtcUeChangePasswordOkNotification) {
-        _bindings.Mtc_ProfSaveProvision();
+        _mtc.Mtc_ProfSaveProvision();
         completer.complete(true);
       } else {
         completer.complete(_parseUeReason(info));
       }
     });
-    if (_bindings.Mtc_UeChangePassword(
+    if (_mtc.Mtc_UeChangePassword(
             cookie,
             oldPassword.toNativeUtf8().cast(),
             newPassword.toNativeUtf8().cast()) !=
@@ -299,7 +299,7 @@ class FlutterAccountImpl extends FlutterAccount {
   @override
   Future<dynamic> delete({required String password}) async {
     _logger.i(tag: _tag, message: 'delete($password)');
-    if (password != _bindings.Mtc_UeDbGetPassword().cast<Utf8>().toDartString()) {
+    if (password != _mtc.Mtc_UeDbGetPassword().cast<Utf8>().toDartString()) {
       _logger.i(tag: _tag, message: 'delete fail, wrong password');
       return FlutterAccountConstants.errorDeleteWrongPWD;
     }
@@ -316,7 +316,7 @@ class FlutterAccountImpl extends FlutterAccount {
         completer.complete(_parseUeReason(info));
       }
     });
-    if (_bindings.Mtc_UeDeleteUser(cookie, 0) != FlutterJussdkConstants.ZOK) {
+    if (_mtc.Mtc_UeDeleteUser(cookie, 0) != FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'delete fail, call Mtc_UeDeleteUser did fail');
       FlutterNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
@@ -332,7 +332,7 @@ class FlutterAccountImpl extends FlutterAccount {
       completer.complete();
     }
     _didLogoutCallbacks.add(callback);
-    if (_bindings.Mtc_CliLogout() != FlutterJussdkConstants.ZOK) {
+    if (_mtc.Mtc_CliLogout() != FlutterJussdkConstants.ZOK) {
       _didLogoutCallbacks.remove(callback);
       _logoutOk(0, true);
       completer.complete();
@@ -343,7 +343,7 @@ class FlutterAccountImpl extends FlutterAccount {
   @override
   String getLoginUid() {
     _logger.i(tag: _tag, message: 'getLoginUid()');
-    return _bindings.Mtc_UeGetUid().cast<Utf8>().toDartString();
+    return _mtc.Mtc_UeGetUid().cast<Utf8>().toDartString();
   }
 
   @override
@@ -353,44 +353,44 @@ class FlutterAccountImpl extends FlutterAccount {
 
   int _cliOpen(String userType, String username, {String? password}) {
     String clientUser = '$userType)$username';
-    int result = _bindings.Mtc_CliOpen(clientUser.toNativeUtf8().cast());
+    int result = _mtc.Mtc_CliOpen(clientUser.toNativeUtf8().cast());
     if (result == FlutterJussdkConstants.ZOK) {
       if (_clientUser != clientUser) {
         _clientUser = clientUser;
         _clientUserProvisionOk = false;
       }
-      _bindings.Mtc_ProfResetProvision(); // 清空一下配置信息
-      _bindings.Mtc_UeDbSetIdTypeX(userType.toNativeUtf8().cast());
+      _mtc.Mtc_ProfResetProvision(); // 清空一下配置信息
+      _mtc.Mtc_UeDbSetIdTypeX(userType.toNativeUtf8().cast());
       // 自定义 userType 设置, 如果是标准的 userType, 得使用其它接口
-      _bindings.Mtc_UeDbSetUdids(jsonEncode({userType: username}).toNativeUtf8().cast());
-      _bindings.Mtc_ProfDbSetAppVer(_buildNumber.toNativeUtf8().cast());
+      _mtc.Mtc_UeDbSetUdids(jsonEncode({userType: username}).toNativeUtf8().cast());
+      _mtc.Mtc_ProfDbSetAppVer(_buildNumber.toNativeUtf8().cast());
       if (password != null) {
-        _bindings.Mtc_UeDbSetPassword(password.toNativeUtf8().cast());
+        _mtc.Mtc_UeDbSetPassword(password.toNativeUtf8().cast());
       }
-      _bindings.Mtc_ProfSaveProvision();
+      _mtc.Mtc_ProfSaveProvision();
     }
     return result;
   }
 
   int _cliStart() {
-    _bindings.Mtc_UeDbSetAppKey(_appKey.toNativeUtf8().cast());
-    _bindings.Mtc_UeDbSetNetwork(_router.toNativeUtf8().cast());
+    _mtc.Mtc_UeDbSetAppKey(_appKey.toNativeUtf8().cast());
+    _mtc.Mtc_UeDbSetNetwork(_router.toNativeUtf8().cast());
 
-    _bindings.Mtc_CliApplyDevId(_deviceId.toNativeUtf8().cast());
+    _mtc.Mtc_CliApplyDevId(_deviceId.toNativeUtf8().cast());
 
-    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_LANGUAGE_KEY.toNativeUtf8().cast(), _deviceLang.toNativeUtf8().cast());
-    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VERSION_KEY.toNativeUtf8().cast(), _deviceSWVersion.toNativeUtf8().cast());
-    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_MODEL_KEY.toNativeUtf8().cast(), _deviceModel.toNativeUtf8().cast());
-    _bindings.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VENDOR_KEY.toNativeUtf8().cast(), _deviceManufacture.toNativeUtf8().cast());
+    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_LANGUAGE_KEY.toNativeUtf8().cast(), _deviceLang.toNativeUtf8().cast());
+    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VERSION_KEY.toNativeUtf8().cast(), _deviceSWVersion.toNativeUtf8().cast());
+    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_MODEL_KEY.toNativeUtf8().cast(), _deviceModel.toNativeUtf8().cast());
+    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VENDOR_KEY.toNativeUtf8().cast(), _deviceManufacture.toNativeUtf8().cast());
 
-    _bindings.Mtc_CliCfgSetAppVer(_buildNumber.toNativeUtf8().cast());
-    _bindings.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VERSION_KEY.toNativeUtf8().cast(), _buildNumber.toNativeUtf8().cast());
-    _bindings.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VENDOR_KEY.toNativeUtf8().cast(), _vendor.toNativeUtf8().cast());
+    _mtc.Mtc_CliCfgSetAppVer(_buildNumber.toNativeUtf8().cast());
+    _mtc.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VERSION_KEY.toNativeUtf8().cast(), _buildNumber.toNativeUtf8().cast());
+    _mtc.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VENDOR_KEY.toNativeUtf8().cast(), _vendor.toNativeUtf8().cast());
 
     // 将 Log.Verbose.AgentCall 从1提升为4
-    _bindings.Mtc_CliDbSetAgentCallLevel(4);
+    _mtc.Mtc_CliDbSetAgentCallLevel(4);
 
-    return _bindings.Mtc_CliStart();
+    return _mtc.Mtc_CliStart();
   }
 
   /// option:
@@ -399,7 +399,7 @@ class FlutterAccountImpl extends FlutterAccount {
   int _login(int option) {
     int result = _cliStart();
     if (result == FlutterJussdkConstants.ZOK) {
-      result = _bindings.Mtc_CliLogin(option, '0.0.0.0'.toNativeUtf8().cast());
+      result = _mtc.Mtc_CliLogin(option, '0.0.0.0'.toNativeUtf8().cast());
     }
     return result;
   }
@@ -441,7 +441,7 @@ class FlutterAccountImpl extends FlutterAccount {
     _state = FlutterAccountConstants.stateLoggedOut;
     _autoLogging = false;
     _reLoggingTimeout = 2;
-    _bindings.Mtc_CliStop();
+    _mtc.Mtc_CliStop();
     _stateEvents.add({'state': _state, 'reason': reason, 'manual': manual});
   }
 
@@ -502,7 +502,7 @@ class FlutterAccountImpl extends FlutterAccount {
         propList!.add({MtcUeInitialPropertyNameKey: key, MtcUeInitialPropertyValueKey: value});
       });
     }
-    if (_bindings.Mtc_UeCreate2(
+    if (_mtc.Mtc_UeCreate2(
         cookie,
         jsonEncode([{MtcUeRelationTypeKey: userType, MtcUeRelationIdKey: username}]).toNativeUtf8().cast(),
         password.toNativeUtf8().cast(),

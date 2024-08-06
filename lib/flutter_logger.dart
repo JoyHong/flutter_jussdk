@@ -6,22 +6,22 @@ import 'package:ffi/ffi.dart';
 import 'flutter_mtc_bindings_generated.dart';
 
 class FlutterLogger {
-  final FlutterMtcBindings _bindings;
+  final FlutterMtcBindings _mtc;
   final String _appName;
   final String _buildNumber;
   final String _deviceId;
   final Directory _logDir;
 
-  FlutterLogger(this._bindings, this._appName, this._buildNumber,
+  FlutterLogger(this._mtc, this._appName, this._buildNumber,
       this._deviceId, this._logDir);
 
   void i({required String tag, required String message}) {
-    _bindings.Mtc_AnyLogInfoStr(
+    _mtc.Mtc_AnyLogInfoStr(
         tag.toNativeUtf8().cast(), message.toNativeUtf8().cast());
   }
 
   void e({required String tag, required String message}) {
-    _bindings.Mtc_AnyLogErrStr(
+    _mtc.Mtc_AnyLogErrStr(
         tag.toNativeUtf8().cast(), message.toNativeUtf8().cast());
   }
 
@@ -36,7 +36,7 @@ class FlutterLogger {
       MtcParmAcvCommitMemo: memo,
       MtcParmAcvCommitPaths: [_logDir.path]
     };
-    // _bindings.Mtc_AnyLogFlush(); // 如果设置了日志异步打印, 才需要调用一下
-    _bindings.Mtc_AcvCommitJ(0, jsonEncode(info).toNativeUtf8().cast(), isManual);
+    // _mtc.Mtc_AnyLogFlush(); // 如果设置了日志异步打印, 才需要调用一下
+    _mtc.Mtc_AcvCommitJ(0, jsonEncode(info).toNativeUtf8().cast(), isManual);
   }
 }
