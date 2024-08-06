@@ -1,5 +1,5 @@
 # Run with `flutter pub run ffigen --config ffigen_pgm.yaml`.
-name: FlutterMtcBindings
+name: FlutterPGMBindings
 description: |
   Bindings for `src/include/*.h`.
 
