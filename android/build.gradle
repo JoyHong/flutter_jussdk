@@ -37,7 +37,7 @@ android {
     // declared in /android/app/build.gradle file of the Flutter project.
     // Replace it with a version number if this plugin requires a specfic NDK version.
     // (e.g. ndkVersion "23.1.7779620")
-    ndkVersion android.ndkVersion
+    ndkVersion "16.1.4479499"
 
     // Invoke the shared CMake build with the Android Gradle Plugin.
     externalNativeBuild {
@@ -61,6 +61,19 @@ android {
 
     defaultConfig {
         minSdkVersion 19
+    }
+
+    buildTypes {
+        release {
+            ndk {
+                abiFilters 'armeabi-v7a','arm64-v8a'
+            }
+        }
+        debug {
+            ndk {
+                abiFilters 'armeabi-v7a','arm64-v8a'
+            }
+        }
     }
 
     sourceSets {
