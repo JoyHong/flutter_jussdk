@@ -1,7 +1,7 @@
 ﻿#ifndef __PGM_I_h
 #define __PGM_I_h
 
-#include "Client.h"
+#include "Client/Client.h"
 
 #ifdef _MSC_VER
 #include "../Group/GroupPub1Agent.h"
