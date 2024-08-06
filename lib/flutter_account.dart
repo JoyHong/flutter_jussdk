@@ -7,9 +7,9 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_jussdk.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
-import 'package:flutter_jussdk/flutter_notify.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
+import 'flutter_mtc_notify.dart';
 
 class FlutterAccountConstants {
 
@@ -275,8 +275,8 @@ class FlutterAccountImpl extends FlutterAccount {
       return FlutterAccountConstants.errorNotConnected;
     }
     Completer<dynamic> completer = Completer();
-    int cookie = FlutterNotify.addCookie((cookie, name, info) {
-      FlutterNotify.removeCookie(cookie);
+    int cookie = FlutterMtcNotify.addCookie((cookie, name, info) {
+      FlutterMtcNotify.removeCookie(cookie);
       if (name == MtcUeChangePasswordOkNotification) {
         _mtc.Mtc_ProfSaveProvision();
         completer.complete(true);
@@ -290,7 +290,7 @@ class FlutterAccountImpl extends FlutterAccount {
             newPassword.toNativeUtf8().cast()) !=
         FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'changePassword fail, call Mtc_UeChangePassword did fail');
-      FlutterNotify.removeCookie(cookie);
+      FlutterMtcNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
     return completer.future;
@@ -308,8 +308,8 @@ class FlutterAccountImpl extends FlutterAccount {
       return FlutterAccountConstants.errorNotConnected;
     }
     Completer<dynamic> completer = Completer();
-    int cookie = FlutterNotify.addCookie((cookie, name, info) {
-      FlutterNotify.removeCookie(cookie);
+    int cookie = FlutterMtcNotify.addCookie((cookie, name, info) {
+      FlutterMtcNotify.removeCookie(cookie);
       if (name == MtcUeDeleteUserOkNotifcation) {
         completer.complete(true);
       } else {
@@ -318,7 +318,7 @@ class FlutterAccountImpl extends FlutterAccount {
     });
     if (_mtc.Mtc_UeDeleteUser(cookie, 0) != FlutterJussdkConstants.ZOK) {
       _logger.e(tag: _tag, message: 'delete fail, call Mtc_UeDeleteUser did fail');
-      FlutterNotify.removeCookie(cookie);
+      FlutterMtcNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
     return completer.future;
@@ -487,8 +487,8 @@ class FlutterAccountImpl extends FlutterAccount {
 
   Future<dynamic> _Mtc_UeCreate2(String userType, String username, String password, {Map<String, String>? props}) {
     Completer<dynamic> completer = Completer();
-    int cookie = FlutterNotify.addCookie((cookie, name, info) {
-      FlutterNotify.removeCookie(cookie);
+    int cookie = FlutterMtcNotify.addCookie((cookie, name, info) {
+      FlutterMtcNotify.removeCookie(cookie);
       if (name == MtcUeCreateOkNotification) {
         completer.complete(true);
       } else {
@@ -508,7 +508,7 @@ class FlutterAccountImpl extends FlutterAccount {
         password.toNativeUtf8().cast(),
         true,
         propList != null ? jsonEncode(propList).toNativeUtf8().cast() : nullptr) != FlutterJussdkConstants.ZOK) {
-      FlutterNotify.removeCookie(cookie);
+      FlutterMtcNotify.removeCookie(cookie);
       completer.complete(FlutterAccountConstants.errorDevIntegration);
     }
     return completer.future;

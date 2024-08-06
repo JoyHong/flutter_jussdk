@@ -9,7 +9,8 @@ import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
-import 'package:flutter_jussdk/flutter_notify.dart';
+
+import 'flutter_mtc_notify.dart';
 
 class FlutterJussdkConstants {
 
@@ -86,7 +87,7 @@ class FlutterJussdk {
           .listen((event) {
             logger.i(tag: _tag, message: 'MtcNotify:$event');
             if (event['cookie'] > 0) {
-              FlutterNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
+              FlutterMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
             } else {
               mtcNotifyEvents.sink.add(event);
             }
