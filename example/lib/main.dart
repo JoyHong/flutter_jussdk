@@ -18,7 +18,7 @@ void main() async {
       router: 'udp:test.api.justalkcloud.com:8000;udp:47.101.139.97:8000;udp:148.153.45.251:8000;http:test.api.justalkcloud.com:8080;http:47.101.139.97:8080;http:148.153.45.251:8080;',
       appName: packageInfo.appName,
       buildNumber: packageInfo.buildNumber,
-      deviceId: '{YOUR DEVICE ID}',
+      deviceId: 'aa6bbff22d7eff98', // 设备 ID
       deviceLang: 'en_US', // 设备的系统语言
       deviceSWVersion: '14', // 设备的系统版本
       deviceModel: 'SM-S9080', // 设备的型号
