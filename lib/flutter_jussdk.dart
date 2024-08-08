@@ -34,6 +34,8 @@ class FlutterJussdk {
 
   static const _tag = 'FlutterJussdk';
 
+  static final StreamController<dynamic> _mtcNotifyEvents = StreamController<dynamic>();
+
   /// 日志模块对象
   static late FlutterLogger logger;
   /// 网络模块对象
@@ -62,17 +64,12 @@ class FlutterJussdk {
       required String appName,
       required String buildNumber,
       required String deviceId,
-      required String deviceLang,
-      required String deviceSWVersion,
-      required String deviceModel,
-      required String deviceManufacture,
-      required String vendor,
       required Directory logDir,
-      required Directory profileDir}) {
-    final StreamController<dynamic> mtcNotifyEvents = StreamController<dynamic>();
+      required Directory profileDir,
+      Map<String, String>? accountPropMap}) {
     logger = FlutterLogger(_mtc, appName, buildNumber, deviceId, logDir);
     connectivity = FlutterConnectivity(_mtc, logger);
-    account = FlutterAccountImpl(_mtc, logger, connectivity, appKey, router, buildNumber, deviceId, deviceLang, deviceSWVersion, deviceModel, deviceManufacture, vendor, mtcNotifyEvents);
+    account = FlutterAccountImpl(_mtc, logger, connectivity, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
     message = FlutterMessage();
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
     if (Platform.isWindows) {
@@ -89,7 +86,7 @@ class FlutterJussdk {
             if (event['cookie'] > 0) {
               FlutterMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
             } else {
-              mtcNotifyEvents.sink.add(event);
+              _mtcNotifyEvents.sink.add(event);
             }
       });
     } else {

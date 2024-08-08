@@ -48,6 +48,13 @@ class FlutterAccountConstants {
   /// 已登出
   static const int stateLoggedOut = 4;
 
+  static const String PROP_MTC_INFO_TERMINAL_LANGUAGE_KEY = MTC_INFO_TERMINAL_LANGUAGE_KEY;
+  static const String PROP_MTC_INFO_TERMINAL_VERSION_KEY = MTC_INFO_TERMINAL_VERSION_KEY;
+  static const String PROP_MTC_INFO_TERMINAL_MODEL_KEY = MTC_INFO_TERMINAL_MODEL_KEY;
+  static const String PROP_MTC_INFO_TERMINAL_VENDOR_KEY = MTC_INFO_TERMINAL_VENDOR_KEY;
+  static const String PROP_MTC_INFO_SOFTWARE_VERSION_KEY = MTC_INFO_SOFTWARE_VERSION_KEY;
+  static const String PROP_MTC_INFO_SOFTWARE_VENDOR_KEY = MTC_INFO_SOFTWARE_VENDOR_KEY;
+
 }
 
 abstract class FlutterAccount {
@@ -110,11 +117,7 @@ class FlutterAccountImpl extends FlutterAccount {
   final String _router;
   final String _buildNumber;
   final String _deviceId;
-  final String _deviceLang;
-  final String _deviceSWVersion;
-  final String _deviceModel;
-  final String _deviceManufacture;
-  final String _vendor;
+  final Map<String, String>? _propMap;
 
   FlutterAccountImpl(
       this._mtc,
@@ -124,11 +127,7 @@ class FlutterAccountImpl extends FlutterAccount {
       this._router,
       this._buildNumber,
       this._deviceId,
-      this._deviceLang,
-      this._deviceSWVersion,
-      this._deviceModel,
-      this._deviceManufacture,
-      this._vendor,
+      this._propMap,
       StreamController<dynamic> mtcNotifyEvents) {
     mtcNotifyEvents.stream.listen((event) {
       final String name = event['name'];
@@ -377,15 +376,11 @@ class FlutterAccountImpl extends FlutterAccount {
     _mtc.Mtc_UeDbSetNetwork(_router.toNativeUtf8().cast());
 
     _mtc.Mtc_CliApplyDevId(_deviceId.toNativeUtf8().cast());
-
-    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_LANGUAGE_KEY.toNativeUtf8().cast(), _deviceLang.toNativeUtf8().cast());
-    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VERSION_KEY.toNativeUtf8().cast(), _deviceSWVersion.toNativeUtf8().cast());
-    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_MODEL_KEY.toNativeUtf8().cast(), _deviceModel.toNativeUtf8().cast());
-    _mtc.Mtc_CliSetProperty(MTC_INFO_TERMINAL_VENDOR_KEY.toNativeUtf8().cast(), _deviceManufacture.toNativeUtf8().cast());
-
     _mtc.Mtc_CliCfgSetAppVer(_buildNumber.toNativeUtf8().cast());
-    _mtc.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VERSION_KEY.toNativeUtf8().cast(), _buildNumber.toNativeUtf8().cast());
-    _mtc.Mtc_CliSetProperty(MTC_INFO_SOFTWARE_VENDOR_KEY.toNativeUtf8().cast(), _vendor.toNativeUtf8().cast());
+
+    _propMap?.forEach((key, value) {
+      _mtc.Mtc_CliSetProperty(key.toNativeUtf8().cast(), value.toNativeUtf8().cast());
+    });
 
     // 将 Log.Verbose.AgentCall 从1提升为4
     _mtc.Mtc_CliDbSetAgentCallLevel(4);
