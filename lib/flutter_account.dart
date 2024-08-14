@@ -91,7 +91,7 @@ abstract class FlutterJusAccount {
   /// 获取当前的状态
   int getState();
 
-  late Stream<dynamic> stateUpdated;
+  late Stream<FlutterJusAccountState> stateUpdated;
 }
 
 class FlutterJusAccountImpl extends FlutterJusAccount {
@@ -107,9 +107,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
 
-  final StreamController<dynamic> _stateEvents = StreamController.broadcast();
+  final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
-  Stream get stateUpdated => _stateEvents.stream;
+  Stream<FlutterJusAccountState> get stateUpdated => _stateEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterJusLogger _logger;
@@ -157,29 +157,22 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         return;
       }
       if (name == MtcCliServerLoginDidFailNotification) { // 登陆失败的回调
-        int reason = FlutterJusAccountConstants.errorFailNotification;
-        String message = '';
-        try {
-          dynamic map = jsonDecode(info);
-          reason = map[MtcCliStatusCodeKey];
-          message = map[MtcCliReasonKey];
-        } catch (ignored) {}
-        FlutterJusError error = FlutterJusError(reason, message: message);
+        FlutterJusError error = info.toCliError();
         for (var callback in _loginCallbacks) {
           callback.call(error);
         }
         _loginCallbacks.clear();
         if (_autoLogging) { // 是自动登陆, 如出现以下错误原因, 表明自动登陆失败，无法继续尝试自动登陆
-          if (reason == MTC_CLI_REG_ERR_DEACTED ||      // 其它设备已登录, 被踢出
-              reason == MTC_CLI_REG_ERR_AUTH_FAILED ||  // 账号密码错误, 比如被修改
-              reason == MTC_CLI_REG_ERR_BANNED ||       // 账号被封禁
-              reason == MTC_CLI_REG_ERR_DELETED ||      // 账号被删除
-              reason == MTC_CLI_REG_ERR_INVALID_USER) { // 账号不存在等
-            _logoutOk(reason, false);
+          if (error.reason == MTC_CLI_REG_ERR_DEACTED ||      // 其它设备已登录, 被踢出
+              error.reason == MTC_CLI_REG_ERR_AUTH_FAILED ||  // 账号密码错误, 比如被修改
+              error.reason == MTC_CLI_REG_ERR_BANNED ||       // 账号被封禁
+              error.reason == MTC_CLI_REG_ERR_DELETED ||      // 账号被删除
+              error.reason == MTC_CLI_REG_ERR_INVALID_USER) { // 账号不存在等
+            _logoutOk(error.reason, false, message: error.message);
             return;
           }
         }
-        _loginFailed(reason, message);
+        _loginFailed(error.reason, error.message);
         return;
       }
       if (name == MtcCliServerDidLogoutNotification) { // 主动登出
@@ -407,13 +400,13 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   void _loggingIn(bool auto) {
     _state = FlutterJusAccountConstants.stateLoggingIn;
     _autoLogging = auto;
-    _stateEvents.add({'state': _state});
+    _stateEvents.add(FlutterJusAccountState(_state));
   }
 
   /// 登陆成功后的统一逻辑处理
   void _loginOk() {
     _state = FlutterJusAccountConstants.stateLoggedIn;
-    _stateEvents.add({'state': _state});
+    _stateEvents.add(FlutterJusAccountState(_state));
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }
@@ -433,16 +426,16 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _reLoggingTimeout *= 2;
       }
     }
-    _stateEvents.add({'state': _state, 'reason': reason, 'message': message});
+    _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message));
   }
 
   /// 退出登陆后的统一逻辑处理
-  void _logoutOk(int reason, bool manual) {
+  void _logoutOk(int reason, bool manual, {String message = ''}) {
     _state = FlutterJusAccountConstants.stateLoggedOut;
     _autoLogging = false;
     _reLoggingTimeout = 2;
     _mtc.Mtc_CliStop();
-    _stateEvents.add({'state': _state, 'reason': reason, 'manual': manual});
+    _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];
@@ -526,5 +519,31 @@ extension _FlutterJusAccountError on String {
       message = map[MtcUeReasonDetailKey];
     } catch (ignored) {}
     return FlutterJusError(reason, message: message);
+  }
+
+  FlutterJusError toCliError() {
+    int reason = FlutterJusAccountConstants.errorFailNotification;
+    String message = '';
+    try {
+      dynamic map = jsonDecode(this);
+      reason = map[MtcCliStatusCodeKey];
+      message = map[MtcCliReasonKey];
+    } catch (ignored) {}
+    return FlutterJusError(reason, message: message);
+  }
+}
+
+class FlutterJusAccountState {
+  final int state;
+  final int reason;
+  final String message;
+  final bool manual;
+
+  const FlutterJusAccountState(this.state,
+      {this.reason = -1, this.message = '', this.manual = false});
+
+  @override
+  String toString() {
+    return 'FlutterJusAccountState{state: $state, reason: $reason, message: $message, manual: $manual}';
   }
 }
