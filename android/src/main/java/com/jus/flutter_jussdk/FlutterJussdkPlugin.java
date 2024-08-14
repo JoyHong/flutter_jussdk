@@ -16,7 +16,7 @@ import io.flutter.plugin.common.EventChannel;
 
 public class FlutterJussdkPlugin implements FlutterPlugin, EventChannel.StreamHandler {
 
-    private static final String sEventChannelName = "com.jus.flutter_jusdk.MtcNotify";
+    private static final String sEventChannelName = "com.jus.flutter_jussdk.MtcNotify";
     private static EventChannel.EventSink sEvents;
     private static boolean sInitialized = false;
 

@@ -79,7 +79,7 @@ class FlutterJussdk {
       _mtc.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), nullptr);
     }
     if (Platform.isAndroid) {
-      const EventChannel('com.jus.flutter_jusdk.MtcNotify')
+      const EventChannel('com.jus.flutter_jussdk.MtcNotify')
           .receiveBroadcastStream()
           .listen((event) {
             logger.i(tag: _tag, message: 'MtcNotify:$event');
