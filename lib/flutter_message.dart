@@ -1,3 +1,3 @@
-class FlutterMessage {
+class FlutterJusMessage {
 
 }

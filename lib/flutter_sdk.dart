@@ -12,7 +12,7 @@ import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 
 import 'flutter_mtc_notify.dart';
 
-class FlutterJussdkConstants {
+class FlutterJusSDKConstants {
 
   /// 开发问题, 需要开发排查
   static const int errorDevIntegration = -1;
@@ -30,20 +30,20 @@ class FlutterJussdkConstants {
 
 }
 
-class FlutterJussdk {
+class FlutterJusSDK {
 
-  static const _tag = 'FlutterJussdk';
+  static const _tag = 'FlutterJusSDK';
 
   static final StreamController<dynamic> _mtcNotifyEvents = StreamController<dynamic>();
 
   /// 日志模块对象
-  static late FlutterLogger logger;
+  static late FlutterJusLogger logger;
   /// 网络模块对象
-  static late FlutterConnectivity connectivity;
+  static late FlutterJusConnectivity connectivity;
   /// 账号模块对象
-  static late FlutterAccount account;
+  static late FlutterJusAccount account;
   /// 消息模块对象
-  static late FlutterMessage message;
+  static late FlutterJusMessage message;
 
   /// 初始化 Sdk
   /// appKey: Juphoon sdk 的 app key
@@ -67,10 +67,10 @@ class FlutterJussdk {
       required Directory logDir,
       required Directory profileDir,
       Map<String, String>? accountPropMap}) {
-    logger = FlutterLogger(_mtc, appName, buildNumber, deviceId, logDir);
-    connectivity = FlutterConnectivity(_mtc, logger);
-    account = FlutterAccountImpl(_mtc, logger, connectivity, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
-    message = FlutterMessage();
+    logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
+    connectivity = FlutterJusConnectivity(_mtc, logger);
+    account = FlutterJusAccountImpl(_mtc, logger, connectivity, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
+    message = FlutterJusMessage();
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
     if (Platform.isWindows) {
       // final myUiEventCallable = NativeCallable<MyUiEvent>.listener(myUiEvent);
@@ -84,7 +84,7 @@ class FlutterJussdk {
           .listen((event) {
             logger.i(tag: _tag, message: 'MtcNotify:$event');
             if (event['cookie'] > 0) {
-              FlutterMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
+              FlutterJusMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
             } else {
               _mtcNotifyEvents.sink.add(event);
             }

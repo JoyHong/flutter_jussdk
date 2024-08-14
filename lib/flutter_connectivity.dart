@@ -1,7 +1,7 @@
 import 'flutter_logger.dart';
 import 'flutter_mtc_bindings_generated.dart';
 
-class FlutterConnectivityConstants {
+class FlutterJusConnectivityConstants {
   static const int typeWifi = MTC_ANET_WIFI;
   static const int typeMobile = MTC_ANET_MOBILE;
   static const int typeEthernet = MTC_ANET_ETHERNET;
@@ -9,17 +9,17 @@ class FlutterConnectivityConstants {
   static const int typeUnavailable = MTC_ANET_UNAVAILABLE;
 }
 
-class FlutterConnectivity {
+class FlutterJusConnectivity {
 
-  static const String _tag = 'FlutterConnectivity';
+  static const String _tag = 'FlutterJusConnectivity';
 
   final FlutterMtcBindings _mtc;
-  final FlutterLogger _logger;
+  final FlutterJusLogger _logger;
   final List<Function(int, int)> _onConnectivityChangedListeners = [];
 
-  int _type = FlutterConnectivityConstants.typeUnknown;
+  int _type = FlutterJusConnectivityConstants.typeUnknown;
 
-  FlutterConnectivity(this._mtc, this._logger);
+  FlutterJusConnectivity(this._mtc, this._logger);
 
   void notifyChanged(int type) {
     if (_type != type) {
@@ -49,16 +49,16 @@ class FlutterConnectivity {
 
 extension _ConnectivityTypeName on int {
   String toConnectivityName() {
-    if (this == FlutterConnectivityConstants.typeWifi) {
+    if (this == FlutterJusConnectivityConstants.typeWifi) {
       return 'Wifi';
     }
-    if (this == FlutterConnectivityConstants.typeMobile) {
+    if (this == FlutterJusConnectivityConstants.typeMobile) {
       return 'Mobile';
     }
-    if (this == FlutterConnectivityConstants.typeEthernet) {
+    if (this == FlutterJusConnectivityConstants.typeEthernet) {
       return 'Ethernet';
     }
-    if (this == FlutterConnectivityConstants.typeUnavailable) {
+    if (this == FlutterJusConnectivityConstants.typeUnavailable) {
       return 'Unavailable';
     }
     return 'Unknown';

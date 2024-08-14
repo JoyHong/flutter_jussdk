@@ -5,14 +5,14 @@ import 'package:ffi/ffi.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
-class FlutterLogger {
+class FlutterJusLogger {
   final FlutterMtcBindings _mtc;
   final String _appName;
   final String _buildNumber;
   final String _deviceId;
   final Directory _logDir;
 
-  FlutterLogger(this._mtc, this._appName, this._buildNumber,
+  FlutterJusLogger(this._mtc, this._appName, this._buildNumber,
       this._deviceId, this._logDir);
 
   void i({required String tag, required String message}) {
