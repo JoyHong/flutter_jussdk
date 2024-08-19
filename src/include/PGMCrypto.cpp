@@ -10,8 +10,6 @@
 #define OPENSSL_CONF_FILE_IOS_ARMV7
 #elif defined(__arm64__)
 #define OPENSSL_CONF_FILE_IOS_ARM64
-#elif defined(__aarch64__)
-#define OPENSSL_CONF_FILE_ANDROID_ARM64
 #endif
 
 #include <openssl/dh.h>

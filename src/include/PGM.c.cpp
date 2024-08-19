@@ -1,6 +1,9 @@
 ﻿#include "PGM.c.h"
 #include "PGM.h"
 
+extern "C" {
+    void Mtc_AnyLogInfoStr(char *pcLogName, char *pcFormat, ...);
+}
 
 #define JSON_CONVERTER(Type, Name) \
     static String c_s_##Name##2Json(const Type& data) \
@@ -15,7 +18,8 @@
         IputStreamPtr iput = IputStream::createText(StreamJSON, json); \
         if (__textRead_##Name(iput, "", data)) \
             return true; \
-        err = "json_err"; \
+        err = #Name"_json_err"; \
+        Mtc_AnyLogInfoStr("PGM", "c_s_loadGroupCb %s", err.c_str()); \
         return false; \
     }
 
@@ -51,6 +55,8 @@ static int c_s_loadGroupCbConverter(const String& groupId, Group::RelationsMap& 
     int ret = c_s_loadGroupCb(groupId.c_str(), &pcRelationsMap, &lRelationUpdateTime, &pcStatusVersMap, &lStatusTime, &pcProps);
     if (ret != 0)
         return ret;
+    Mtc_AnyLogInfoStr("PGM", "c_s_loadGroupCb %s\n  pcRelationsMap:\n    %s\n  lRelationUpdateTime:\n    %ld\n  pcStatusVersMap:\n    %s\n  lStatusTime:\n    %ld\n  pcProps:    %s\n",
+        groupId.c_str(), pcRelationsMap, lRelationUpdateTime, pcStatusVersMap, lStatusTime, pcProps);
     String err;
     return c_s_Json2RelationsMap(pcRelationsMap, relations, err)
         && c_s_Json2StatusVersMap(pcStatusVersMap, statusVersMap, err)
@@ -90,7 +96,7 @@ void pgm_c_version(char* pcVersion)
     strncpy(pcVersion, pgm_version().c_str(), 256);
 }
 
-void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb)
+void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb, int cbInIsolate)
 {
     c_s_eventProcessorCb = eventProcessorCb;
     c_s_loadGroupCb = loadGroupCb;
@@ -98,9 +104,14 @@ void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGro
     c_s_updateStatusesCb = updateStatusesCb;
     c_s_updatePropsCb = updatePropsCb;
     c_s_insertMsgsCb = insertMsgsCb;
-    c_s_getTicksCb = getTicksCb;
+    //c_s_getTicksCb = getTicksCb;
     pgm_init(c_s_eventProcessorCbConverter, c_s_loadGroupCbConverter, c_s_updateGroupCbConverter, c_s_updateStatusesCbConverter,
-        c_s_updatePropsCbConverter, c_s_insertMsgsCbConverter, c_s_getTicksCb!=NULL ? c_s_getTicksCbConverter : NULL);
+        c_s_updatePropsCbConverter, c_s_insertMsgsCbConverter, c_s_getTicksCb!=NULL ? c_s_getTicksCbConverter : NULL, cbInIsolate!=0);
+}
+
+int pgm_c_cb_thread_func()
+{
+    return pgm_cb_thread_func();
 }
 
 int pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr)
@@ -135,10 +146,10 @@ int pgm_c_record_err(const JStrStrMap* pcErrRecord)
     return c_s_Json2StrStrMap(pcErrRecord, errRecord, err) && pgm_record_err(errRecord) ? 0 : -1;
 }
 
-int pgm_c_flush_data(char* pcErr)
+int pgm_c_reflush_data(char* pcErr)
 {
     String err;
-    if (pgm_flush_data(err))
+    if (pgm_reflush_data(err))
         return 0;
     strncpy(pcErr, err.c_str(), 256);
     return -1;

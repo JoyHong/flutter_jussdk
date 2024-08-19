@@ -42,7 +42,7 @@ namespace Message
     const Common::String MSG_TYPE_VIDEO_KEYWORD     = "Video";
     const Common::String MSG_TYPE_AUDIO_KEYWORD     = "Audio";
     const Common::String MSG_TYPE_TEXT              = "Text";
-    const Common::String MSG_TYPE_WITHDRAW          = "Withdraw";
+    const Common::String MSG_TYPE_WITHDRAW          = "Withdraw";   //@
     const Common::String MSG_TYPE_SYSTEM_PREFIX     = "System.";
     const Common::String MSG_TYPE_TEXT_ILLEGAL      = MSG_TYPE_TEXT + ".Illegal";
 
@@ -66,6 +66,8 @@ namespace Message
     const Common::String K_MSG_IMDNID               = "imdnId";
     const Common::String K_MSG_REMIND               = "Remind"; //  组织消息实现指定push. 值的形式为 'uidA;uidB;...;' 或 V_MSG_REMIND_ALL
     const Common::String V_MSG_REMIND_ALL           = "All";
+    const Common::String K_MSG_BRIEF                = "Brief";  //@
+    const Common::String K_MSG_WITHDRAW             = "Withdraw";   //@
 
     // sys msg _params
     const Common::String K_MSG_LAST_UPDATE_TIME     = "LastUpdateTime";
@@ -78,6 +80,8 @@ namespace Message
     const Common::String K_MSG_INVOKER_NAME         = "InvokerName";
     const Common::String K_MSG_ORG_ID               = "UpdateId";   // 本应取名'OrgId', 历史原因取成了'UpdateId', 不再修改避免兼容问题
     const Common::String K_MSG_ORG_NAME             = "OrgName";
+    const Common::String K_MSG_UPDATE_ID            = "UpdateId";   //@ obsolete
+    const Common::String K_MSG_ORG_DEL              = "OrgDel";     //@ obsolete
 
     // apply(Response) sys msg _params
     const Common::String K_MSG_APPLY_APPLICANT_ID   = "ApplicantId";
@@ -88,6 +92,9 @@ namespace Message
     const Common::String K_MSG_APPLY_TARGET_NAME    = "TargetName";
     const Common::String K_MSG_APPLY_TARGET_TYPE    = "TargetType";
     const Common::String K_MSG_APPLY_APPLY_MSG_IDX  = "ApplyMsgIdx";
+    const Common::String K_MSG_APPLY_UPDATE_REL     = K_MSG_UPDATE_RELATION;    //@
+    const Common::String K_MSG_APPLY_LAST_UPDATE_TIME = K_MSG_LAST_UPDATE_TIME; //@
+    const Common::String K_MSG_APPLY_UPDATE_TIME    = K_MSG_UPDATE_TIME;    //@
 
     /*
       p2p加密

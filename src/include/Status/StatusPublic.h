@@ -38,10 +38,12 @@ namespace Status
     const Common::String STATUS_PUSH                        = "Push/";      // 表示该session是否注册了push参数. value "0"/"1".
 
     const Common::String STATUS_LAST_MSG                    = "ML";
+    const Common::String STATUS_LAST_MSG_BRIEF              = "MLB";//@
     const Common::String STATUS_LAST_LOCAL_RECV             = "MLV";
     const Common::String STATUS_LAST_READ                   = PERSON_REL_PERSIST_STATUS_PREFIX + "MR";  // <Msg::_msgIdx>. MR是自己setRead,通知给自己的其他session.
     const Common::String STATUS_PEER_READ                   = PERSON_REL_PERSIST_STATUS_PREFIX + "MPR" + NOTIFY_SUFFIX; // <Msg::_msgIdx>. MPR是自己setRead,通知给对方(已读回执).
     const Common::String STATUS_ORG_READ                    = ORG_REL_PERSIST_STATUS_PREFIX + "MOR" + NOTIFY_SUFFIX; // <Msg::_msgIdx>. MOR是自己setRead,通知给组织(已读回执).
+    const Common::String STATUS_LAST_RECV                   = PERSON_REL_PERSIST_STATUS_PREFIX + "MV" + NOTIFY_SUFFIX;  //@
 
     class OrgReadProcessor;
     typedef Common::Handle<OrgReadProcessor>    OrgReadProcessorPtr;

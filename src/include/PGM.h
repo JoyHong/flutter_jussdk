@@ -116,7 +116,13 @@ String pgm_version();
 /*
   设置回调函数, 进程拉起即可调用, 生存期内只需调用一次
 */
-void pgm_init(PGM_EVENT_PROCESSOR eventProcessorCb, PGM_LOAD_GROUP loadGroupCb, PGM_UPDATE_GROUP updateGroupCb, PGM_UPDATE_STATUSES updateStatusesCb, PGM_UPDATE_RPOPS updatePropsCb, PGM_INSERT_MSGS insertMsgsCb, PGM_GET_TICKS getTicksCb = NULL);
+void pgm_init(PGM_EVENT_PROCESSOR eventProcessorCb, PGM_LOAD_GROUP loadGroupCb, PGM_UPDATE_GROUP updateGroupCb, PGM_UPDATE_STATUSES updateStatusesCb, PGM_UPDATE_RPOPS updatePropsCb, PGM_INSERT_MSGS insertMsgsCb, PGM_GET_TICKS getTicksCb = NULL, bool cbInIsolate = false);
+
+/*
+  某些平台集成pgm时, Common库的回调线程不能直接作为执行回调的线程. 使用该函数创建专门用于回调的线程
+  必须在pgm_init之后调用且cbInIsolate需为true, 否则返回-1
+*/
+int pgm_cb_thread_func();
 
 /*
   控制库的内部参数, 暂时未用
@@ -140,9 +146,9 @@ bool pgm_get_cur_time(Long& curTimeMs);
 bool pgm_record_err(StrStrMap& errRecord);
 
 /*
-  flush db异常恢复后, 调用pgm_flush_all清空待写队列
+  flush db异常恢复后, 需调用pgm_reflush_data清空待写队列
 */
-bool pgm_flush_data(String& err);
+bool pgm_reflush_data(String& err);
 
 /* 以下接口当cookie重复/请求过频/未登录/入参本地检查有误时返回false. rpc的异步结果通过CookieEnd事件回调 */
 

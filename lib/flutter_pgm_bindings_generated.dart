@@ -51,6 +51,7 @@ class FlutterPGMBindings {
     PGM_C_UPDATE_RPOPS updatePropsCb,
     PGM_C_INSERT_MSGS insertMsgsCb,
     PGM_C_GET_TICKS getTicksCb,
+    int cbInIsolate,
   ) {
     return _pgm_c_init(
       eventProcessorCb,
@@ -60,6 +61,7 @@ class FlutterPGMBindings {
       updatePropsCb,
       insertMsgsCb,
       getTicksCb,
+      cbInIsolate,
     );
   }
 
@@ -72,7 +74,8 @@ class FlutterPGMBindings {
               PGM_C_UPDATE_STATUSES,
               PGM_C_UPDATE_RPOPS,
               PGM_C_INSERT_MSGS,
-              PGM_C_GET_TICKS)>>('pgm_c_init');
+              PGM_C_GET_TICKS,
+              ffi.Int)>>('pgm_c_init');
   late final _pgm_c_init = _pgm_c_initPtr.asFunction<
       void Function(
           PGM_C_EVENT_PROCESSOR,
@@ -81,7 +84,59 @@ class FlutterPGMBindings {
           PGM_C_UPDATE_STATUSES,
           PGM_C_UPDATE_RPOPS,
           PGM_C_INSERT_MSGS,
+          PGM_C_GET_TICKS,
+          int)>();
+
+  void pgm_c_cb_thread_int(
+    PGM_C_EVENT_PROCESSOR eventProcessorCb,
+    PGM_C_LOAD_GROUP loadGroupCb,
+    PGM_C_UPDATE_GROUP updateGroupCb,
+    PGM_C_UPDATE_STATUSES updateStatusesCb,
+    PGM_C_UPDATE_RPOPS updatePropsCb,
+    PGM_C_INSERT_MSGS insertMsgsCb,
+    PGM_C_GET_TICKS getTicksCb,
+  ) {
+    return _pgm_c_cb_thread_int(
+      eventProcessorCb,
+      loadGroupCb,
+      updateGroupCb,
+      updateStatusesCb,
+      updatePropsCb,
+      insertMsgsCb,
+      getTicksCb,
+    );
+  }
+
+  late final _pgm_c_cb_thread_intPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              PGM_C_EVENT_PROCESSOR,
+              PGM_C_LOAD_GROUP,
+              PGM_C_UPDATE_GROUP,
+              PGM_C_UPDATE_STATUSES,
+              PGM_C_UPDATE_RPOPS,
+              PGM_C_INSERT_MSGS,
+              PGM_C_GET_TICKS)>>('pgm_c_cb_thread_int');
+  late final _pgm_c_cb_thread_int = _pgm_c_cb_thread_intPtr.asFunction<
+      void Function(
+          PGM_C_EVENT_PROCESSOR,
+          PGM_C_LOAD_GROUP,
+          PGM_C_UPDATE_GROUP,
+          PGM_C_UPDATE_STATUSES,
+          PGM_C_UPDATE_RPOPS,
+          PGM_C_INSERT_MSGS,
           PGM_C_GET_TICKS)>();
+
+  /// flutter集成pgm时, 对执行回调的线程有特殊要求, 使用该函数创建专门用于回调的线程
+  /// 必须在pgm_init之后调用且cbInIsolate需为true, 否则返回-1
+  int pgm_c_cb_thread_func() {
+    return _pgm_c_cb_thread_func();
+  }
+
+  late final _pgm_c_cb_thread_funcPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('pgm_c_cb_thread_func');
+  late final _pgm_c_cb_thread_func =
+      _pgm_c_cb_thread_funcPtr.asFunction<int Function()>();
 
   /// 控制库的内部参数, 暂时未用
   int pgm_c_set_cfgs(
@@ -151,20 +206,20 @@ class FlutterPGMBindings {
   late final _pgm_c_record_err =
       _pgm_c_record_errPtr.asFunction<int Function(ffi.Pointer<JStrStrMap>)>();
 
-  /// flush db异常恢复后, 调用pgm_flush_all清空待写队列
-  int pgm_c_flush_data(
+  /// flush db异常恢复后, 调用pgm_reflush_data清空待写队列
+  int pgm_c_reflush_data(
     ffi.Pointer<ffi.Char> pcErr,
   ) {
-    return _pgm_c_flush_data(
+    return _pgm_c_reflush_data(
       pcErr,
     );
   }
 
-  late final _pgm_c_flush_dataPtr =
+  late final _pgm_c_reflush_dataPtr =
       _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Char>)>>(
-          'pgm_c_flush_data');
-  late final _pgm_c_flush_data =
-      _pgm_c_flush_dataPtr.asFunction<int Function(ffi.Pointer<ffi.Char>)>();
+          'pgm_c_reflush_data');
+  late final _pgm_c_reflush_data =
+      _pgm_c_reflush_dataPtr.asFunction<int Function(ffi.Pointer<ffi.Char>)>();
 
   /// 以下接口当cookie重复/请求过频/未登录/入参本地检查有误时返回false. rpc的异步结果通过CookieEnd事件回调
   int pgm_c_refresh_main(
