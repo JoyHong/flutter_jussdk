@@ -14,7 +14,7 @@ void main() async {
   Directory logDir = await Directory('${dir.path}/log').create(recursive: true);
   Directory profileDir = await Directory('${dir.path}/profile').create(recursive: true);
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  FlutterJusSDK.initialize(
+  await FlutterJusSDK.initialize(
       appKey: '4b15dc404fff9fe1f5234097',
       router: 'udp:test.api.justalkcloud.com:8000;udp:47.101.139.97:8000;udp:148.153.45.251:8000;http:test.api.justalkcloud.com:8080;http:47.101.139.97:8080;http:148.153.45.251:8080;',
       appName: packageInfo.appName,
@@ -54,7 +54,11 @@ class _MyAppState extends State<MyApp> {
           spacing: 12,
           children: [
             button(text: '注册', onPressed: () async {
-              final result = await FlutterJusSDK.account.signUp(username: 'test_0013', password: 'test_0013');
+              final result = await FlutterJusSDK.account.signUp(username: '1234567890', password: '1234567890', props: {
+                'SC.duoNumber': '1234567890',
+                'blockStrangers': '1',
+                'signUpDate': DateTime.now().millisecondsSinceEpoch.toString()
+              });
               if (result is! FlutterJusError) {
                 // 注册成功
                 return;
@@ -69,7 +73,7 @@ class _MyAppState extends State<MyApp> {
               }
             }),
             button(text: '登录', onPressed: () async {
-              final result = await FlutterJusSDK.account.login(username: 'test_0013', password: 'test_0013');
+              final result = await FlutterJusSDK.account.login(username: '1234567890', password: '1234567890');
               if (result is! FlutterJusError) {
                 // 登陆成功, 此时可以保存 uid
                 // FlutterJussdk.account.getLoginUid();

@@ -1,4 +1,5 @@
-import 'flutter_logger.dart';
+import 'package:flutter_jussdk/flutter_sdk.dart';
+
 import 'flutter_mtc_bindings_generated.dart';
 
 class FlutterJusConnectivityConstants {
@@ -14,16 +15,15 @@ class FlutterJusConnectivity {
   static const String _tag = 'FlutterJusConnectivity';
 
   final FlutterMtcBindings _mtc;
-  final FlutterJusLogger _logger;
   final List<Function(int, int)> _onConnectivityChangedListeners = [];
 
   int _type = FlutterJusConnectivityConstants.typeUnknown;
 
-  FlutterJusConnectivity(this._mtc, this._logger);
+  FlutterJusConnectivity(this._mtc);
 
   void notifyChanged(int type) {
     if (_type != type) {
-      _logger.i(tag: _tag, message: 'notifyChanged:${type.toConnectivityName()}');
+      FlutterJusSDK.logger.i(tag: _tag, message: 'notifyChanged:${type.toConnectivityName()}');
       int oldType = _type;
       _type = type;
       _mtc.Mtc_CliNetworkChanged(type);

@@ -1,16 +1,19 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 
-import 'package:ffi/ffi.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_jussdk/flutter_account.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
+import 'package:flutter_jussdk/flutter_utils.dart';
 
 import 'flutter_mtc_notify.dart';
+import 'flutter_pgm_bindings_generated.dart';
 
 class FlutterJusSDKConstants {
 
@@ -35,6 +38,7 @@ class FlutterJusSDK {
   static const _tag = 'FlutterJusSDK';
 
   static final StreamController<dynamic> _mtcNotifyEvents = StreamController<dynamic>();
+  static late SendPort _pgmIsolateSendPort;
 
   /// 日志模块对象
   static late FlutterJusLogger logger;
@@ -51,49 +55,177 @@ class FlutterJusSDK {
   /// appName: 应用的 app name
   /// buildNumber: 应用的构建版本号(对应 Android 的 versionCode)
   /// deviceId: 设备 ID
-  /// deviceLang: 设备系统语言
-  /// deviceSWVersion: 设备的系统版本
-  /// deviceModel: 设备型号
-  /// deviceManufacture: 设备品牌
-  /// vendor: app 的渠道名
   /// logDir: sdk 内部日志输出目录
   /// profileDir: 用户配置文件的目录
-  static void initialize(
-      {required String appKey,
-      required String router,
-      required String appName,
-      required String buildNumber,
-      required String deviceId,
-      required Directory logDir,
-      required Directory profileDir,
-      Map<String, String>? accountPropMap}) {
+  static Future initialize({
+    required String appKey,
+    required String router,
+    required String appName,
+    required String buildNumber,
+    required String deviceId,
+    required Directory logDir,
+    required Directory profileDir,
+    Map<String, String>? accountPropMap}) async {
     logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
-    connectivity = FlutterJusConnectivity(_mtc, logger);
-    account = FlutterJusAccountImpl(_mtc, logger, connectivity, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
+    connectivity = FlutterJusConnectivity(_mtc);
+    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
     message = FlutterJusMessage();
-    _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativeUtf8().cast());
-    if (Platform.isWindows) {
-      // final myUiEventCallable = NativeCallable<MyUiEvent>.listener(myUiEvent);
-      // _mtc.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), myUiEventCallable.nativeFunction.cast<Void>());
-    } else {
-      _mtc.Mtc_CliInit(profileDir.path.toNativeUtf8().cast(), nullptr);
+    _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());
+    if (!Platform.isWindows) {
+      _mtc.Mtc_CliInit(profileDir.path.toNativePointer(), nullptr);
     }
+    _pgm.pgm_c_init(
+        Pointer.fromFunction(_pgmEventProcessor, 1),
+        Pointer.fromFunction(_pgmLoadGroup, 1),
+        Pointer.fromFunction(_pgmUpdateGroup, 1),
+        Pointer.fromFunction(_pgmUpdateStatus, 1),
+        Pointer.fromFunction(_pgmUpdateProps, 1),
+        Pointer.fromFunction(_pgmInsertMsgs, 1),
+        nullptr,
+        1);
     if (Platform.isAndroid) {
       const EventChannel('com.jus.flutter_jussdk.MtcNotify')
           .receiveBroadcastStream()
           .listen((event) {
-            logger.i(tag: _tag, message: 'MtcNotify:$event');
+            _log('MtcNotify:$event');
             if (event['cookie'] > 0) {
               FlutterJusMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
             } else {
               _mtcNotifyEvents.sink.add(event);
             }
       });
-    } else {
-      // _mtc.Mtc_CliCbSetNotify(Pointer.fromFunction(mtcNotify, 0));
     }
+    _pgmIsolateSendPort = await _helperIsolateSendPort;
+    _pgmIsolateSendPort.send(_PGMIsolateInitLogger(appName, buildNumber, deviceId, logDir));
+    _pgmIsolateSendPort.send(_PGMIsolateInit());
   }
 
+  static void _log(String message) {
+    logger.i(tag: _tag, message: message);
+  }
+
+  /// The SendPort belonging to the helper isolate.
+  static final Future<SendPort> _helperIsolateSendPort = () async {
+    // The helper isolate is going to send us back a SendPort, which we want to
+    // wait for.
+    final Completer<SendPort> completer = Completer<SendPort>();
+
+    // Receive port on the main isolate to receive messages from the helper.
+    // We receive two types of messages:
+    // 1. A port to send messages on.
+    // 2. Responses to requests we sent.
+    final ReceivePort receivePort = ReceivePort()
+      ..listen((dynamic data) {
+        if (data is SendPort) {
+          // The helper isolate sent us the port on which we can sent it requests.
+          completer.complete(data);
+          return;
+        }
+        throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
+      });
+
+    // Start the helper isolate.
+    await Isolate.spawn((SendPort sendPort) async {
+      final ReceivePort helperReceivePort = ReceivePort()
+        ..listen((dynamic data) {
+          // On the helper isolate listen to requests and respond to them.
+          if (data is _PGMIsolateInitLogger) {
+            // 初始化 pgm isolate 的 logger 对象
+            logger = FlutterJusLogger(_mtc, data.appName, data.buildNumber, data.deviceId, data.logDir);
+            return;
+          }
+          if (data is _PGMIsolateInit) {
+            _pgm.pgm_c_cb_thread_int(
+              Pointer.fromFunction(_pgmEventProcessor, 1),
+              Pointer.fromFunction(_pgmLoadGroup, 1),
+              Pointer.fromFunction(_pgmUpdateGroup, 1),
+              Pointer.fromFunction(_pgmUpdateStatus, 1),
+              Pointer.fromFunction(_pgmUpdateProps, 1),
+              Pointer.fromFunction(_pgmInsertMsgs, 1),
+              nullptr,
+            );
+            _pgm.pgm_c_cb_thread_func();
+            return;
+          }
+          throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
+        });
+
+      // Send the port to the main isolate on which we can receive requests.
+      sendPort.send(helperReceivePort.sendPort);
+    }, receivePort.sendPort);
+
+    // Wait until the helper isolate has sent us back the SendPort on which we
+    // can start sending requests.
+    return completer.future;
+  }();
+
+}
+
+class _PGMIsolateInitLogger {
+  final String appName;
+  final String buildNumber;
+  final String deviceId;
+  final Directory logDir;
+
+  const _PGMIsolateInitLogger(
+      this.appName, this.buildNumber, this.deviceId, this.logDir);
+}
+
+class _PGMIsolateInit {}
+
+final DynamicLibrary _library = _openLibrary('mtc');
+final FlutterMtcBindings _mtc = FlutterMtcBindings(_library);
+final FlutterPGMBindings _pgm = FlutterPGMBindings(_library);
+
+int _pgmEventProcessor(int event, Pointer<JStrStrMap> pcParams) {
+  FlutterJusSDK._log(
+      'pgmEventProcessor, event=$event, pcParams=${pcParams.toDartString()}');
+  return 0;
+}
+
+int _pgmLoadGroup(
+    Pointer<Char> pcGroupId,
+    Pointer<Pointer<JRelationsMap>> ppcRelations,
+    Pointer<Int64> plRelationUpdateTime,
+    Pointer<Pointer<JStatusVersMap>> ppcStatusVersMap,
+    Pointer<Int64> plStatusTime,
+    Pointer<Pointer<JStrStrMap>> ppcProps) {
+  FlutterJusSDK._log('pgmLoadGroup, pcGroupId=${pcGroupId.toDartString()}');
+  ppcRelations.value = jsonEncode({}).toNativePointer();
+  plRelationUpdateTime.value = -1;
+  ppcStatusVersMap.value = jsonEncode({}).toNativePointer();
+  plStatusTime.value = -1;
+  ppcProps.value = jsonEncode({}).toNativePointer();
+  return 0;
+}
+
+int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
+    int lUpdateTime, Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
+  FlutterJusSDK._log(
+      'pgmUpdateGroup, pcGroupId=${pcGroupId.toDartString()}, pcDiff=${pcDiff.toDartString()}, lUpdateTime=$lUpdateTime,'
+      'pcStatusVersMap=${pcStatusVersMap.toDartString()}, lStatusTime=$lStatusTime');
+  return 0;
+}
+
+int _pgmUpdateStatus(Pointer<Char> pcGroupId,
+    Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
+  FlutterJusSDK._log(
+      'pgmUpdateStatus, pcGroupId=${pcGroupId.toDartString()}, pcStatusVersMap=${pcStatusVersMap.toDartString()}, lStatusTime=$lStatusTime');
+  return 0;
+}
+
+int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
+  FlutterJusSDK._log(
+      'pgmUpdateProps, pcGroupId=${pcGroupId.toDartString()}, pcProps=${pcProps.toDartString()}');
+  // Map<String, String> props = (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString()));
+  return 0;
+}
+
+int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
+    Pointer<JStatusTimes> pcMsgStatuses) {
+  FlutterJusSDK._log(
+      'pgmInsertMsgs, pcGroupId=${pcGroupId.toDartString()}, pcMsgs=${pcMsgs.toDartString()}, pcMsgStatuses=${pcMsgStatuses.toDartString()}');
+  return 0;
 }
 
 DynamicLibrary _openLibrary(String libName) {
@@ -108,21 +240,3 @@ DynamicLibrary _openLibrary(String libName) {
   }
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
 }
-
-final FlutterMtcBindings _mtc = FlutterMtcBindings(_openLibrary('mtc'));
-
-// typedef MyUiEvent = Void Function(Pointer<Void> zEvntId);
-// typedef MyUiEventPtr = Pointer<NativeFunction<MyUiEvent>>;
-//
-// void myUiEvent(Pointer<Void> zEvntId) {
-//   // 发送到 ui 线程去执行 CliDrive
-//   // SchedulerBinding.instance.addPostFrameCallback((_) {
-//   _mtc.Mtc_CliDrive(zEvntId);
-//   // });
-//   // return 0;
-// }
-//
-// int mtcNotify(Pointer<Char> pcName, int zCookie, Pointer<Char> pcInfo) {
-//   // pcName.cast<Utf8>().toDartString();
-//   return 0;
-// }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ffi/ffi.dart';
+import 'package:flutter_jussdk/flutter_utils.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
@@ -16,13 +16,11 @@ class FlutterJusLogger {
       this._deviceId, this._logDir);
 
   void i({required String tag, required String message}) {
-    _mtc.Mtc_AnyLogInfoStr(
-        tag.toNativeUtf8().cast(), message.toNativeUtf8().cast());
+    _mtc.Mtc_AnyLogInfoStr(tag.toNativePointer(), message.toNativePointer());
   }
 
   void e({required String tag, required String message}) {
-    _mtc.Mtc_AnyLogErrStr(
-        tag.toNativeUtf8().cast(), message.toNativeUtf8().cast());
+    _mtc.Mtc_AnyLogErrStr(tag.toNativePointer(), message.toNativePointer());
   }
 
   /// 上传日志到 https://cloud.juphoon.com
@@ -37,6 +35,6 @@ class FlutterJusLogger {
       MtcParmAcvCommitPaths: [_logDir.path]
     };
     // _mtc.Mtc_AnyLogFlush(); // 如果设置了日志异步打印, 才需要调用一下
-    _mtc.Mtc_AcvCommitJ(0, jsonEncode(info).toNativeUtf8().cast(), isManual);
+    _mtc.Mtc_AcvCommitJ(0, jsonEncode(info).toNativePointer(), isManual);
   }
 }
