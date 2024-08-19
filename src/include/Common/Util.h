@@ -5,9 +5,9 @@
 
 #define COMMON_VERSION_MAJOR    3
 #define COMMON_VERSION_MINOR    6
-#define COMMON_VERSION_PATCHSET 36
+#define COMMON_VERSION_PATCHSET 37
 #define COMMON_VERSION_STATUS   15
-#define COMMON_VERSION_TEXT     "3.6.36 (2423)"
+#define COMMON_VERSION_TEXT     "3.6.37 (2426)"
 
 // major: 1-15
 // minor: 0-255
@@ -613,6 +613,22 @@ do {\
 #define UTIL_LOGFMT_CONTEXT_WRN(key,context,fmt,...) Common::logContextFmt(UTIL_LOG_LOC, Common::LogWarn, key, context, fmt, __VA_ARGS__)
 #define UTIL_LOGFMT_CONTEXT_DBG(key,context,fmt,...) Common::logContextFmt(UTIL_LOG_LOC, Common::LogDebug, key, context, fmt, __VA_ARGS__)
 
+const unsigned int LogModTypeChannel = 0x01;
+
+#define UTIL_LOGMOD_LVL(level, mod, info) Common::log(UTIL_LOG_LOC, level, LogModType##mod, #mod, info)
+#define UTIL_LOGMOD_ERR(mod, info) UTIL_LOGMOD_LVL(Common::LogError, mod, info)
+#define UTIL_LOGMOD_IFO(mod, info) UTIL_LOGMOD_LVL(Common::LogInfo, mod, info)
+#define UTIL_LOGMOD_WRN(mod, info) UTIL_LOGMOD_LVL(Common::LogWarn, mod, info)
+#define UTIL_LOGMOD_DBG(mod, info) UTIL_LOGMOD_LVL(Common::LogDebug, mod, info)
+#define UTIL_LOGMOD_VBS(mod, info) UTIL_LOGMOD_LVL(Common::LogVerbose, mod, info)
+
+#define UTIL_LOGMODFMT_LVL(level, mod, fmt, ...) Common::logFmt(UTIL_LOG_LOC, level, LogModType##mod, #mod, fmt, __VA_ARGS__)
+#define UTIL_LOGMODFMT_ERR(mod, fmt, ...) UTIL_LOGMODFMT_LVL(Common::LogError, mod, fmt, __VA_ARGS__)
+#define UTIL_LOGMODFMT_IFO(mod, fmt, ...) UTIL_LOGMODFMT_LVL(Common::LogInfo, mod, fmt, __VA_ARGS__)
+#define UTIL_LOGMODFMT_WRN(mod, fmt, ...) UTIL_LOGMODFMT_LVL(Common::LogWarn, mod, fmt, __VA_ARGS__)
+#define UTIL_LOGMODFMT_DBG(mod, fmt, ...) UTIL_LOGMODFMT_LVL(Common::LogDebug, mod, fmt, __VA_ARGS__)
+#define UTIL_LOGMODFMT_VBS(mod, fmt, ...) UTIL_LOGMODFMT_LVL(Common::LogVerbose, mod, fmt, __VA_ARGS__)
+
 #define UTIL_LOG_BEGIN(__loglevel) \
     do { int _level = __loglevel;
 #define UTIL_LOG_ERR_BEGIN\
@@ -946,6 +962,7 @@ namespace Common
     CommonAPI void setLogApp(const String& app);
     CommonAPI void setLogContext(const String& context);
     CommonAPI void setLogLevel(int level);
+    CommonAPI void setLogModules(unsigned int mod);
     CommonAPI void setLogPrint(bool enable);
     CommonAPI void setLogFile(const String &fileName, const String &rootDir, int fileMaxMB);
     CommonAPI void setLogOpt(unsigned int mask, unsigned int val);
@@ -955,8 +972,12 @@ namespace Common
 
     // cppcheck-suppress shadowFunction
     CommonAPI void log(const char *file, size_t filelen, const char *func, size_t funclen, long line,
+        int level, unsigned int mod, const char* key, const String& info);
+    CommonAPI void log(const char *file, size_t filelen, const char *func, size_t funclen, long line,
         int level, const char* mod, const String& info);
      // cppcheck-suppress shadowFunction
+    CommonAPI void logFmt(const char *file, size_t filelen, const char *func, size_t funclen, long line,
+        int level, unsigned int mod, const char *key, const char *format, ...);
     CommonAPI void logFmt(const char *file, size_t filelen, const char *func, size_t funclen, long line,
         int level,const char *mod,const char *format,...);
 
