@@ -1,6 +1,6 @@
 ﻿//
 // *****************************************************************************
-// Copyright(c) 2017-2022 Juphoon System Software Co., LTD. All rights reserved.
+// Copyright(c) 2017-2024 Juphoon System Software Co., LTD. All rights reserved.
 // *****************************************************************************
 //
 // Auto generated from: ObjectLocator.def
@@ -11,6 +11,7 @@
 #define __Common_ObjectLocatorAgent_h
 
 #include "Common/ObjectLocatorPub.h"
+#include <functional>
 
 namespace Common
 {

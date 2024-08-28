@@ -47,6 +47,9 @@
 //#elif defined(OPENSSL_CONF_FILE_MACOS_X86_64)
 //#include <openssl/conf_macos_x86_64.h>
 //
+//#elif defined(OPENSSL_CONF_FILE_MACOS_ARM64)
+//#include <openssl/conf_macos_arm64.h>
+//
 ///******************* for Linux ********************/
 //#elif defined(OPENSSL_CONF_FILE_LINUX_X86_64)
 //#include <openssl/conf_linux_x86_64.h>

@@ -1,3 +1,9 @@
+//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
 #ifndef __Common_Resolve_h__
 #define __Common_Resolve_h__
 

@@ -1,6 +1,6 @@
 ﻿//
 // *****************************************************************************
-// Copyright(c) 2017-2022 Juphoon System Software Co., LTD. All rights reserved.
+// Copyright(c) 2017-2024 Juphoon System Software Co., LTD. All rights reserved.
 // *****************************************************************************
 //
 // Auto generated from: RouterDb.def
@@ -11,6 +11,7 @@
 #define __Common_RouterDbAgent_h
 
 #include "Common/RouterDbPub.h"
+#include <functional>
 
 namespace Common
 {
@@ -25,10 +26,14 @@ public:
     bool recordRouter(int routerId,const Common::String& host,const Common::String& name,const Common::RouterStatistics& statistics,const Common::RouterQualityMap& qualitys,const Common::CallParamsPtr& __params = 0) const throw();
     void recordRouter_begin(const Common::AgentAsyncPtr& __async,int routerId,const Common::String& host,const Common::String& name,const Common::RouterStatistics& statistics,const Common::RouterQualityMap& qualitys,const Common::CallParamsPtr& __params = 0,const Common::ObjectPtr& __userdata = 0) const throw();
     static bool recordRouter_end(int __rslt,const Common::IputStreamPtr& __iput) throw();
+    typedef std::function<void(bool __ret)> recordRouter_result;
+    Common::HandleT<recordRouter_result, Common::AgentCall> recordRouter_call(int routerId,const Common::String& host,const Common::String& name,const Common::RouterStatistics& statistics,const Common::RouterQualityMap& qualitys,const Common::CallParamsPtr& __params = 0) const throw();
 
     bool recordClient(int routerId,int clientId,const Common::String& host,double longitude,double latitude,const Common::ClientQuality& sendQuality,const Common::ClientQuality& recvQuality,const Common::CallParamsPtr& __params = 0) const throw();
     void recordClient_begin(const Common::AgentAsyncPtr& __async,int routerId,int clientId,const Common::String& host,double longitude,double latitude,const Common::ClientQuality& sendQuality,const Common::ClientQuality& recvQuality,const Common::CallParamsPtr& __params = 0,const Common::ObjectPtr& __userdata = 0) const throw();
     static bool recordClient_end(int __rslt,const Common::IputStreamPtr& __iput) throw();
+    typedef std::function<void(bool __ret)> recordClient_result;
+    Common::HandleT<recordClient_result, Common::AgentCall> recordClient_call(int routerId,int clientId,const Common::String& host,double longitude,double latitude,const Common::ClientQuality& sendQuality,const Common::ClientQuality& recvQuality,const Common::CallParamsPtr& __params = 0) const throw();
 };
 
 };//namespace: Common

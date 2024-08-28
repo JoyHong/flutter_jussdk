@@ -1,4 +1,10 @@
-﻿#ifndef __Common_Net_h__
+﻿//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
+#ifndef __Common_Net_h__
 #define __Common_Net_h__
 
 #include "Util.h"

@@ -1,6 +1,6 @@
 ﻿//
 // *****************************************************************************
-// Copyright(c) 2017-2022 Juphoon System Software Co., LTD. All rights reserved.
+// Copyright(c) 2017-2024 Juphoon System Software Co., LTD. All rights reserved.
 // *****************************************************************************
 //
 // Auto generated from: Common.def
@@ -10,7 +10,7 @@
 #ifndef __Common_CommonPub_h
 #define __Common_CommonPub_h
 
-#include "Common/Common.h"
+#include "Common/CommonBase.h"
 #include "Common/TypesPub.h"
 
 namespace Common

@@ -1,4 +1,10 @@
-﻿/**
+﻿//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
+/**
  * @file ErrorDefs.h
  *
  * 错误码定义范围说明
@@ -130,6 +136,11 @@ namespace AgentError
      * 重试次数 3 次。解决方案应该是要检查服务端和客户端使用接口定义是否为相同版本或者兼容版本。
      */
     ERROR_DECLARE_FC(419, VersionsError, REASON_AGENT_ERROR_VERSIONS_ERROR);
+    /** RPC 服务发现错误
+     *
+     * 需要具体查看导致的原因
+     */
+    ERROR_DECLARE_FC(430, LocateError, REASON_AGENT_ERROR_LOCATE_ERROR);
     /** @} */
 } // namespace AgentError
 
@@ -463,6 +474,10 @@ namespace RouterError
      * 需要检查终端是否配置对应 AccessKey 信息是否与 Router 配置内容匹配。
      */
     ERROR_DECLARE_FC(4021, AuthFailed, REASON_AUTH_FAILED);
+    /**
+     * Router 获取统计信息时回程不可达
+     */
+    ERROR_DECLARE_FC(4022, ReturnTripUnreachable, REASON_RETURN_TRIP_UNREACHABLE);
 
     /** 重复调用 start 接口 */
     ERROR_DECLARE_F(4022, AlreadyStarted);

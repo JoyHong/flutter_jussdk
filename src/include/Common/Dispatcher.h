@@ -1,8 +1,13 @@
-﻿#ifndef __Common_Dispatcher_h__
+﻿//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
+#ifndef __Common_Dispatcher_h__
 #define __Common_Dispatcher_h__
 
 #include "Common.h"
-#include "Common/Util.h"
 
 #define TEXT_PROXY_KEY_TID                "tid"
 #define TEXT_PROXY_KEY_CMD                "cmd"

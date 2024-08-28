@@ -1,12 +1,18 @@
-﻿#ifndef __Common_Router_h__
+﻿//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
+#ifndef __Common_Router_h__
 #define __Common_Router_h__
 
-#include "Util.h"
+#include "Common.h"
 #define ROUTER_VERSION_NUMBER COMMON_VERSION_NUMBER
 #define ROUTER_VERSION_TEXT COMMON_VERSION_TEXT
 
-#define ARC_VERSION_NUMBER COMMON_VERSION_NUMBER_MAKER(2, 0, 0, 0)
-#define ARC_VERSION_TEXT "2.0"
+#define ARC_VERSION_NUMBER COMMON_VERSION_NUMBER_MAKER(2, 1, 0, 0)
+#define ARC_VERSION_TEXT "2.1"
 
 #include "TypesPub.h"
 #include "RouterTypesPub.h"
@@ -21,6 +27,7 @@ namespace Common
     class GetResource_Result;
     class GetPortStates_Result;
     class GetPathQualitys_Result;
+    class GetPathQualitys2_Result;
     class UploadLog_Result;
     class SecondPathListener;
 
@@ -32,6 +39,7 @@ namespace Common
     typedef Handle<GetResource_Result>      GetResource_ResultPtr;
     typedef Handle<GetPortStates_Result>    GetPortStates_ResultPtr;
     typedef Handle<GetPathQualitys_Result>  GetPathQualitys_ResultPtr;
+    typedef Handle<GetPathQualitys2_Result> GetPathQualitys2_ResultPtr;
     typedef Handle<UploadLog_Result>        UploadLog_ResultPtr;
     typedef Handle<SecondPathListener>      SecondPathListenerPtr;
 
@@ -56,6 +64,12 @@ namespace Common
     {
     public:
         virtual void onGetPathQualitys_Result(bool result,const String& reason,const PathQualityVec& qualitys) = 0;
+    };
+
+    class CommonAPI GetPathQualitys2_Result : virtual public Shared
+    {
+    public:
+        virtual void onGetPathQualitys2_Result(bool result,const String& reason,const PathQualityVec& uplink,const PathQualityVec& downlink) = 0;
     };
 
     class CommonAPI UploadLog_Result : virtual public Shared
@@ -113,6 +127,8 @@ namespace Common
         virtual String getStatistics() = 0;
         virtual void getPortStates_begin(int routerId,int portMin,int portMax,const GetPortStates_ResultPtr& result) = 0;
         virtual void getPathQualitys_begin(const String& toHost,int level,const GetPathQualitys_ResultPtr& result) = 0;
+        /** 获取从客户端到Router/服务之间的上下行网络链路质量 */
+        virtual void getPathQualitys2_begin(int fromRouterId,int fromClientId,int toRouterId,int level,const GetPathQualitys2_ResultPtr& result) = 0;
 
         virtual bool getPathProperties(int routerId,int clientId,String& jsonProperties) = 0;
         virtual void uploadLog_begin(const String& log, const UploadLog_ResultPtr& result, const CallParamsPtr params = 0) = 0;

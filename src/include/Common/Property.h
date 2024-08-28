@@ -1,4 +1,10 @@
-﻿#ifndef __Common_Property_h__
+﻿//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
+#ifndef __Common_Property_h__
 #define __Common_Property_h__
 
 #define CALL_PARAMS_OID                     "id"
@@ -11,6 +17,17 @@
 #define CALL_PARAMS_APP                     "app"
 #define CALL_PARAMS_TOKEN                   "token"
 #define CALL_PARAMS_ACCOUNT_ENTRY           "accountEntry"
+
+#define CALL_PARAMS_AGENT_APP               "__agent"
+#define CALL_PARAMS_SERVER_APP              "__server"
+#define CALL_PARAMS_SERVICE_TAG             "__service_tag__"
+
+#define LOCATOR_PARAMS_IDENTITY             "LocateIdentity"
+#define LOCATOR_PARAMS_PASSWORD             "LocatePassword"
+#define LOCATOR_PARAMS_HOST                 "host"
+#define LOCATOR_PARAMS_LONGITUDE            "longitude"
+#define LOCATOR_PARAMS_LATITUDE             "latitude"
+#define LOCATOR_PARAMS_SERVICE_TAG          CALL_PARAMS_SERVICE_TAG
 
 #define SPAN_TAG_ERROR                      "error"
 #define SPAN_TAG_LOCAL_ADDRESS              "local.address"
@@ -51,12 +68,19 @@
 #define LOG_KEY_TRACE_CMD                   "trace_cmd"
 #define LOG_KEY_TRACE_SPANID                "span_id"
 #define LOG_KEY_TRACE_PARENT_SPANID         "parent_id"
+#define LOG_KEY_TRACE_KIND                  "trace_kind"
+#define LOG_KEY_TRACE_NAME                  "trace_name"
 
 #define LOG_KEY_TIME                        "time"
 #define LOG_KEY_LEVEL                       "lv"
 #define LOG_KEY_APP_NAME                    "app"
 #define LOG_KEY_CATEGORY                    "cat"
 #define LOG_KEY_PERIOD                      "period"
+#define LOG_KEY_RESULT                      "result"
+#define LOG_KEY_PEER_APP                    "peer_app"
+#define LOG_KEY_ERROR                       "error"
+#define LOG_KEY_REASON                      "reason"
+#define LOG_KEY_LOCATION                    "location"
 #define LOG_KEY_FILE                        "file"
 #define LOG_KEY_LINE                        "line"
 #define LOG_KEY_FUNCTION                    "func"
@@ -70,6 +94,10 @@
 #define LOG_KEY_EVENT_CODE                  "event"
 #define LOG_KEY_UID                         "uid"
 #define LOG_KEY_ACCOUNT                     "account"
+#define LOG_KEY_OBJECT                      "obj"
+#define LOG_KEY_DETAIL                      "detail"
+#define LOG_KEY_ADAPTER                     "adapter"
+#define LOG_KEY_EXCEPTION                   "exception"
+#define LOG_KEY_OID                         "oid"
 
 #endif
-

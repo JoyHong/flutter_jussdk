@@ -1,6 +1,6 @@
 ﻿//
 // *****************************************************************************
-// Copyright(c) 2017-2022 Juphoon System Software Co., LTD. All rights reserved.
+// Copyright(c) 2017-2024 Juphoon System Software Co., LTD. All rights reserved.
 // *****************************************************************************
 //
 // Auto generated from: RouterTypes.def
@@ -10,7 +10,7 @@
 #ifndef __Common_RouterTypesPub_h
 #define __Common_RouterTypesPub_h
 
-#include "Common/Common.h"
+#include "Common/CommonBase.h"
 
 namespace Common
 {

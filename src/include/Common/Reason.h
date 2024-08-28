@@ -1,3 +1,9 @@
+//
+// *****************************************************************************
+// Copyright (c) 2024 Juphoon System Software Co., LTD. All rights reserved
+// *****************************************************************************
+//
+
 #ifndef __Common_Reason_h__
 #define __Common_Reason_h__
 
@@ -26,6 +32,7 @@
 #define REASON_AGENT_ERROR_PROCESS_VER            "agent-error:process ver"
 #define REASON_AGENT_ERROR_REQUEST_TIMEOUT        "agent-error:request timeout"
 #define REASON_AGENT_ERROR_VERSIONS_ERROR         "agent-error:vers error"
+#define REASON_AGENT_ERROR_LOCATE_ERROR           "agent-error:locate-error"
 
 #define REASON_SERVER_ERROR                       "server-error"          /* error occurred when server process request, for example: object not found */
 #define REASON_SERVER_ERROR_CMD_NOT_FOUND         "server-error:cmd not found"
@@ -53,6 +60,8 @@
 #define REASON_INVALID_CMD                        "proxy-error:invalid cmd"
 #define REASON_PROXY_NOT_FOUND                    "proxy-error:proxy not found"
 
+#define REASON_LOCATE_ERROR_NO_LOCATORS           "locate-error:NoLocators"
+
 #define REASON_HASH_TABLES_NOT_READY              "HashTablesNotReady"
 #define REASON_CLEAR_DATA                         "ClearData"
 
@@ -78,5 +87,6 @@
 #define REASON_INVALID_AUTHENTICATION             "invalid authentication format"
 #define REASON_INVALID_ACCESSKEY                  "invalid accesskey"
 #define REASON_AUTH_FAILED                        "auth failed"
+#define REASON_RETURN_TRIP_UNREACHABLE            "return trip unreachable"
 
 #endif
