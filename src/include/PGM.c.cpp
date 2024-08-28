@@ -40,19 +40,32 @@ static PGM_C_UPDATE_RPOPS c_s_updatePropsCb = NULL;
 static PGM_C_INSERT_MSGS c_s_insertMsgsCb = NULL;
 static PGM_C_GET_TICKS c_s_getTicksCb = NULL;
 
+static PGM_C_EVENT_PROCESSOR c_s_eventProcessorCb_ = NULL;
+static PGM_C_LOAD_GROUP c_s_loadGroupCb_ = NULL;
+static PGM_C_UPDATE_GROUP c_s_updateGroupCb_ = NULL;
+static PGM_C_UPDATE_STATUSES c_s_updateStatusesCb_ = NULL;
+static PGM_C_UPDATE_RPOPS c_s_updatePropsCb_ = NULL;
+static PGM_C_INSERT_MSGS c_s_insertMsgsCb_ = NULL;
+static PGM_C_GET_TICKS c_s_getTicksCb_ = NULL;
+
+static void* c_s_mainTid = NULL;
+
 static int c_s_eventProcessorCbConverter(PGM_EVENT event, const StrStrMap& params)
 {
-    return c_s_eventProcessorCb(event, c_s_StrStrMap2Json(params).c_str());
+    return 0;// c_s_eventProcessorCb(event, c_s_StrStrMap2Json(params).c_str());
 }
 
 static int c_s_loadGroupCbConverter(const String& groupId, Group::RelationsMap& relations, Long& relationUpdateTime, Status::StatusVersMap& statusVersMap, Long& statusTime, StrStrMap& props)
 {
+    Mtc_AnyLogInfoStr("PGM", "c_s_loadGroupCb pid %lld\n", (Long)getTid());
     JRelationsMap* pcRelationsMap;
     int64_t lRelationUpdateTime;
     JStatusVersMap* pcStatusVersMap;
     int64_t lStatusTime;
     JStrStrMap* pcProps;
-    int ret = c_s_loadGroupCb(groupId.c_str(), &pcRelationsMap, &lRelationUpdateTime, &pcStatusVersMap, &lStatusTime, &pcProps);
+    int ret = c_s_mainTid == getTid()
+        ? c_s_loadGroupCb(groupId.c_str(), &pcRelationsMap, &lRelationUpdateTime, &pcStatusVersMap, &lStatusTime, &pcProps)
+        : c_s_loadGroupCb_(groupId.c_str(), &pcRelationsMap, &lRelationUpdateTime, &pcStatusVersMap, &lStatusTime, &pcProps);
     if (ret != 0)
         return ret;
     Mtc_AnyLogInfoStr("PGM", "c_s_loadGroupCb %s\n  pcRelationsMap:\n    %s\n  lRelationUpdateTime:\n    %ld\n  pcStatusVersMap:\n    %s\n  lStatusTime:\n    %ld\n  pcProps:    %s\n",
@@ -66,26 +79,41 @@ static int c_s_loadGroupCbConverter(const String& groupId, Group::RelationsMap& 
 
 static int c_s_updateGroupCbConverter(const String& groupId, const Group::RelationsMap& diff, Long updateTime, const Status::StatusVersMap& statusVersMap, Long statusTime)
 {
-    return c_s_updateGroupCb(groupId.c_str(), c_s_RelationsMap2Json(diff).c_str(), updateTime, c_s_StatusVersMap2Json(statusVersMap).c_str(), statusTime);
+    Mtc_AnyLogInfoStr("PGM", "c_s_updateGroupCb pid %lld\n", (Long)getTid());
+    return  c_s_mainTid == getTid()
+        ? c_s_updateGroupCb(groupId.c_str(), c_s_RelationsMap2Json(diff).c_str(), updateTime, c_s_StatusVersMap2Json(statusVersMap).c_str(), statusTime)
+        : c_s_updateGroupCb_(groupId.c_str(), c_s_RelationsMap2Json(diff).c_str(), updateTime, c_s_StatusVersMap2Json(statusVersMap).c_str(), statusTime);
 }
 
 static int c_s_updateStatusesCbConverter(const String& groupId, const Status::StatusVersMap& statusVersMap, Long statusTime)
 {
-    return c_s_updateStatusesCb(groupId.c_str(), c_s_StatusVersMap2Json(statusVersMap).c_str(), statusTime);
+    Mtc_AnyLogInfoStr("PGM", "c_s_updateStatusesCb pid %lld\n", (Long)getTid());
+    return  c_s_mainTid == getTid()
+        ? c_s_updateStatusesCb(groupId.c_str(), c_s_StatusVersMap2Json(statusVersMap).c_str(), statusTime)
+        : c_s_updateStatusesCb_(groupId.c_str(), c_s_StatusVersMap2Json(statusVersMap).c_str(), statusTime);
 }
 
 static int c_s_updatePropsCbConverter(const String& groupId, const StrStrMap& props)
 {
-    return c_s_updatePropsCb(groupId.c_str(), c_s_StrStrMap2Json(props).c_str());
+    Mtc_AnyLogInfoStr("PGM", "c_s_updatePropsCb pid %lld\n", (Long)getTid());
+    int ret =  c_s_mainTid == getTid()
+        ? c_s_updatePropsCb(groupId.c_str(), c_s_StrStrMap2Json(props).c_str())
+        : c_s_updatePropsCb_(groupId.c_str(), c_s_StrStrMap2Json(props).c_str());
+    Mtc_AnyLogInfoStr("PGM", "c_s_updatePropsCb ret %d, pid %lld\n", ret, (Long)getTid());
+    return ret;
 }
 
 static int c_s_insertMsgsCbConverter(const String& groupId, const Message::SortedMsgs& msgs, const Status::StatusTimes& msgStatuses)
 {
-    return c_s_insertMsgsCb(groupId.c_str(), c_s_SortedMsgs2Json(msgs).c_str(), c_s_StatusTimes2Json(msgStatuses).c_str());
+    Mtc_AnyLogInfoStr("PGM", "c_s_insertMsgsCb pid %lld\n", (Long)getTid());
+    return  c_s_mainTid == getTid()
+        ? c_s_insertMsgsCb(groupId.c_str(), c_s_SortedMsgs2Json(msgs).c_str(), c_s_StatusTimes2Json(msgStatuses).c_str())
+        : c_s_insertMsgsCb_(groupId.c_str(), c_s_SortedMsgs2Json(msgs).c_str(), c_s_StatusTimes2Json(msgStatuses).c_str());
 }
 
 static Ulong c_s_getTicksCbConverter()
 {
+    Mtc_AnyLogInfoStr("PGM", "c_s_getTicksCb pid %lld\n", (Long)getTid());
     return c_s_getTicksCb();
 }
 
@@ -98,6 +126,8 @@ void pgm_c_version(char* pcVersion)
 
 void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb, int cbInIsolate)
 {
+    c_s_mainTid = getTid();
+    Mtc_AnyLogInfoStr("PGM", "pgm_c_init pid %lld\n", (Long)getTid());
     c_s_eventProcessorCb = eventProcessorCb;
     c_s_loadGroupCb = loadGroupCb;
     c_s_updateGroupCb = updateGroupCb;
@@ -109,9 +139,23 @@ void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGro
         c_s_updatePropsCbConverter, c_s_insertMsgsCbConverter, c_s_getTicksCb!=NULL ? c_s_getTicksCbConverter : NULL, cbInIsolate!=0);
 }
 
+void pgm_c_cb_thread_int(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb)
+{
+    Mtc_AnyLogInfoStr("PGM", "pgm_c_cb_thread_int pid %lld\n", (Long)getTid());
+    c_s_eventProcessorCb = eventProcessorCb;
+    c_s_loadGroupCb_ = loadGroupCb;
+    c_s_updateGroupCb_ = updateGroupCb;
+    c_s_updateStatusesCb_ = updateStatusesCb;
+    c_s_updatePropsCb_ = updatePropsCb;
+    c_s_insertMsgsCb_ = insertMsgsCb;
+}
+
 int pgm_c_cb_thread_func()
 {
-    return pgm_cb_thread_func();
+    Mtc_AnyLogInfoStr("PGM", "pgm_c_cb_thread_func pid %lld\n", (Long)getTid());
+    int ret = pgm_cb_thread_func();
+    Mtc_AnyLogInfoStr("PGM", "pgm_c_cb_thread_func end with %d\n", ret);
+    return ret;
 }
 
 int pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr)

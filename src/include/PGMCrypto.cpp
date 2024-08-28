@@ -1,7 +1,9 @@
-#include "PGMCrypto.h"
+ï»¿#include "PGMCrypto.h"
 
 #ifdef _MSC_VER
 #define OPENSSL_CONF_FILE_WIN_X86
+#elif defined(__ANDROID__)
+#define OPENSSL_CONF_FILE_ANDROID_ARMV7
 #elif defined(__i386__)
 #define OPENSSL_CONF_FILE_IOS_X86
 #elif defined(__x86_64__)
@@ -24,8 +26,21 @@
         break; \
     }
 
+extern "C" {
+    void Mtc_AnyLogInfoStr(char *pcLogName, char *pcFormat, ...);
+}
+
 bool generateKeyPair(String& pubKey, String& priKey, String& reason)
 {
+    Mtc_AnyLogInfoStr("PGM", "openssl generateKeyPair begin");
+    static int i = 0;
+    if (i++ == 0)
+    {
+        Mtc_AnyLogInfoStr("PGM", "openssl OpenSSL_add_all_algorithms begin");
+        OpenSSL_add_all_algorithms();
+        Mtc_AnyLogInfoStr("PGM", "openssl OpenSSL_add_all_algorithms end");
+    }
+
     DH *dh = NULL;
     const BIGNUM *pub_key = NULL;
     const BIGNUM *pri_key = NULL;
@@ -33,21 +48,22 @@ bool generateKeyPair(String& pubKey, String& priKey, String& reason)
     char *pri_key_buf = NULL;
     do
     {
-        // »ñÈ¡ DH ¶ÔÏó
+        // è·å– DH å¯¹è±¡
         dh = DH_get_1024_160();
+        Mtc_AnyLogInfoStr("PGM", "openssl DH_get_1024_160 end");
         if (!dh)
             REASON_BREAK;
 
-        // Éú³É DH ÃÜÔ¿¶Ô
+        // ç”Ÿæˆ DH å¯†é’¥å¯¹
         if (!DH_generate_key(dh))
             REASON_BREAK;
 
-        // »ñÈ¡¹«Ô¿ºÍË½Ô¿
+        // è·å–å…¬é’¥å’Œç§é’¥
         DH_get0_key(dh, &pub_key, &pri_key);
         if (!pub_key || !pri_key)
             REASON_BREAK;
 
-        // ½«¹«Ô¿ºÍË½Ô¿×ª»»Îª×Ö·û´®
+        // å°†å…¬é’¥å’Œç§é’¥è½¬æ¢ä¸ºå­—ç¬¦ä¸²
         pub_key_buf = BN_bn2hex(pub_key);
         pri_key_buf = BN_bn2hex(pri_key);
         if (!pub_key_buf || !pri_key_buf)
@@ -71,24 +87,24 @@ bool _DH(const String& pubA, const String& priB, String& secret, String& reason)
     unsigned char *buf = NULL;
     do
     {
-        // »ñÈ¡ DH ¶ÔÏó
+        // è·å– DH å¯¹è±¡
         dh = DH_get_1024_160();
         if (!dh)
             REASON_BREAK;
 
-        // ÉèÖÃ¹«Ô¿ A
+        // è®¾ç½®å…¬é’¥ A
         if (!BN_hex2bn(&pub_key_a, &(pubA.c_str())[0]))
             REASON_BREAK;
         if (!pub_key_a || !DH_set0_key(dh, pub_key_a, NULL))
             REASON_BREAK;
 
-        // ÉèÖÃË½Ô¿ B
+        // è®¾ç½®ç§é’¥ B
         if (!BN_hex2bn(&pri_key_b, &(priB.c_str())[0]))
             REASON_BREAK;
         if (!pri_key_b || !DH_set0_key(dh, NULL, pri_key_b))
             REASON_BREAK;
 
-        // ¼ÆËã¹²ÏíÃÜÔ¿
+        // è®¡ç®—å…±äº«å¯†é’¥
         int secretLen = DH_size(dh);
         buf = new unsigned char[secretLen];
         if (DH_compute_key(buf, pub_key_a, dh) < 0)
@@ -142,19 +158,19 @@ bool HKDF(const String& srcSecret, const String& salt, String& destSecret, Strin
         if (EVP_PKEY_CTX_set_hkdf_md(pctx, EVP_sha256()) <= 0)
             REASON_BREAK;
 
-        // ÉèÖÃÑÎÖµ
+        // è®¾ç½®ç›å€¼
         int saltLen;
         const unsigned char *saltBuf = salt.getData(saltLen);
         if (EVP_PKEY_CTX_set1_hkdf_salt(pctx, saltBuf, saltLen) <= 0)
             REASON_BREAK;
 
-        // ÉèÖÃÊäÈëÃÜÔ¿
+        // è®¾ç½®è¾“å…¥å¯†é’¥
         int srcSecretLen;
         const unsigned char *srcSecretBuf = srcSecret.getData(srcSecretLen);
         if (EVP_PKEY_CTX_set1_hkdf_key(pctx, srcSecretBuf, srcSecretLen) <= 0)
             REASON_BREAK;
 
-        // Éú³ÉÃÜÔ¿
+        // ç”Ÿæˆå¯†é’¥
         unsigned char destSecretBuf[32];
         size_t destSecretLen = sizeof(destSecretBuf);
         if (EVP_PKEY_derive(pctx, destSecretBuf, &destSecretLen) <= 0)
@@ -177,11 +193,11 @@ bool shareKeyEncrpyt(String& str, const String& shareKey, const String& iv, Stri
         if (!ctx)
             break;
 
-        // ´´½¨¼ÓÃÜÉÏÏÂÎÄ
+        // åˆ›å»ºåŠ å¯†ä¸Šä¸‹æ–‡
         if (EVP_EncryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, (const unsigned char*)shareKey.c_str(), (const unsigned char*)iv.c_str()) != 1)
             REASON_BREAK;
 
-        // ¼ÓÃÜÃ÷ÎÄ
+        // åŠ å¯†æ˜æ–‡
         int len;
         const unsigned char* data = str.getData(len);
         int outlen = len + EVP_CIPHER_CTX_block_size(ctx);
@@ -194,7 +210,7 @@ bool shareKeyEncrpyt(String& str, const String& shareKey, const String& iv, Stri
         if (EVP_EncryptFinal_ex(ctx, cipher_text + outlen, &finalLen) != 1)
             REASON_BREAK;
 
-        // ·µ»Ø¼ÓÃÜ½á¹û
+        // è¿”å›åŠ å¯†ç»“æœ
         str = String((const char *)cipher_text, outlen + finalLen);
     } while (0);
 
@@ -224,11 +240,11 @@ bool shareKeyDecrpyt(String& str, const String& shareKey, const String& iv, Stri
         if (!ctx)
             REASON_BREAK;
 
-        // ´´½¨½âÃÜÉÏÏÂÎÄ
+        // åˆ›å»ºè§£å¯†ä¸Šä¸‹æ–‡
         if (EVP_DecryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, (const unsigned char*)shareKey.c_str(), (const unsigned char*)iv.c_str()) != 1)
             REASON_BREAK;
 
-        // ½âÃÜÃÜÎÄ
+        // è§£å¯†å¯†æ–‡
         int len;
         const unsigned char* data = str.getData(len);
         int outlen = len + EVP_CIPHER_CTX_block_size(ctx);
@@ -241,7 +257,7 @@ bool shareKeyDecrpyt(String& str, const String& shareKey, const String& iv, Stri
         if (EVP_DecryptFinal_ex(ctx, plain_text + outlen, &finalLen) != 1)
             REASON_BREAK;
 
-        // ·µ»Ø¼ÓÃÜ½á¹û
+        // è¿”å›åŠ å¯†ç»“æœ
         str = String((const char *)plain_text, outlen + finalLen);
     } while (0);
 

@@ -10,7 +10,7 @@
 //   a. uid/orgId分别表示userId/组织id. 现阶段组织的主要形式是群
 //   b. groupId表示uid或orgId, 视代码场景所定
 //   c. 除非特别说明, 否则 节点/changedId 这样的陈述或命名, 表示既可能是uid节点, 也可能是orgId节点
-//   d. 所有结构化数据都使用json表达, J开头类型标识符表示这是一个json字符串, 比如JStrStrMap表示这是一个map<string,string> json
+//   d. 所有结构化数据都使用json表达, J开头类型标识符表示这是一个json字符串, 比如JStrStrMap表示这是一个std::map<string,string> json
 //
 
 #include "PGMDef.h"
@@ -21,13 +21,13 @@
 #endif
 #include <stdint.h>
 
-typedef char JStrStrMap;    // map<pcKey, pcValue>
+typedef char JStrStrMap;    // std::map<pcKey, pcValue>
 typedef char JStrSet;       // set<pcStr>
 typedef char JRelation;     // [iType, pcTagName, pcTag, JStrStrMap]
-typedef char JRelationsMap; // map<pcUid, JRelation>
-typedef char JStatusTimes;  // map<pcType, [pcValue, lVer]>
-typedef char JStatusVersMap;// map<pcUid, JStatusTimes>
-typedef char JMsgContent;   // [pcType, pcBody, map<pcKey, pcStream>, map<pcKey, pcValue>]
+typedef char JRelationsMap; // std::map<pcUid, JRelation>
+typedef char JStatusTimes;  // std::map<pcType, [pcValue, lVer]>
+typedef char JStatusVersMap;// std::map<pcUid, JStatusTimes>
+typedef char JMsgContent;   // [pcType, pcBody, std::map<pcKey, pcStream>, std::map<pcKey, pcValue>]
 typedef char JSortedMsgs;   // vector<[lIdx, lTime, pcSender, JMsgContent]>
 
 #ifdef __cplusplus
@@ -182,9 +182,9 @@ MTCFUNC int pgm_c_refresh_org(const char* pcCookie, const char* pcOrgId, char* p
 /*
   1. 无需对方确认的列表修改
   2. 调用方式:
-    a. 好友(批量)添加: pgm_add_relations(cookie, selfUid, map<uid,Relation(Contact,tagName,tag,nullCfgs)>, err)
-    b. 直接入群: pgm_add_relations(cookie, selfUid, map<orgId,Relation(Organize,tagName,tag,nullCfgs)>, err), added map size必须为1
-    c. 拉人入群: pgm_add_relations(cookie, orgId, map<uid,Relation(Member,tagName,tag,nullCfgs)>, err)
+    a. 好友(批量)添加: pgm_add_relations(cookie, selfUid, std::map<uid,Relation(Contact,tagName,tag,nullCfgs)>, err)
+    b. 直接入群: pgm_add_relations(cookie, selfUid, std::map<orgId,Relation(Organize,tagName,tag,nullCfgs)>, err), added map size必须为1
+    c. 拉人入群: pgm_add_relations(cookie, orgId, std::map<uid,Relation(Member,tagName,tag,nullCfgs)>, err)
   3. CookieEnd 'added_exist'时,表示同时间点发生了异源修改,比如 自己两台正在登录的设备, 同时添加同一个人
     接口保证 会先将这样的列表异源修改flush db, 再回调CookieEnd err!
 */
@@ -192,7 +192,7 @@ MTCFUNC int pgm_c_add_relations(const char* pcCookie, const char* pcGroupId, con
 
 /*
   1. 调用方式: @groupId是节点所属的列表id, @changed是修改节点id及内容的集合. 比如
-    a. 设置组织消息免打扰: pgm_change_relations(cookie, orgId, map<selfUid,Relation(preType,preTagName,preTag,preCfgs['ImPush']='0'>, err)
+    a. 设置组织消息免打扰: pgm_change_relations(cookie, orgId, std::map<selfUid,Relation(preType,preTagName,preTag,preCfgs['ImPush']='0'>, err)
   2. 需要将修改节点修改后的全部内容传入. 故目前存在这样的问题: 2个异源修改同时分别修改不同字段时, 最终可能只有一条生效
   3. CookieEnd 'changed_nonexist'时, 表示同时间点发生了异源修改, 比如 修改自己的群内备注名时刚好群主把自己踢了
     接口保证 会先将这样的他源列表修改flush db, 再回调CookieEnd err!

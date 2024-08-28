@@ -13,6 +13,8 @@
 #include "Global/GlobalAgent.h"
 #endif
 
+#include <deque>
+
 using namespace Common;
 
 namespace Cli
@@ -405,7 +407,7 @@ namespace Cli
         virtual bool __tryFlush(const TobeFlushDataPtr& tobeFlushData, String& err) = 0;
         String __flush(const TobeFlushDataPtr& tobeFlushData);
     protected:
-        deque<TobeFlushDataPtr> _tobeFlushDatas;
+        std::deque<TobeFlushDataPtr> _tobeFlushDatas;
     };
 
 
@@ -427,8 +429,7 @@ namespace Cli
         bool __tryFlush(const TobeFlushDataPtr& tobeFlushData, String& err);
         void cb_thread_func();
     private:
-        int _mainPid;
-        void* _event;
+        void *_mainTid, *_event;
     };
 
 
@@ -534,9 +535,9 @@ namespace Cli
         bool _everRefreshed, _refreshing;   // 等待重试状态也认为是refreshing
         int _rerefreshInterval; // -1表示未处于等待重试状态
         TimerPtr _rerefreshTimer;
-        deque<GroupRqstPtr> _pendingRqsts, _pendingRspss;
+        std::deque<GroupRqstPtr> _pendingRqsts, _pendingRspss;
 
-        deque<SendMsgRqstPtr> _pendingSendMsgRqsts;
+        std::deque<SendMsgRqstPtr> _pendingSendMsgRqsts;
     };
 
 
@@ -557,9 +558,9 @@ namespace Cli
         void __updateSPKOPK(Status::StatusTimes& keyStatuses, Status::StatusTimes& keyStatusesDiff, Status::StatusTimes& remoteKeyStatusesDiff);
     public:
         String _region;
-        map<String, bool> _regionsRecving;
+        std::map<String, bool> _regionsRecving;
 
-        map<String, BoxStatusesPtr> _boxsStatuses;
+        std::map<String, BoxStatusesPtr> _boxsStatuses;
 
         String _IKPub, _IKPri, _SPKPri0, _SPKPri1;
         String _OPKPris[10];
@@ -600,10 +601,10 @@ namespace Cli
     private:
         GlobalTimePtr _globalTime;
 
-        map<String, OrgGroupPtr> _orgGroups;
+        std::map<String, OrgGroupPtr> _orgGroups;
 
         StrSet _cookies;
-        map<String, deque<RqstPtr> > _rqstDeques;
+        std::map<String, std::deque<RqstPtr> > _rqstDeques;
 
         Global::ErrRecords _errRecords;
         Global::ErrRecordAgent _errRecordAgent;

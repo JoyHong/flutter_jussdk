@@ -8,7 +8,6 @@
 #include "../Status/StatusPublic.h"
 #include "../Message/MessagePublic.h"
 #else
-//#include "lemon/lemon.h"
 #include "Group/GroupPublic.h"
 #include "Status/StatusPublic.h"
 #include "Message/MessagePublic.h"
@@ -19,7 +18,7 @@ extern "C" {
     void* Mtc_CliGetClient();
 }
 
-#define STLPORT
+//#define ZH_COMPILE
 
 #define ERR_BREAK_IF(condition, e) \
     { \
@@ -220,7 +219,7 @@ namespace Cli
         bool delayExcute = false;
         if (!_dequeName.empty())
         {
-            deque<RqstPtr>& rqstDeque = s_pgm->_rqstDeques[_dequeName];
+            std::deque<RqstPtr>& rqstDeque = s_pgm->_rqstDeques[_dequeName];
             rqstDeque.push_back(this);
             delayExcute = rqstDeque.size() > 1;
         }
@@ -247,9 +246,9 @@ namespace Cli
 
         if (!_dequeName.empty())
         {
-            deque<RqstPtr>& rqstDeque = s_pgm->_rqstDeques[_dequeName];
+            std::deque<RqstPtr>& rqstDeque = s_pgm->_rqstDeques[_dequeName];
             rqstDeque.pop_front();
-            deque<RqstPtr>::const_iterator it = rqstDeque.begin();
+            std::deque<RqstPtr>::const_iterator it = rqstDeque.begin();
             if (it != rqstDeque.end())
                 (*it)->__excute_begin();
         }
@@ -556,7 +555,7 @@ namespace Cli
                     Group::RelationsMap::const_iterator localIt = _group->_relations.find(removedIt->first);
                     if (localIt == _group->_relations.end())
                     {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                         _removed.erase(removedIt++);
 #else
                         removedIt = _removed.erase(removedIt);
@@ -1051,7 +1050,7 @@ namespace Cli
                 if (localIt == localStatusVersIt->second.end()  // localStatusVersIt的状态集应不会缩小, 这里也可以替换为一个assert(localIt!=localStatusVersIt->second.end())
                     || localIt->second != diffIt->second)
                 {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                     _statusVers.erase(diffIt++);
 #else
                     diffIt = _statusVers.erase(diffIt);
@@ -1091,7 +1090,7 @@ namespace Cli
                         && diffIt->second._time == localIt->second._time)
                         localIt->second._value = (diffIt++)->second._value;
                     else
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                         _statusVers.erase(diffIt++);
 #else
                         diffIt = _statusVers.erase(diffIt);
@@ -1144,7 +1143,7 @@ namespace Cli
             if (localIt != _group->_props.end()
                 && localIt->second == diffIt->second)
             {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                 _diffProps.erase(diffIt++);
 #else
                 diffIt = _diffProps.erase(diffIt);
@@ -1190,7 +1189,7 @@ namespace Cli
             if (_group->_props[timeStampKey].empty()
                 || _group->_props[diffIt->first] != diffIt->second)
             {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                 _diffProps.erase(diffIt++);
 #else
                 diffIt = _diffProps.erase(diffIt);
@@ -1310,7 +1309,7 @@ namespace Cli
 
     void SendP2PMsgRqst::__doExcute_begin()
     {
-        map<String, BoxStatusesPtr>::const_iterator it = _selfGroup->_boxsStatuses.find(_targetId);
+        std::map<String, BoxStatusesPtr>::const_iterator it = _selfGroup->_boxsStatuses.find(_targetId);
         if (it == _selfGroup->_boxsStatuses.end()
             || it->second->__cryptReset())
             __fetchPeerPubKeys_begin();
@@ -1327,7 +1326,7 @@ namespace Cli
 
     void SendP2PMsgRqst::__clientSend_begin()
     {
-        pair<map<String, BoxStatusesPtr>::iterator, bool> p = _selfGroup->_boxsStatuses.insert(make_pair(_targetId, BoxStatuses::create(_targetId)));
+        pair<std::map<String, BoxStatusesPtr>::iterator, bool> p = _selfGroup->_boxsStatuses.insert(make_pair(_targetId, BoxStatuses::create(_targetId)));
         _boxStatuses = p.first->second;
         if (p.second)
         {
@@ -1488,7 +1487,7 @@ namespace Cli
 
     void SendOrgMsgRqst::__doExcute_begin()
     {
-        pair<map<String, BoxStatusesPtr>::iterator, bool> p = _selfGroup->_boxsStatuses.insert(make_pair(_targetId, BoxStatuses::create(_targetId)));
+        pair<std::map<String, BoxStatusesPtr>::iterator, bool> p = _selfGroup->_boxsStatuses.insert(make_pair(_targetId, BoxStatuses::create(_targetId)));
         _boxStatuses = p.first->second;
         if (p.second)
         {
@@ -1684,12 +1683,12 @@ namespace Cli
 
     bool NormalDataFlusher::__reflush(String& err)
     {
-        deque<TobeFlushDataPtr>::iterator it = _tobeFlushDatas.begin();
+        std::deque<TobeFlushDataPtr>::iterator it = _tobeFlushDatas.begin();
         while (it != _tobeFlushDatas.end())
         {
             if (!(*it)->__flush(err))
                 return false;
-#ifdef STLPORT
+#ifdef ZH_COMPILE
             _tobeFlushDatas.erase(it++);
 #else
             it = _tobeFlushDatas.erase(it);
@@ -1705,7 +1704,7 @@ namespace Cli
 
 
     IsolateDataFlusher::IsolateDataFlusher()
-        : _mainPid(getPid()), _event(createEvent())
+        : _mainTid(getTid()), _event(createEvent())
     {
 
     }
@@ -1732,7 +1731,7 @@ namespace Cli
         {
             RecLock lock(this);
             if (_tobeFlushDatas.empty()
-                && getPid() == _mainPid)
+                && getTid() == _mainTid)
                 return tobeFlushData->__flush(err);
 
             _tobeFlushDatas.push_back(tobeFlushData);
@@ -1747,13 +1746,13 @@ namespace Cli
         {
             waitEvent(_event, -1);
             RecLock lock(this);
-            deque<TobeFlushDataPtr>::iterator it = _tobeFlushDatas.begin();
+            std::deque<TobeFlushDataPtr>::iterator it = _tobeFlushDatas.begin();
             while (it != _tobeFlushDatas.end())
             {
                 String err;
                 if (!(*it)->__flush(err))
                     break;
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                 _tobeFlushDatas.erase(it++);
 #else
                 it = _tobeFlushDatas.erase(it);
@@ -1901,7 +1900,7 @@ namespace Cli
         {
             if (_mv >= msgIt->_msgIdx)
             {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                 msgs.erase(msgIt++);
 #else
                 msgIt = msgs.erase(msgIt);
@@ -2711,7 +2710,7 @@ namespace Cli
                             }
                             else
                             {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                                 remoteNodeStatuses.erase(remoteNodeStatusIt++);
 #else
                                 remoteNodeStatusIt = remoteNodeStatuses.erase(remoteNodeStatusIt);
@@ -2724,7 +2723,7 @@ namespace Cli
             if (nodeExist && !remoteNodeIt->second.empty())
                 ++remoteNodeIt;
             else
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                 statusVersMap.erase(remoteNodeIt++);
 #else
                 remoteNodeIt = statusVersMap.erase(remoteNodeIt);
@@ -2835,7 +2834,7 @@ namespace Cli
                         }
                         else
                         {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                             diff.erase(diffIt++);
 #else
                             diffIt = diff.erase(diffIt);
@@ -2974,7 +2973,7 @@ namespace Cli
                     }
                     else
                     {
-#ifdef STLPORT
+#ifdef ZH_COMPILE
                         diff.erase(diffIt++);
 #else
                         diffIt = diff.erase(diffIt);
@@ -3062,7 +3061,7 @@ namespace Cli
     {
         vector<RqstEnd> endRqsts;
 
-        deque<GroupRqstPtr>::const_iterator rqstIt = _pendingRqsts.begin();
+        std::deque<GroupRqstPtr>::const_iterator rqstIt = _pendingRqsts.begin();
         for (; rqstIt != _pendingRqsts.end(); ++rqstIt)
         {
             if (err.empty())
@@ -3072,7 +3071,7 @@ namespace Cli
         }
         _pendingRqsts.clear();
 
-        deque<GroupRqstPtr>::const_iterator rspsIt = _pendingRspss.begin();
+        std::deque<GroupRqstPtr>::const_iterator rspsIt = _pendingRspss.begin();
         for (; rspsIt != _pendingRspss.end(); ++rspsIt)
         {
             String err_ = err;
@@ -3119,7 +3118,7 @@ namespace Cli
 
     void GroupList::__deliverSendMsgRqsts()
     {
-        deque<SendMsgRqstPtr>::const_iterator it = _pendingSendMsgRqsts.begin();
+        std::deque<SendMsgRqstPtr>::const_iterator it = _pendingSendMsgRqsts.begin();
         for (; it != _pendingSendMsgRqsts.end(); ++it)
             (*it)->__doExcute_begin();
         _pendingSendMsgRqsts.clear();
@@ -3245,7 +3244,7 @@ namespace Cli
 
     bool SelfGroup::__msgRecvIdle()
     {
-        map<String, bool>::const_iterator it = _regionsRecving.begin();
+        std::map<String, bool>::const_iterator it = _regionsRecving.begin();
         for (; it != _regionsRecving.end(); ++it)
         {
             if (it->second)
@@ -3264,7 +3263,7 @@ namespace Cli
         if (it == _statusVersMap.end())
             return;
 
-        pair<map<String, BoxStatusesPtr>::iterator, bool> p = _boxsStatuses.insert(make_pair(groupId, BoxStatuses::create(groupId)));
+        pair<std::map<String, BoxStatusesPtr>::iterator, bool> p = _boxsStatuses.insert(make_pair(groupId, BoxStatuses::create(groupId)));
         BoxStatusesPtr boxStatuses = p.first->second;
         if (p.second)
         {
@@ -3292,7 +3291,7 @@ namespace Cli
     void SelfGroup::__regionRecv(const String& region)
     {
         StrLongMap groupIdsStart;
-        map<String, BoxStatusesPtr>::iterator it = _boxsStatuses.begin();
+        std::map<String, BoxStatusesPtr>::iterator it = _boxsStatuses.begin();
         for (; it != _boxsStatuses.end(); ++it)
         {
             if (it->second->_region != region)
@@ -3384,7 +3383,7 @@ namespace Cli
 
     void SelfGroup::__regionsRecv()
     {
-        map<String, bool>::iterator it = _regionsRecving.begin();
+        std::map<String, bool>::iterator it = _regionsRecving.begin();
         for (; it != _regionsRecving.end(); ++it)
         {
             if (!it->second)
@@ -3394,7 +3393,7 @@ namespace Cli
 
     void SelfGroup::__batchRecved(const String& region, Message::SortedMsgss& msgss, StrLongMap& groupIdsStart)
     {
-        map<String, BoxStatusesPtr>::iterator boxStatusesIt = _boxsStatuses.begin();
+        std::map<String, BoxStatusesPtr>::iterator boxStatusesIt = _boxsStatuses.begin();
         Message::SortedMsgss::iterator msgsIt = msgss.begin();
         do
         {
@@ -3558,7 +3557,7 @@ namespace Cli
 
         _selfGroup->__clear();
         _selfGroup = 0;
-        map<String, OrgGroupPtr>::const_iterator it = _orgGroups.begin();
+        std::map<String, OrgGroupPtr>::const_iterator it = _orgGroups.begin();
         for (; it != _orgGroups.end(); ++it)
             it->second->__clear();
         _orgGroups.clear();
@@ -3604,7 +3603,7 @@ namespace Cli
             return 0;
         }
 
-        map<String, OrgGroupPtr>::const_iterator it = _orgGroups.find(groupId);
+        std::map<String, OrgGroupPtr>::const_iterator it = _orgGroups.find(groupId);
         if (it == _orgGroups.end())
             return __createGroup(groupId, err);
         else
@@ -4151,7 +4150,7 @@ namespace Cli
 
 String pgm_version()
 {
-    return "d635faf";
+    return "d530682";
 }
 
 void pgm_init(PGM_EVENT_PROCESSOR eventProcessorCb, PGM_LOAD_GROUP loadGroupCb, PGM_UPDATE_GROUP updateGroupCb, PGM_UPDATE_STATUSES updateStatusesCb, PGM_UPDATE_RPOPS updatePropsCb, PGM_INSERT_MSGS insertMsgsCb, PGM_GET_TICKS getTicksCb, bool cbInIsolate)
