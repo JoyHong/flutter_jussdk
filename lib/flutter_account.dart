@@ -56,6 +56,9 @@ class FlutterJusAccountConstants {
   static const String PROP_MTC_INFO_SOFTWARE_VERSION_KEY = MTC_INFO_SOFTWARE_VERSION_KEY;
   static const String PROP_MTC_INFO_SOFTWARE_VENDOR_KEY = MTC_INFO_SOFTWARE_VENDOR_KEY;
 
+  /// push 类型
+  static const String pushTypeGCM = "GCM";
+
 }
 
 abstract class FlutterJusAccount {
@@ -84,6 +87,13 @@ abstract class FlutterJusAccount {
 
   /// 退出登陆
   Future logout();
+
+  /// 注册 push, 默认注册了 Text 消息, 无返回值, 失败则返回错误对象(FlutterJusError)
+  /// pushType: push 类型 - pushTypeGCM
+  /// pushAppId: push 对应的 key, 如 GCM 是 sender id
+  /// pushToken: push token
+  /// infoTypes: 需要注册的 info 消息列表
+  Future registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -335,6 +345,71 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       completer.complete();
     }
     return completer.future;
+  }
+
+  @override
+  Future registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes}) async {
+    _logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $infoTypes)');
+    if (pushType != FlutterJusAccountConstants.pushTypeGCM) {
+      _logger.e(tag: _tag, message: 'registerPush fail, pushType must be FlutterJusAccountConstants.pushTypeGCM');
+      return const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'pushType must be FlutterJusAccountConstants.pushTypeGCM');
+    }
+    if (!(await _connectOkTransformer())) {
+      _logger.i(tag: _tag, message: 'registerPush fail, not connected');
+      return const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+    }
+
+    String expiration = (4 * 7 * 24 * 60 * 60).toString(); // 4 weeks
+    Map<String, String> params = {
+      'Notify.GCM.SenderId': pushAppId,
+      'Notify.GCM.RegId': pushToken
+    };
+
+    /// 注册文本消息 push
+    void putPayloadMessageText() {
+      params['Notify.$pushType.Message.Text.Payload'] = jsonEncode({
+        'MtcImDisplayNameKey': '\${Sender}',
+        'MtcImSenderUidKey': '\${SenderUid}',
+        'MtcImMsgIdKey': '\${MsgIdx}',
+        'MtcImImdnIdKey': '\${ImdnId}',
+        'MtcImTextKey': '\${Text}',
+        'MtcImLabelKey': '\${Box}',
+        'MtcImTimeKey': '\${Time}',
+        'MtcImUserDataKey': '\${ImUserData}',
+        'MtcImInfoTypeKey': 'Text'
+      });
+      params['Notify.$pushType.Message.Text.Expiration'] = expiration;
+      params['Notify.$pushType.Message.Text.ResendCount'] = '0';
+      params['Notify.$pushType.Message.Text.ResendTimeout'] = '20';
+      params['Notify.$pushType.Message.Text.PassThrough'] = '1';
+    }
+    /// 注册 Info 消息 push
+    void putPayloadMessageInfo(String infoType) {
+      params['Notify.$pushType.Message.Info.$infoType.Payload'] = jsonEncode({
+        'MtcImDisplayNameKey': '\${Sender}',
+        'MtcImSenderUidKey': '\${SenderUid}',
+        'MtcImMsgIdKey': '\${MsgIdx}',
+        'MtcImImdnIdKey': '\${ImdnId}',
+        'MtcImInfoContentKey': '\${Text}',
+        'MtcImInfoTypeKey': infoType,
+        'MtcImLabelKey': '\${Box}',
+        'MtcImTimeKey': '\${Time}',
+        'MtcImUserDataKey': '\${ImUserData}'
+      });
+      params['Notify.$pushType.Message.Info.$infoType.Expiration'] = expiration;
+      params['Notify.$pushType.Message.Info.$infoType.ResendCount'] = '0';
+      params['Notify.$pushType.Message.Info.$infoType.ResendTimeout'] = '20';
+      params['Notify.$pushType.Message.Info.$infoType.PassThrough'] = '1';
+    }
+
+    putPayloadMessageText();
+    infoTypes?.forEach((infoType) {
+      putPayloadMessageInfo(infoType);
+    });
+
+    if (_mtc.Mtc_CliSetPushParm(jsonEncode(params).toNativeUtf8().cast()) != FlutterJusSDKConstants.ZOK) {
+      _logger.e(tag: _tag, message: 'registerPush fail, Mtc_CliSetPushParm did fail');
+    }
   }
 
   @override
