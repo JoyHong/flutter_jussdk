@@ -1,5 +1,9 @@
 import 'dart:ffi';
+import 'dart:io';
+
+
 import 'package:ffi/ffi.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
@@ -24,4 +28,10 @@ class FlutterJusTools {
   bool isValidUserId(String uid) {
     return _mtc.Mtc_UserIsValidUid(uid.toNativePointer());
   }
+
+  static Future<String> getUserPath(String uid) async {
+    Directory dir = await getApplicationSupportDirectory();
+    return '${dir.path}/jussdk/$uid';
+  }
+
 }

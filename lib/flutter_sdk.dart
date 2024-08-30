@@ -38,7 +38,10 @@ class FlutterJusSDK {
   static const _tag = 'FlutterJusSDK';
 
   static final StreamController<dynamic> _mtcNotifyEvents = StreamController<dynamic>();
-  static late SendPort _pgmIsolateSendPort;
+  /// ui isolate 发送数据到 pgm isolate
+  static late SendPort _toPgmIsolateSendPort;
+  /// pgm isolate 发送数据到 ui isolate
+  static late SendPort _fromPgmIsolateSendPort;
 
   /// 日志模块对象
   static late FlutterJusLogger logger;
@@ -98,9 +101,9 @@ class FlutterJusSDK {
             }
       });
     }
-    SendPort sendPort = await _helperIsolateSendPort;
-    sendPort.send(_PGMIsolateInitLogger(appName, buildNumber, deviceId, logDir));
-    sendPort.send(_PGMIsolateInit());
+    _toPgmIsolateSendPort = await _helperIsolateSendPort;
+    _toPgmIsolateSendPort.send(_PGMIsolateInitLogger(appName, buildNumber, deviceId, logDir));
+    _toPgmIsolateSendPort.send(_PGMIsolateInit());
   }
 
   static void _log(String message) {
@@ -126,7 +129,7 @@ class FlutterJusSDK {
         }
         if (data is _PGMUpdateProps) {
           if (tools.isValidUserId(data.uid)) {
-            (account as FlutterJusAccountImpl).onGetPropertiesNotification(data.props);
+            (account as FlutterJusAccountImpl).onUpdatePropertiesNotification(data.props);
           }
           return;
         }
@@ -135,7 +138,7 @@ class FlutterJusSDK {
 
     // Start the helper isolate.
     await Isolate.spawn((SendPort sendPort) async {
-      _pgmIsolateSendPort = sendPort;
+      _fromPgmIsolateSendPort = sendPort;
 
       final ReceivePort helperReceivePort = ReceivePort()
         ..listen((dynamic data) {
@@ -206,7 +209,7 @@ int _pgmLoadGroup(
   plRelationUpdateTime.value = -1;
   ppcStatusVersMap.value = jsonEncode({}).toNativePointer();
   plStatusTime.value = -1;
-  ppcProps.value = jsonEncode({}).toNativePointer();
+  ppcProps.value = jsonEncode((FlutterJusSDK.account as FlutterJusAccountImpl).userProps).toNativePointer();
   return 0;
 }
 
@@ -233,10 +236,10 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
       pcGroupId.toDartString(),
       (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString())));
   try {
-    FlutterJusSDK._pgmIsolateSendPort.send(pgmUpdateProps);
+    FlutterJusSDK._fromPgmIsolateSendPort.send(pgmUpdateProps);
   } catch (e) {
     if (FlutterJusSDK.tools.isValidUserId(pgmUpdateProps.uid)) {
-      (FlutterJusSDK.account as FlutterJusAccountImpl).onGetPropertiesNotification(pgmUpdateProps.props);
+      (FlutterJusSDK.account as FlutterJusAccountImpl).onUpdatePropertiesNotification(pgmUpdateProps.props);
     }
   }
   return 0;

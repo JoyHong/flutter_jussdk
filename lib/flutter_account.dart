@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
+import 'package:hive/hive.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
@@ -122,7 +124,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   bool _autoLogging = false;
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
-  Map<String, String>? _userProps;
+  Box<String>? _userPropsBox;
+
+  /// 当前用户的实时属性
+  Map<String, String> get userProps => _userPropsBox!.toMap().map((key, value) => MapEntry(key, value.toString()));
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
@@ -145,7 +150,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       this._deviceId,
       this._propMap,
       StreamController<dynamic> mtcNotifyEvents) {
-    mtcNotifyEvents.stream.listen((event) {
+    mtcNotifyEvents.stream.listen((event) async {
       final String name = event['name'];
       final String info = event['info'] ?? '';
       if (name == MtcCliProvisionOkNotification) {
@@ -164,6 +169,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         return;
       }
       if (name == MtcCliServerLoginOkNotification) { // 登陆成功的回调
+        String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeGetUid().toDartString());
+        Directory dir = await Directory(path).create(recursive: true);
+        _userPropsBox = await Hive.openBox('userProps', path: dir.path);
         Pointer<Char> pcErr = ''.toNativePointer();
         if (_pgm.pgm_c_logined('0'.toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
           FlutterJusSDK.logger.e(tag: _tag, message: 'pgm_c_logined fail, ${pcErr.toDartString()}');
@@ -448,16 +456,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     return true;
   }
 
-  void onGetPropertiesNotification(Map<String, String> props) {
-    if (_userProps == null) {
-      _userProps = props;
-    } else {
-      _userProps!.addAll(props);
-    }
-    for (var callback in _getPropertiesCallbacks) {
-      callback.call();
-    }
-    _getPropertiesCallbacks.clear();
+  void onUpdatePropertiesNotification(Map<String, String> props) {
+    _userPropsBox!.putAll(props);
   }
 
   @override
@@ -467,15 +467,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties fail, not connected');
       throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    if (_userProps != null) {
-      return Map.from(_userProps!);
-    }
-    Completer<Map<String, String>> completer = Completer();
-    callback() {
-      completer.complete(Map.from(_userProps!));
-    }
-    _getPropertiesCallbacks.add(callback);
-    return completer.future;
+    return userProps;
   }
 
   @override
@@ -601,7 +593,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeout = 2;
     _reLoggingTimeoutToken?.cancel();
     _reLoggingTimeoutToken = null;
-    _userProps = null;
+    _userPropsBox?.close();
+    _userPropsBox = null;
+    if (reason == MTC_CLI_REG_ERR_DELETED) {
+      // 删除个人数据
+    }
     _mtc.Mtc_CliStop();
     _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
   }
@@ -610,7 +606,6 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   static final List<Function(dynamic)> _loginCallbacks = [];
   static final List<Function> _didLogoutCallbacks = [];
   static final List<CancellationToken> _connectCancellationTokens = [];
-  static final List<Function> _getPropertiesCallbacks = [];
 
   Future<bool> _provisionOkTransformer() {
     Completer<bool> completer = Completer();
