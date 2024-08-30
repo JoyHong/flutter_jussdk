@@ -564,10 +564,6 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   void _loginOk() {
     _state = FlutterJusAccountConstants.stateLoggedIn;
     _stateEvents.add(FlutterJusAccountState(_state));
-    for (var cancellationToken in _connectCancellationTokens) {
-      cancellationToken.cancel();
-    }
-    _connectCancellationTokens.clear();
   }
 
   /// 登陆失败的逻辑处理
@@ -595,6 +591,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeoutToken = null;
     _userPropsBox?.close();
     _userPropsBox = null;
+    for (var cancellationToken in _connectCancellationTokens) {
+      cancellationToken.cancel();
+    }
+    _connectCancellationTokens.clear();
     if (reason == MTC_CLI_REG_ERR_DELETED) {
       // 删除个人数据
     }
