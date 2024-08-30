@@ -63,37 +63,37 @@ class FlutterJusAccountConstants {
 
 abstract class FlutterJusAccount {
 
-  /// 注册账号, 成功返回 true, 失败则返回错误对象(FlutterJusError)
+  /// 注册账号, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// username: 用户名
   /// password: 密码
-  Future<dynamic> signUp({required String username, required String password, Map<String, String>? props});
+  Future<bool> signUp({required String username, required String password, Map<String, String>? props});
 
-  /// 账号密码登陆, 成功返回 true, 失败则返回错误对象(FlutterJusError)
+  /// 账号密码登陆, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// username: 用户名
   /// password: 密码
-  Future<dynamic> login({required String username, required String password});
+  Future<bool> login({required String username, required String password});
 
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
   void autoLogin({required String username});
 
-  /// 修改密码, 成功返回 true, 失败则返回错误对象(FlutterJusError)
+  /// 修改密码, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// oldPassword: 原密码
   /// newPassword: 新密码
-  Future<dynamic> changePassword({required String oldPassword, required String newPassword});
+  Future<bool> changePassword({required String oldPassword, required String newPassword});
 
-  /// 删除账号, 成功返回 true, 失败则返回错误对象(FlutterJusError)
+  /// 删除账号, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// 注: 需要在登陆成功的状态下才能进行删除操作
-  Future<dynamic> delete({required String password});
+  Future<bool> delete({required String password});
 
   /// 退出登陆
-  Future logout();
+  Future<bool> logout();
 
-  /// 注册 push, 默认注册了 Text 消息, 无返回值, 失败则返回错误对象(FlutterJusError)
+  /// 注册 push, 默认注册了 Text 消息, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// pushType: push 类型 - pushTypeGCM
   /// pushAppId: push 对应的 key, 如 GCM 是 sender id
   /// pushToken: push token
   /// infoTypes: 需要注册的 info 消息列表
-  Future registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
+  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -218,43 +218,72 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  Future<dynamic> signUp({required String username, required String password, Map<String, String>? props}) async {
+  Future<bool> signUp({required String username, required String password, Map<String, String>? props}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
     dynamic result = _cliOpen(_defUserType, username) == FlutterJusSDKConstants.ZOK;
     if (!result) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliOpen did fail');
-      return const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
     }
     result = _cliStart() == FlutterJusSDKConstants.ZOK;
     if (!result) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliStart did fail');
-      return const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliStart did fail');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliStart did fail');
     }
     result = await _provisionOkTransformer();
     if (result != true) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call provisionOkTransformer did fail');
-      return const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call provisionOkTransformer did fail');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call provisionOkTransformer did fail');
     }
-    return _Mtc_UeCreate2(_defUserType, username, password, props: props);
+    Completer<bool> completer = Completer();
+    int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
+      FlutterJusMtcNotify.removeCookie(cookie);
+      if (name == MtcUeCreateOkNotification) {
+        completer.complete(true);
+      } else {
+        completer.completeError(info.toUeError());
+      }
+    });
+    List<Map<String, String>>? propList;
+    if (props != null) {
+      propList = [];
+      props.forEach((key, value) {
+        propList!.add({MtcUeInitialPropertyNameKey: key, MtcUeInitialPropertyValueKey: value});
+      });
+    }
+    if (_mtc.Mtc_UeCreate2(
+        cookie,
+        jsonEncode([{MtcUeRelationTypeKey: _defUserType, MtcUeRelationIdKey: username}]).toNativePointer(),
+        password.toNativePointer(),
+        true,
+        propList != null ? jsonEncode(propList).toNativePointer() : nullptr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusMtcNotify.removeCookie(cookie);
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeCreate2 did fail'));
+    }
+    return completer.future;
   }
 
   @override
-  Future<dynamic> login({required String username, required String password}) async {
+  Future<bool> login({required String username, required String password}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'login($username, $password)');
     bool result = _cliOpen(_defUserType, username, password: password) == FlutterJusSDKConstants.ZOK;
     if (!result) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'login fail, call cliOpen did fail');
-      return const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
     }
-    Completer<dynamic> completer = Completer();
+    Completer<bool> completer = Completer();
     callback(result) {
-      completer.complete(result);
+      if (result == true) {
+        completer.complete(true);
+      } else {
+        completer.completeError(result);
+      }
     }
     _loginCallbacks.add(callback);
     if (_login(MTC_LOGIN_OPTION_PREEMPTIVE) != FlutterJusSDKConstants.ZOK) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'login fail, call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail');
       _loginCallbacks.remove(callback);
-      completer.complete(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail'));
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail'));
     } else {
       _loggingIn(false);
     }
@@ -277,84 +306,84 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  Future<dynamic> changePassword({required String oldPassword, required String newPassword}) async {
+  Future<bool> changePassword({required String oldPassword, required String newPassword}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
     if (!(await _connectOkTransformer())) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'changePassword fail, not connected');
-      return const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    Completer<dynamic> completer = Completer();
+    Completer<bool> completer = Completer();
     int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
       FlutterJusMtcNotify.removeCookie(cookie);
       if (name == MtcUeChangePasswordOkNotification) {
         _mtc.Mtc_ProfSaveProvision();
         completer.complete(true);
       } else {
-        completer.complete(info.toUeError());
+        completer.completeError(info.toUeError());
       }
     });
     if (_mtc.Mtc_UeChangePassword(cookie, oldPassword.toNativePointer(), newPassword.toNativePointer()) != FlutterJusSDKConstants.ZOK) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'changePassword fail, call Mtc_UeChangePassword did fail');
       FlutterJusMtcNotify.removeCookie(cookie);
-      completer.complete(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeChangePassword did fail'));
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeChangePassword did fail'));
     }
     return completer.future;
   }
 
   @override
-  Future<dynamic> delete({required String password}) async {
+  Future<bool> delete({required String password}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'delete($password)');
     if (password != _mtc.Mtc_UeDbGetPassword().toDartString()) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'delete fail, wrong password');
-      return const FlutterJusError(FlutterJusAccountConstants.errorDeleteWrongPWD, message: 'wrong password');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDeleteWrongPWD, message: 'wrong password');
     }
     if (!(await _connectOkTransformer())) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'delete fail, not connected');
-      return const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    Completer<dynamic> completer = Completer();
+    Completer<bool> completer = Completer();
     int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
       FlutterJusMtcNotify.removeCookie(cookie);
       if (name == MtcUeDeleteUserOkNotifcation) {
         completer.complete(true);
       } else {
-        completer.complete(info.toUeError());
+        completer.completeError(info.toUeError());
       }
     });
     if (_mtc.Mtc_UeDeleteUser(cookie, 0) != FlutterJusSDKConstants.ZOK) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'delete fail, call Mtc_UeDeleteUser did fail');
       FlutterJusMtcNotify.removeCookie(cookie);
-      completer.complete(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'Mtc_UeDeleteUser did fail'));
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'Mtc_UeDeleteUser did fail'));
     }
     return completer.future;
   }
 
   @override
-  Future logout() async {
+  Future<bool> logout() async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'logout()');
-    Completer<dynamic> completer = Completer();
+    Completer<bool> completer = Completer();
     callback() {
-      completer.complete();
+      completer.complete(true);
     }
     _didLogoutCallbacks.add(callback);
     if (_mtc.Mtc_CliLogout() != FlutterJusSDKConstants.ZOK) {
       _didLogoutCallbacks.remove(callback);
       _logoutOk(0, true);
-      completer.complete();
+      completer.complete(true);
     }
     return completer.future;
   }
 
   @override
-  Future registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes}) async {
+  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $infoTypes)');
     if (pushType != FlutterJusAccountConstants.pushTypeGCM) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'registerPush fail, pushType must be FlutterJusAccountConstants.pushTypeGCM');
-      return const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'pushType must be FlutterJusAccountConstants.pushTypeGCM');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'pushType must be FlutterJusAccountConstants.pushTypeGCM');
     }
     if (!(await _connectOkTransformer())) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'registerPush fail, not connected');
-      return const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
 
     String expiration = (4 * 7 * 24 * 60 * 60).toString(); // 4 weeks
@@ -407,7 +436,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
     if (_mtc.Mtc_CliSetPushParm(jsonEncode(params).toNativePointer()) != FlutterJusSDKConstants.ZOK) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'registerPush fail, Mtc_CliSetPushParm did fail');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'Mtc_CliSetPushParm did fail');
     }
+    return true;
   }
 
   @override
@@ -552,35 +583,6 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         .asCancellable(cancellationToken)
         .onError((error, stackTrace) => false)
         .whenComplete(() => _connectCancellationTokens.remove(cancellationToken));
-  }
-
-  Future<dynamic> _Mtc_UeCreate2(String userType, String username, String password, {Map<String, String>? props}) {
-    Completer<dynamic> completer = Completer();
-    int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
-      FlutterJusMtcNotify.removeCookie(cookie);
-      if (name == MtcUeCreateOkNotification) {
-        completer.complete(true);
-      } else {
-        completer.complete(info.toUeError());
-      }
-    });
-    List<Map<String, String>>? propList;
-    if (props != null) {
-      propList = [];
-      props.forEach((key, value) {
-        propList!.add({MtcUeInitialPropertyNameKey: key, MtcUeInitialPropertyValueKey: value});
-      });
-    }
-    if (_mtc.Mtc_UeCreate2(
-        cookie,
-        jsonEncode([{MtcUeRelationTypeKey: userType, MtcUeRelationIdKey: username}]).toNativePointer(),
-        password.toNativePointer(),
-        true,
-        propList != null ? jsonEncode(propList).toNativePointer() : nullptr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusMtcNotify.removeCookie(cookie);
-      completer.complete(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeCreate2 did fail'));
-    }
-    return completer.future;
   }
 
 }

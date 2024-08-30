@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_jussdk/flutter_account.dart';
-import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -54,44 +53,14 @@ class _MyAppState extends State<MyApp> {
           spacing: 12,
           children: [
             button(text: '注册', onPressed: () async {
-              final result = await FlutterJusSDK.account.signUp(username: '1234567890', password: '1234567890', props: {
+              FlutterJusSDK.account.signUp(username: '1234567890', password: '1234567890', props: {
                 'SC.duoNumber': '1234567890',
                 'blockStrangers': '1',
                 'signUpDate': DateTime.now().millisecondsSinceEpoch.toString()
               });
-              if (result is! FlutterJusError) {
-                // 注册成功
-                return;
-              }
-              // 注册失败
-              if (result.reason == FlutterJusAccountConstants.errorSignUpExist) {
-                // 注册失败, 用户名已存在
-              } else if (result.reason == FlutterJusAccountConstants.errorDevIntegration) {
-                // 开发问题, 请自行检查
-              } else {
-                // 可以认为大多数情况下是网络异常
-              }
             }),
             button(text: '登录', onPressed: () async {
-              final result = await FlutterJusSDK.account.login(username: '1234567890', password: '1234567890');
-              if (result is! FlutterJusError) {
-                // 登陆成功, 此时可以保存 uid
-                // FlutterJussdk.account.getLoginUid();
-                return;
-              }
-              if (result.reason == FlutterJusAccountConstants.errorLoginAuthFailed) {
-                // 登陆失败, 账号密码错误
-              } else if (result.reason == FlutterJusAccountConstants.errorLoginDeleted) {
-                // 登陆失败, 账号已删除
-              } else if (result.reason == FlutterJusAccountConstants.errorLoginInvalid) {
-                // 登陆失败, 账号不存在
-              } else if (result.reason == FlutterJusAccountConstants.errorLoginBanned) {
-                // 登陆失败, 账号被封禁
-              } else if (result.reason == FlutterJusAccountConstants.errorDevIntegration) {
-                // 开发问题, 请自行检查
-              } else {
-                // 可以认为大多数情况下是网络异常
-              }
+              FlutterJusSDK.account.login(username: '1234567890', password: '1234567890');
             }),
             button(text: '自动登陆', onPressed: () {
               FlutterJusSDK.account.autoLogin(username: 'test_0013');
