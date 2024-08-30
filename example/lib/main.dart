@@ -60,8 +60,7 @@ class _MyAppState extends State<MyApp> {
               });
             }),
             button(text: '登录', onPressed: () async {
-              FlutterJusSDK.account.login(username: '1234567890', password: '1234567890')
-                  .then((value) => FlutterJusSDK.account.getProperties());
+              FlutterJusSDK.account.login(username: '1234567890', password: '1234567890');
             }),
             button(text: '自动登陆', onPressed: () {
               FlutterJusSDK.account.autoLogin(username: 'test_0013');
@@ -70,6 +69,7 @@ class _MyAppState extends State<MyApp> {
               FlutterJusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
             }),
             button(text: '自定义测试', onPressed: () {
+              FlutterJusSDK.account.setProperties({'Basic.NickName': 'CCC'});
             })
           ],
         ),

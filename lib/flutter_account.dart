@@ -98,6 +98,9 @@ abstract class FlutterJusAccount {
   /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 FlutterJusError
   Future<Map<String, String>> getProperties();
 
+  /// 设置用户的个人属性, 成功返回 true, 失败则返回 false（一般是由于还未登陆成功的情况下调用此函数）
+  bool setProperties(Map<String, String> props);
+
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
@@ -446,7 +449,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   void onGetPropertiesNotification(Map<String, String> props) {
-    _userProps = props;
+    if (_userProps == null) {
+      _userProps = props;
+    } else {
+      _userProps!.addAll(props);
+    }
     for (var callback in _getPropertiesCallbacks) {
       callback.call();
     }
@@ -469,6 +476,27 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     }
     _getPropertiesCallbacks.add(callback);
     return completer.future;
+  }
+
+  @override
+  bool setProperties(Map<String, String> props) {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties($props)');
+    if (_state != FlutterJusAccountConstants.stateLoggedIn) {
+      FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties fail, not logged in');
+      return false;
+    }
+    Pointer<Char> pcErr = ''.toNativePointer();
+    bool result = _pgm.pgm_c_nowait_ack_set_props(_mtc.Mtc_UeGetUid(), jsonEncode(props).toNativePointer(), pcErr) == FlutterJusSDKConstants.ZOK;
+    if (!result) {
+      String error = pcErr.toDartString();
+      if (error == 'empty_diff') {
+        // 内容前后无实际变化
+        FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties nothing happened, no diff');
+        return true;
+      }
+      FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, $error');
+    }
+    return result;
   }
 
   @override

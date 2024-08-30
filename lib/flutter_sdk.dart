@@ -229,9 +229,16 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
 int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   FlutterJusSDK._log(
       'pgmUpdateProps, pcGroupId=${pcGroupId.toDartString()}, pcProps=${pcProps.toDartString()}');
-  FlutterJusSDK._pgmIsolateSendPort.send(_PGMUpdateProps(
+  final pgmUpdateProps = _PGMUpdateProps(
       pcGroupId.toDartString(),
-      (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString()))));
+      (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString())));
+  try {
+    FlutterJusSDK._pgmIsolateSendPort.send(pgmUpdateProps);
+  } catch (e) {
+    if (FlutterJusSDK.tools.isValidUserId(pgmUpdateProps.uid)) {
+      (FlutterJusSDK.account as FlutterJusAccountImpl).onGetPropertiesNotification(pgmUpdateProps.props);
+    }
+  }
   return 0;
 }
 
