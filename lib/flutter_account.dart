@@ -92,7 +92,7 @@ abstract class FlutterJusAccount {
 
   /// 注册 push, 默认注册了 Text 消息, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// pushType: push 类型 - pushTypeGCM
-  /// pushAppId: push 对应的 key, 如 GCM 是 sender id
+  /// pushAppId: push 对应的 key, 如 GCM 是 Project ID (Project settings -> General -> Your project -> Project ID)
   /// pushToken: push token
   /// infoTypes: 需要注册的 info 消息列表
   Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
