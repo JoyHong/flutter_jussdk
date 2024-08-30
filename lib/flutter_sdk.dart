@@ -10,7 +10,7 @@ import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
-import 'package:flutter_jussdk/flutter_utils.dart';
+import 'package:flutter_jussdk/flutter_tools.dart';
 
 import 'flutter_mtc_notify.dart';
 import 'flutter_pgm_bindings_generated.dart';
@@ -48,6 +48,8 @@ class FlutterJusSDK {
   static late FlutterJusAccount account;
   /// 消息模块对象
   static late FlutterJusMessage message;
+  /// 工具模块对象
+  static late FlutterJusTools tools;
 
   /// 初始化 Sdk
   /// appKey: Juphoon sdk 的 app key
@@ -70,6 +72,7 @@ class FlutterJusSDK {
     connectivity = FlutterJusConnectivity(_mtc);
     account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
     message = FlutterJusMessage();
+    tools = FlutterJusTools(_mtc);
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());
     if (!Platform.isWindows) {
       _mtc.Mtc_CliInit(profileDir.path.toNativePointer(), nullptr);
@@ -95,9 +98,9 @@ class FlutterJusSDK {
             }
       });
     }
-    _pgmIsolateSendPort = await _helperIsolateSendPort;
-    _pgmIsolateSendPort.send(_PGMIsolateInitLogger(appName, buildNumber, deviceId, logDir));
-    _pgmIsolateSendPort.send(_PGMIsolateInit());
+    SendPort sendPort = await _helperIsolateSendPort;
+    sendPort.send(_PGMIsolateInitLogger(appName, buildNumber, deviceId, logDir));
+    sendPort.send(_PGMIsolateInit());
   }
 
   static void _log(String message) {
@@ -121,11 +124,19 @@ class FlutterJusSDK {
           completer.complete(data);
           return;
         }
+        if (data is _PGMUpdateProps) {
+          if (tools.isValidUserId(data.uid)) {
+            (account as FlutterJusAccountImpl).onGetPropertiesNotification(data.props);
+          }
+          return;
+        }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
       });
 
     // Start the helper isolate.
     await Isolate.spawn((SendPort sendPort) async {
+      _pgmIsolateSendPort = sendPort;
+
       final ReceivePort helperReceivePort = ReceivePort()
         ..listen((dynamic data) {
           // On the helper isolate listen to requests and respond to them.
@@ -214,10 +225,13 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
   return 0;
 }
 
+/// 更新列表属性, 如果 pcGroupId 是 uid, 则表示已登陆用户的属性; 否则表示对应群组的属性
 int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   FlutterJusSDK._log(
       'pgmUpdateProps, pcGroupId=${pcGroupId.toDartString()}, pcProps=${pcProps.toDartString()}');
-  // Map<String, String> props = (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString()));
+  FlutterJusSDK._pgmIsolateSendPort.send(_PGMUpdateProps(
+      pcGroupId.toDartString(),
+      (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString()))));
   return 0;
 }
 
@@ -239,4 +253,11 @@ DynamicLibrary _openLibrary(String libName) {
     return DynamicLibrary.open('$libName.dll');
   }
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
+}
+
+class _PGMUpdateProps {
+  final String uid;
+  final Map<String, String> props;
+
+  const _PGMUpdateProps(this.uid, this.props);
 }

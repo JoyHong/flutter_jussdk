@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_jussdk/flutter_utils.dart';
+import 'package:flutter_jussdk/flutter_tools.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 

@@ -7,7 +7,7 @@ import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
-import 'package:flutter_jussdk/flutter_utils.dart';
+import 'package:flutter_jussdk/flutter_tools.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
@@ -95,6 +95,9 @@ abstract class FlutterJusAccount {
   /// infoTypes: 需要注册的 info 消息列表
   Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
 
+  /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 FlutterJusError
+  Future<Map<String, String>> getProperties();
+
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
@@ -116,6 +119,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   bool _autoLogging = false;
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
+  Map<String, String>? _userProps;
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
@@ -441,6 +445,32 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     return true;
   }
 
+  void onGetPropertiesNotification(Map<String, String> props) {
+    _userProps = props;
+    for (var callback in _getPropertiesCallbacks) {
+      callback.call();
+    }
+    _getPropertiesCallbacks.clear();
+  }
+
+  @override
+  Future<Map<String, String>> getProperties() async {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties()');
+    if (!(await _connectOkTransformer())) {
+      FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties fail, not connected');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+    }
+    if (_userProps != null) {
+      return Map.from(_userProps!);
+    }
+    Completer<Map<String, String>> completer = Completer();
+    callback() {
+      completer.complete(Map.from(_userProps!));
+    }
+    _getPropertiesCallbacks.add(callback);
+    return completer.future;
+  }
+
   @override
   String getLoginUid() {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
@@ -541,6 +571,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _state = FlutterJusAccountConstants.stateLoggedOut;
     _autoLogging = false;
     _reLoggingTimeout = 2;
+    _reLoggingTimeoutToken?.cancel();
+    _reLoggingTimeoutToken = null;
+    _userProps = null;
     _mtc.Mtc_CliStop();
     _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
   }
@@ -549,6 +582,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   static final List<Function(dynamic)> _loginCallbacks = [];
   static final List<Function> _didLogoutCallbacks = [];
   static final List<CancellationToken> _connectCancellationTokens = [];
+  static final List<Function> _getPropertiesCallbacks = [];
 
   Future<bool> _provisionOkTransformer() {
     Completer<bool> completer = Completer();
