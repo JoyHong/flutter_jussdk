@@ -15,7 +15,7 @@ void main() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   await FlutterJusSDK.initialize(
       appKey: '4b15dc404fff9fe1f5234097',
-      router: 'udp:test.api.justalkcloud.com:8000;udp:47.101.139.97:8000;udp:148.153.45.251:8000;http:test.api.justalkcloud.com:8080;http:47.101.139.97:8080;http:148.153.45.251:8080;',
+      router: 'Router:udp -h intl.router.justalkcloud.com -hb 74.207.243.39 -p 8000;udp -h 143.42.116.123 -p 8000;udp -h 172.105.36.56 -p 8000;udp -h 178.79.144.177 -p 8000;udp -h 148.153.85.44 -p 8000;http -h intl.router.justalkcloud.com -hb 74.207.243.39 -p 8080;http -h 143.42.116.123 -p 8080;http -h 172.105.36.56 -p 8080;http -h 178.79.144.177 -p 8080;http -h 148.153.85.44 -p 8080;',
       appName: packageInfo.appName,
       buildNumber: packageInfo.buildNumber,
       deviceId: 'aa6bbff22d7eff98', // 设备 ID
