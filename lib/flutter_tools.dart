@@ -35,6 +35,11 @@ class FlutterJusTools {
     return _mtc.Mtc_UserIsValidUid(uid.toNativePointer());
   }
 
+  /// 是否是有效的群组的 uid
+  bool isValidGroupId(String uid) {
+    return _mtc.Mtc_GroupIsValidGroupId(uid.toNativePointer());
+  }
+
   static Future<String> getUserPath(String uid) async {
     Directory dir = await getApplicationSupportDirectory();
     return '${dir.path}/jussdk/$uid';
