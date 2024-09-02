@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
               });
             }),
             button(text: '登录', onPressed: () async {
-              FlutterJusSDK.account.login(username: '1234567890', password: '1234567890');
+              FlutterJusSDK.account.login(username: '3845955877', password: '123456');
             }),
             button(text: '自动登陆', onPressed: () {
               FlutterJusSDK.account.autoLogin(username: 'test_0013');
