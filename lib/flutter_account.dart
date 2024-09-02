@@ -177,10 +177,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           _mtc.Mtc_ProfSaveProvision();
         }
         if (_userPropsBox == null) {
-          String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
-          Directory dir = await Directory(path).create(recursive: true);
-          _userPropsBox = await Hive.openBox('userProps', path: dir.path);
-          _pendingPropsBox = await Hive.openBox('pendingProps', path: dir.path);
+          _initUserBoxes();
         }
         Pointer<Char> pcErr = ''.toNativePointer();
         if (_pgm.pgm_c_logined('0'.toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
@@ -539,15 +536,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _mtc.Mtc_UeDbSetPassword(password.toNativePointer());
       }
       _mtc.Mtc_ProfSaveProvision();
-      await _userPropsBox?.close();
-      _userPropsBox = null;
-      await _pendingPropsBox?.close();
-      _pendingPropsBox = null;
+      _releaseUserBoxes();
       if (_mtc.Mtc_UeDbGetUid() != nullptr && _mtc.Mtc_UeDbGetUid().toDartString().isNotEmpty) {
-        String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
-        Directory dir = await Directory(path).create(recursive: true);
-        _userPropsBox = await Hive.openBox('userProps', path: dir.path);
-        _pendingPropsBox = await Hive.openBox('pendingProps', path: dir.path);
+        _initUserBoxes();
       }
     }
     return result;
@@ -619,10 +610,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeout = 2;
     _reLoggingTimeoutToken?.cancel();
     _reLoggingTimeoutToken = null;
-    _userPropsBox?.close();
-    _userPropsBox = null;
-    _pendingPropsBox?.close();
-    _pendingPropsBox = null;
+    _releaseUserBoxes();
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }
@@ -634,6 +622,20 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _mtc.Mtc_ProfSaveProvision();
     _mtc.Mtc_CliStop();
     _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
+  }
+
+  Future<void> _initUserBoxes() async {
+    String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
+    Directory dir = await Directory(path).create(recursive: true);
+    _userPropsBox = await Hive.openBox('userProps', path: dir.path);
+    _pendingPropsBox = await Hive.openBox('pendingProps', path: dir.path);
+  }
+
+  Future<void> _releaseUserBoxes() async {
+    await _userPropsBox?.close();
+    _userPropsBox = null;
+    await _pendingPropsBox?.close();
+    _pendingPropsBox = null;
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];
