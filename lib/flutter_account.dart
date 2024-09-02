@@ -169,7 +169,12 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         return;
       }
       if (name == MtcCliServerLoginOkNotification) { // 登陆成功的回调
-        String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeGetUid().toDartString());
+        if (_mtc.Mtc_UeDbGetUid() == nullptr || _mtc.Mtc_UeDbGetUid().toDartString() != _mtc.Mtc_UeGetUid().toDartString()) {
+          // 只有调用了 Mtc_UeCreate 系列接口, Mtc_UeDbGetUid 才有值, 否则是 nullptr
+          _mtc.Mtc_UeDbSetUid(_mtc.Mtc_UeGetUid());
+          _mtc.Mtc_ProfSaveProvision();
+        }
+        String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
         Directory dir = await Directory(path).create(recursive: true);
         _userPropsBox = await Hive.openBox('userProps', path: dir.path);
         Pointer<Char> pcErr = ''.toNativePointer();
@@ -478,7 +483,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       return false;
     }
     Pointer<Char> pcErr = ''.toNativePointer();
-    bool result = _pgm.pgm_c_nowait_ack_set_props(_mtc.Mtc_UeGetUid(), jsonEncode(props).toNativePointer(), pcErr) == FlutterJusSDKConstants.ZOK;
+    bool result = _pgm.pgm_c_nowait_ack_set_props(_mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) == FlutterJusSDKConstants.ZOK;
     if (!result) {
       String error = pcErr.toDartString();
       if (error == 'empty_diff') {
@@ -494,7 +499,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   @override
   String getLoginUid() {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
-    return _mtc.Mtc_UeGetUid().toDartString();
+    return _mtc.Mtc_UeDbGetUid().toDartString();
   }
 
   @override
@@ -598,6 +603,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     if (reason == MTC_CLI_REG_ERR_DELETED) {
       // 删除个人数据
     }
+    _mtc.Mtc_UeDbSetUid(nullptr);
+    _mtc.Mtc_ProfSaveProvision();
     _mtc.Mtc_CliStop();
     _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
   }
