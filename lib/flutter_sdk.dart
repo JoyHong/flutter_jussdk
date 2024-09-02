@@ -234,7 +234,7 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
       'pgmUpdateProps, pcGroupId=${pcGroupId.toDartString()}, pcProps=${pcProps.toDartString()}');
   final pgmUpdateProps = _PGMUpdateProps(
       pcGroupId.toDartString(),
-      (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString())));
+      (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).castString());
   try {
     FlutterJusSDK._fromPgmIsolateSendPort.send(pgmUpdateProps);
   } catch (e) {

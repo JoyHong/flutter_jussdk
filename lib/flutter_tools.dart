@@ -19,6 +19,12 @@ extension DartToNativePointer on String {
   }
 }
 
+extension CastMap on Map<dynamic, dynamic> {
+  Map<String, String> castString() {
+    return map((key, value) => MapEntry(key, value.toString()));
+  }
+}
+
 class FlutterJusTools {
   final FlutterMtcBindings _mtc;
 

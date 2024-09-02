@@ -76,7 +76,7 @@ abstract class FlutterJusAccount {
   Future<bool> login({required String username, required String password});
 
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
-  void autoLogin({required String username});
+  Future<void> autoLogin({required String username});
 
   /// 修改密码, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// oldPassword: 原密码
@@ -100,8 +100,8 @@ abstract class FlutterJusAccount {
   /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 FlutterJusError
   Future<Map<String, String>> getProperties();
 
-  /// 设置用户的个人属性, 成功返回 true, 失败则返回 false（一般是由于还未登陆成功的情况下调用此函数）
-  bool setProperties(Map<String, String> props);
+  /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
+  void setProperties(Map<String, String> props);
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -124,10 +124,12 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   bool _autoLogging = false;
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
-  Box<String>? _userPropsBox;
 
-  /// 当前用户的实时属性
-  Map<String, String> get userProps => _userPropsBox!.toMap().map((key, value) => MapEntry(key, value.toString()));
+  Map<String, String> get userProps => _userPropsBox!.toMap().castString();
+  /// pgm 实时的用户属性
+  Box<String>? _userPropsBox;
+  /// 未登陆成功的情况下, 将要设置的用户属性
+  Box<String>? _pendingPropsBox;
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
@@ -174,13 +176,27 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           _mtc.Mtc_UeDbSetUid(_mtc.Mtc_UeGetUid());
           _mtc.Mtc_ProfSaveProvision();
         }
-        String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
-        Directory dir = await Directory(path).create(recursive: true);
-        _userPropsBox = await Hive.openBox('userProps', path: dir.path);
+        if (_userPropsBox == null) {
+          String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
+          Directory dir = await Directory(path).create(recursive: true);
+          _userPropsBox = await Hive.openBox('userProps', path: dir.path);
+          _pendingPropsBox = await Hive.openBox('pendingProps', path: dir.path);
+        }
         Pointer<Char> pcErr = ''.toNativePointer();
         if (_pgm.pgm_c_logined('0'.toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
           FlutterJusSDK.logger.e(tag: _tag, message: 'pgm_c_logined fail, ${pcErr.toDartString()}');
         }
+        // TODO 重试时机待调整位置
+        // if (_pendingPropsBox!.isNotEmpty) {
+        //   Pointer<Char> pcErr = ''.toNativePointer();
+        //   Map<String, String> pendingProps = _pendingPropsBox!.toMap().castString();
+        //   bool result = _pgm.pgm_c_nowait_ack_set_props(_mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProps).toNativePointer(), pcErr) == FlutterJusSDKConstants.ZOK;
+        //   if (result) {
+        //     await _pendingPropsBox!.clear();
+        //   } else {
+        //     FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties pending fail, ${pcErr.toDartString()}');
+        //   }
+        // }
         for (var callback in _loginCallbacks) {
           callback.call(true);
         }
@@ -240,7 +256,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   @override
   Future<bool> signUp({required String username, required String password, Map<String, String>? props}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
-    dynamic result = _cliOpen(_defUserType, username) == FlutterJusSDKConstants.ZOK;
+    dynamic result = (await _cliOpen(_defUserType, username)) == FlutterJusSDKConstants.ZOK;
     if (!result) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliOpen did fail');
       throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
@@ -286,7 +302,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   @override
   Future<bool> login({required String username, required String password}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'login($username, $password)');
-    bool result = _cliOpen(_defUserType, username, password: password) == FlutterJusSDKConstants.ZOK;
+    bool result = (await _cliOpen(_defUserType, username, password: password)) == FlutterJusSDKConstants.ZOK;
     if (!result) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'login fail, call cliOpen did fail');
       throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
@@ -311,9 +327,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  void autoLogin({required String username}) {
+  Future<void> autoLogin({required String username}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'autoLogin($username)');
-    bool result = _cliOpen(_defUserType, username) == FlutterJusSDKConstants.ZOK;
+    bool result = (await _cliOpen(_defUserType, username)) == FlutterJusSDKConstants.ZOK;
     if (!result) {
       FlutterJusSDK.logger.e(tag: _tag, message: 'autoLogin fail, cliOpen did fail');
       return;
@@ -472,28 +488,27 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties fail, not connected');
       throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    return userProps;
+    Map<dynamic, String> propsMap = _userPropsBox!.toMap();
+    propsMap.addAll(_pendingPropsBox!.toMap());
+    return propsMap.castString();
   }
 
   @override
-  bool setProperties(Map<String, String> props) {
+  void setProperties(Map<String, String> props) {
     FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties($props)');
+    if (_mtc.Mtc_UeDbGetUid() == nullptr || _mtc.Mtc_UeDbGetUid().toDartString().isEmpty) {
+      FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, no logged user');
+      return;
+    }
     if (_state != FlutterJusAccountConstants.stateLoggedIn) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties fail, not logged in');
-      return false;
+      _pendingPropsBox!.putAll(props);
+      return;
     }
     Pointer<Char> pcErr = ''.toNativePointer();
     bool result = _pgm.pgm_c_nowait_ack_set_props(_mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) == FlutterJusSDKConstants.ZOK;
     if (!result) {
-      String error = pcErr.toDartString();
-      if (error == 'empty_diff') {
-        // 内容前后无实际变化
-        FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties nothing happened, no diff');
-        return true;
-      }
-      FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, $error');
+      FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, ${pcErr.toDartString()}');
     }
-    return result;
   }
 
   @override
@@ -507,7 +522,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     return _state;
   }
 
-  int _cliOpen(String userType, String username, {String? password}) {
+  Future<int> _cliOpen(String userType, String username, {String? password}) async {
     String clientUser = '$userType)$username';
     int result = _mtc.Mtc_CliOpen(clientUser.toNativePointer());
     if (result == FlutterJusSDKConstants.ZOK) {
@@ -524,6 +539,16 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _mtc.Mtc_UeDbSetPassword(password.toNativePointer());
       }
       _mtc.Mtc_ProfSaveProvision();
+      await _userPropsBox?.close();
+      _userPropsBox = null;
+      await _pendingPropsBox?.close();
+      _pendingPropsBox = null;
+      if (_mtc.Mtc_UeDbGetUid() != nullptr && _mtc.Mtc_UeDbGetUid().toDartString().isNotEmpty) {
+        String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
+        Directory dir = await Directory(path).create(recursive: true);
+        _userPropsBox = await Hive.openBox('userProps', path: dir.path);
+        _pendingPropsBox = await Hive.openBox('pendingProps', path: dir.path);
+      }
     }
     return result;
   }
@@ -596,6 +621,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeoutToken = null;
     _userPropsBox?.close();
     _userPropsBox = null;
+    _pendingPropsBox?.close();
+    _pendingPropsBox = null;
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }
