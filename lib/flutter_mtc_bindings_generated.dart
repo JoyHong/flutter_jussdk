@@ -2250,6 +2250,622 @@ class FlutterMtcBindings {
   late final _Mtc_CliDbSetAgentCallLevel =
       _Mtc_CliDbSetAgentCallLevelPtr.asFunction<int Function(int)>();
 
+  /// @brief Create group.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  iType The group type, @ref EN_MTC_GROUP_TYPE.
+  /// @param  pcName The group name.
+  /// @param  pcInfo The properties information in JSON, @ref MtcGroupPropKey.
+  /// @param  pcRelationsToAdd The string in JSON, which is an array. Each item must contains
+  /// @ref MtcGroupUserUriKey, @ref MtcGroupRelationTypeKey
+  /// @ref MtcGroupDisplayNameKey, @ref MtcGroupTagKey.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupCreateOkNotification
+  /// or @ref MtcGroupCreateDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupCreate(
+    int zCookie,
+    int iType,
+    ffi.Pointer<ffi.Char> pcName,
+    ffi.Pointer<ffi.Char> pcInfo,
+    ffi.Pointer<ffi.Char> pcRelationsToAdd,
+  ) {
+    return _Mtc_GroupCreate(
+      zCookie,
+      iType,
+      pcName,
+      pcInfo,
+      pcRelationsToAdd,
+    );
+  }
+
+  late final _Mtc_GroupCreatePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupCreate');
+  late final _Mtc_GroupCreate = _Mtc_GroupCreatePtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Remove group.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The group ID.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupRemoveOkNotification
+  /// or @ref MtcGroupRemoveDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupRemove(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+  ) {
+    return _Mtc_GroupRemove(
+      zCookie,
+      pcGroupId,
+    );
+  }
+
+  late final _Mtc_GroupRemovePtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_GroupRemove');
+  late final _Mtc_GroupRemove = _Mtc_GroupRemovePtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Update group properties.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The group ID.
+  /// @param  pcInfo The properties information in JSON, contains
+  /// @ref MtcGroupPropNameKey, @ref MtcGroupPropPermissionKey
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupSetPropertiesOkNotification
+  /// or @ref MtcGroupSetPropertiesDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupSetProperties(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_GroupSetProperties(
+      zCookie,
+      pcGroupId,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_GroupSetPropertiesPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupSetProperties');
+  late final _Mtc_GroupSetProperties = _Mtc_GroupSetPropertiesPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get group properties.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The group ID.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupGetPropertiesOkNotification
+  /// or @ref MtcGroupGetPropertiesDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupGetProperties(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+  ) {
+    return _Mtc_GroupGetProperties(
+      zCookie,
+      pcGroupId,
+    );
+  }
+
+  late final _Mtc_GroupGetPropertiesPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_GroupGetProperties');
+  late final _Mtc_GroupGetProperties = _Mtc_GroupGetPropertiesPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Refresh all relations
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to refresh self group list.
+  /// @param  qwUpdateTime The start time point to refresh
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupRefreshOkNotification
+  /// or @ref MtcGroupRefreshDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupRefresh(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    int qwUpdateTime,
+  ) {
+    return _Mtc_GroupRefresh(
+      zCookie,
+      pcGroupId,
+      qwUpdateTime,
+    );
+  }
+
+  late final _Mtc_GroupRefreshPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.LongLong)>>('Mtc_GroupRefresh');
+  late final _Mtc_GroupRefresh = _Mtc_GroupRefreshPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief Add relation
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to operate on self group list.
+  /// @param  iRelationType The relation type, @ref EN_MTC_GROUP_RELATION_TYPE
+  /// @param  pcUri The uri or uid of the user
+  /// @param  pcDisplayName The display name of the relation
+  /// @param  pcTag The tag info of the relation that may contains
+  /// @param  pcCfgs The cfgs info of the relation that may contains
+  /// @ref MtcGroupTagKey
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupAddRelationOkNotification
+  /// or @ref MtcGroupAddRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupAddRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcUri,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcCfgs,
+  ) {
+    return _Mtc_GroupAddRelation(
+      zCookie,
+      pcGroupId,
+      iRelationType,
+      pcUri,
+      pcDisplayName,
+      pcTag,
+      pcCfgs,
+    );
+  }
+
+  late final _Mtc_GroupAddRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupAddRelation');
+  late final _Mtc_GroupAddRelation = _Mtc_GroupAddRelationPtr.asFunction<
+      int Function(
+          int,
+          ffi.Pointer<ffi.Char>,
+          int,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Update relation
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to operate on self group list.
+  /// @param  iRelationType The relation type, @ref EN_MTC_GROUP_RELATION_TYPE
+  /// @param  pcUri The uri or uid of the user
+  /// @param  pcDisplayName The display name of the relation
+  /// @param  pcTag The tag info of the relation that may contains
+  /// @param  pcCfgs The cfgs info of the relation that may contains
+  /// @ref MtcGroupTagKey
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupUpdateRelationOkNotification
+  /// or @ref MtcGroupUpdateRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupUpdateRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcUri,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcCfgs,
+  ) {
+    return _Mtc_GroupUpdateRelation(
+      zCookie,
+      pcGroupId,
+      iRelationType,
+      pcUri,
+      pcDisplayName,
+      pcTag,
+      pcCfgs,
+    );
+  }
+
+  late final _Mtc_GroupUpdateRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupUpdateRelation');
+  late final _Mtc_GroupUpdateRelation = _Mtc_GroupUpdateRelationPtr.asFunction<
+      int Function(
+          int,
+          ffi.Pointer<ffi.Char>,
+          int,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Remove relation
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to operate on self group list.
+  /// @param  pcUri The uri or uid of the user
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupRemoveRelationOkNotification
+  /// or @ref MtcGroupRemoveRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupRemoveRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcUri,
+  ) {
+    return _Mtc_GroupRemoveRelation(
+      zCookie,
+      pcGroupId,
+      pcUri,
+    );
+  }
+
+  late final _Mtc_GroupRemoveRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupRemoveRelation');
+  late final _Mtc_GroupRemoveRelation = _Mtc_GroupRemoveRelationPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set batch relations
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to operate on self group list.
+  /// @param  pcInfo The string in JSON, which contains
+  /// @ref MtcGroupListToAddKey, @ref MtcGroupListToUpdateKey, @ref MtcGroupListToRemoveKey.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupSetRelationsOkNotification
+  /// or @ref MtcGroupSetRelationsDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupSetRelations(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_GroupSetRelations(
+      zCookie,
+      pcGroupId,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_GroupSetRelationsPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupSetRelations');
+  late final _Mtc_GroupSetRelations = _Mtc_GroupSetRelationsPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set relation status.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to operate on self group list.
+  /// @param  pcUid The uid of the user
+  /// @param  pcKey The status key
+  /// @param  pcValue The status value
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupSetRelationStatusOkNotification
+  /// or @ref MtcGroupSetRelationStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupSetRelationStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcUid,
+    ffi.Pointer<ffi.Char> pcKey,
+    ffi.Pointer<ffi.Char> pcValue,
+  ) {
+    return _Mtc_GroupSetRelationStatus(
+      zCookie,
+      pcGroupId,
+      pcUid,
+      pcKey,
+      pcValue,
+    );
+  }
+
+  late final _Mtc_GroupSetRelationStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupSetRelationStatus');
+  late final _Mtc_GroupSetRelationStatus =
+      _Mtc_GroupSetRelationStatusPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get relation status.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID, ZNULL to operate on self group list.
+  /// @param  pcUids The uid of the user, or a string which is a JSON array, each item
+  /// is the uid of the user.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupGetRelationStatusOkNotification
+  /// or @ref MtcGroupGetRelationStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupGetRelationStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_GroupGetRelationStatus(
+      zCookie,
+      pcGroupId,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_GroupGetRelationStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupGetRelationStatus');
+  late final _Mtc_GroupGetRelationStatus =
+      _Mtc_GroupGetRelationStatusPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get self uid
+  ///
+  /// @retval The uid of the logined user
+  ffi.Pointer<ffi.Char> Mtc_GroupGetUid() {
+    return _Mtc_GroupGetUid();
+  }
+
+  late final _Mtc_GroupGetUidPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'Mtc_GroupGetUid');
+  late final _Mtc_GroupGetUid =
+      _Mtc_GroupGetUidPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// @brief Check is valid group ID.
+  ///
+  /// @return true, the string is valid group ID.
+  bool Mtc_GroupIsValidGroupId(
+    ffi.Pointer<ffi.Char> pcStr,
+  ) {
+    return _Mtc_GroupIsValidGroupId(
+      pcStr,
+    );
+  }
+
+  late final _Mtc_GroupIsValidGroupIdPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ffi.Char>)>>(
+          'Mtc_GroupIsValidGroupId');
+  late final _Mtc_GroupIsValidGroupId = _Mtc_GroupIsValidGroupIdPtr.asFunction<
+      bool Function(ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Update individual relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID to update.
+  /// @param  pcDisplayName The display name of the relation
+  /// @param  pcTag The tag info of the relation that may contains
+  /// @ref MtcGroupTagKey
+  /// @param  pcInfo The properties information in JSON
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupUpdateIndividualRelationOkNotification
+  /// or @ref MtcGroupUpdateIndividualRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupUpdateIndividualRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_GroupUpdateIndividualRelation(
+      zCookie,
+      pcGroupId,
+      pcDisplayName,
+      pcTag,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_GroupUpdateIndividualRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupUpdateIndividualRelation');
+  late final _Mtc_GroupUpdateIndividualRelation =
+      _Mtc_GroupUpdateIndividualRelationPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Apply relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID.
+  /// @param  pcTargetId The uri or uid of the target user. If target id is Null, apply self.
+  /// @param  iRelationType The relation type, @ref EN_MTC_GROUP_RELATION_TYPE.
+  /// @param  pcDescription The description about how you find the relation.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupApplyRelationOkNotification
+  /// or @ref MtcGroupApplyRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupApplyRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcTargetId,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcDescription,
+  ) {
+    return _Mtc_GroupApplyRelation(
+      zCookie,
+      pcGroupId,
+      pcTargetId,
+      iRelationType,
+      pcDescription,
+    );
+  }
+
+  late final _Mtc_GroupApplyRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupApplyRelation');
+  late final _Mtc_GroupApplyRelation = _Mtc_GroupApplyRelationPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Invite relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID.
+  /// @param  pcUri The uri or uid of the target user.
+  /// @param  iRelationType The relation type, @ref EN_MTC_GROUP_RELATION_TYPE.
+  /// @param  pcDescription The description about invite message.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupInviteRelationOkNotification
+  /// or @ref MtcGroupInviteRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupInviteRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcTargetId,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcDescription,
+  ) {
+    return _Mtc_GroupInviteRelation(
+      zCookie,
+      pcGroupId,
+      pcTargetId,
+      iRelationType,
+      pcDescription,
+    );
+  }
+
+  late final _Mtc_GroupInviteRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupInviteRelation');
+  late final _Mtc_GroupInviteRelation = _Mtc_GroupInviteRelationPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Accept relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  dwMsgId The message id of apply request.
+  /// @param  pcDisplayName The display name of the relation.
+  /// @param  pcTag The tag info of the relation that may contains
+  /// @ref MtcGroupTagKey.
+  /// @param  pcReInviteDescription The description about apply message.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupAcceptRelationOkNotification
+  /// or @ref MtcGroupAcceptRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupAcceptRelation(
+    int zCookie,
+    int dwMsgId,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcReInviteDescription,
+  ) {
+    return _Mtc_GroupAcceptRelation(
+      zCookie,
+      dwMsgId,
+      pcDisplayName,
+      pcTag,
+      pcReInviteDescription,
+    );
+  }
+
+  late final _Mtc_GroupAcceptRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.LongLong,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_GroupAcceptRelation');
+  late final _Mtc_GroupAcceptRelation = _Mtc_GroupAcceptRelationPtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Im Push.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcGroupId The string of GroupID.
+  /// @param  bImPush is im push.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcGroupImPushOkNotification
+  /// or @ref MtcGroupImPushDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_GroupImPush(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    bool bImPush,
+  ) {
+    return _Mtc_GroupImPush(
+      zCookie,
+      pcGroupId,
+      bImPush,
+    );
+  }
+
+  late final _Mtc_GroupImPushPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size, ffi.Pointer<ffi.Char>, ffi.Bool)>>('Mtc_GroupImPush');
+  late final _Mtc_GroupImPush = _Mtc_GroupImPushPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, bool)>();
+
   /// @brief Get user count in profile management.
   ///
   /// This interface should be invoke after @ref Mtc_CliInit was called.
@@ -5806,6 +6422,177 @@ abstract class EN_MTC_CLI_DB_ACCESS_TYPE {
   static const int EN_MTC_CLI_DB_OTHERS = 127;
 }
 
+/// @brief Failure reasons.
+abstract class EN_MTC_GROUP_REASON_TYPE {
+  /// < @brief Base of reason number.
+  static const int EN_MTC_GROUP_REASON_BASE = 2000;
+
+  /// < @brief Internal error get agent failed.
+  static const int EN_MTC_GROUP_REASON_GET_AGENT = 2001;
+
+  /// < @brief Server error.
+  static const int EN_MTC_GROUP_REASON_SERVER = 2002;
+
+  /// < @brief Server error update time invalid.
+  static const int EN_MTC_GROUP_REASON_SERVER_UPDATE_TIME_INVALID = 2003;
+
+  /// < @brief Server error permission denied.
+  static const int EN_MTC_GROUP_REASON_SERVER_PERMISSION_DENIED = 2004;
+
+  /// < @brief Server error uid is not found.
+  static const int EN_MTC_GROUP_REASON_SERVER_UID_NOT_FOUND = 2005;
+
+  /// < @brief Server error change relation that not exists.
+  static const int EN_MTC_GROUP_REASON_SERVER_CHANGE_NOT_EXISTS = 2006;
+
+  /// < @brief Server error add relation that already exists.
+  static const int EN_MTC_GROUP_REASON_SERVER_ADD_ALREADY_EXISTS = 2007;
+
+  /// < @brief Server error add self.
+  static const int EN_MTC_GROUP_REASON_SERVER_ADD_SELF = 2008;
+
+  /// < @brief Server error relation type invalid.
+  static const int EN_MTC_GROUP_REASON_SERVER_RELATION_TYPE_INVALID = 2009;
+
+  /// < @brief Server error remove relation that not exists.
+  static const int EN_MTC_GROUP_REASON_SERVER_REMOVE_NOT_EXIST = 2010;
+
+  /// < @brief Server error status type invalid.
+  static const int EN_MTC_GROUP_REASON_SERVER_STATUS_TYPE_INVALID = 2011;
+
+  /// < @brief Server error only one owner in group.
+  static const int EN_MTC_GROUP_REASON_SERVER_WRITE_OWNER_ERROR = 2012;
+
+  /// < @brief Server error try to set write only prop.
+  static const int EN_MTC_GROUP_REASON_SERVER_SET_WRITE_PROP = 2013;
+
+  /// < @brief Server error apply type granted.
+  static const int EN_MTC_GROUP_REASON_SERVER_APPLY_TYPE_GRANTED = 2014;
+
+  /// < @brief Server error lack of org name.
+  static const int EN_MTC_GROUP_REASON_SERVER_LACK_OF_ORG_NAME = 2015;
+
+  /// < @brief Server error unknow org type.
+  static const int EN_MTC_GROUP_REASON_SERVER_UNKNOW_ORG_TYPE = 2016;
+
+  /// < @brief Server error not assign self as owner.
+  static const int EN_MTC_GROUP_REASON_SERVER_OWNER_NOT_INVOKER = 2017;
+
+  /// < @brief Server error not in relation list of target.
+  static const int EN_MTC_GROUP_REASON_SERVER_NOT_IN_GROUP = 2018;
+
+  /// < @brief Server error block by blacklist.
+  static const int EN_MTC_GROUP_REASON_SERVER_BLACKLIST = 2019;
+
+  /// < @brief Server error capacity of the group is full.
+  static const int EN_MTC_GROUP_REASON_SERVER_CAPACITY_FULL = 2020;
+
+  /// < @brief Server error caller not belong to the group.
+  static const int EN_MTC_GROUP_REASON_SERVER_NOT_BELOG_OT_ORG = 2021;
+
+  /// < @brief Server error try to change the member who has higher level .
+  static const int EN_MTC_GROUP_REASON_SERVER_WRITE_EXCEED_RIGHT = 2022;
+
+  /// < @brief Query UID failed.
+  static const int EN_MTC_GROUP_REASON_QUERY_UID = 2023;
+}
+
+/// @brief Group type.
+abstract class EN_MTC_GROUP_TYPE {
+  /// < @brief Discussion group.
+  static const int EN_MTC_GROUP_DISCUSSION = 0;
+
+  /// < @brief Normal group.
+  static const int EN_MTC_GROUP_NORMAL = 1;
+
+  /// < @brief Group contains large number of members.
+  static const int EN_MTC_GROUP_LARGE = 2;
+
+  /// < @brief Temporary group.
+  static const int EN_MTC_GROUP_ROOM = 3;
+
+  /// < @brief Temporary group contains large number of members.
+  static const int EN_MTC_GROUP_LARGE_ROOM = 4;
+}
+
+/// @brief Type of how to get updated information of group.
+abstract class EN_MTC_GROUP_UPATE_METHOD_TYPE {
+  /// < @brief Server initiates a notification when changed.
+  static const int EN_MTC_GROUP_NOTIFICATION = 0;
+
+  /// < @brief Client fetch information.
+  static const int EN_MTC_GROUP_FETCH = 1;
+
+  /// < @brief Use mixing methods.
+  static const int EN_MTC_GROUP_MIXED = 2;
+}
+
+/// @brief Permission control type of join into the group.
+abstract class EN_MTC_GROUP_PERMISSION_TYPE {
+  /// < @brief Requires authorization by manager or owner of group.
+  static const int EN_MTC_GROUP_ADMIN_AUTHORIZATION = 0;
+
+  /// < @brief Requires authorization by member of group.
+  static const int EN_MTC_GROUP_MEMBER_AUTHORIZATION = 1;
+
+  /// < @brief No permission control.
+  static const int EN_MTC_GROUP_NO_CONTROL = 2;
+
+  /// < @brief Requires password.
+  static const int EN_MTC_GROUP_PASSWORD = 3;
+}
+
+/// @brief Relation type.
+abstract class EN_MTC_GROUP_RELATION_TYPE {
+  static const int EN_MTC_GROUP_RELATION_IN_GROUP = 256;
+
+  /// < @brief Owner.
+  static const int EN_MTC_GROUP_RELATION_OWNER = 257;
+
+  /// < @brief Manager.
+  static const int EN_MTC_GROUP_RELATION_MANAGER = 258;
+
+  /// < @brief Member.
+  static const int EN_MTC_GROUP_RELATION_MEMBER = 259;
+  static const int EN_MTC_GROUP_RELATION_WITH_GROUP = 4096;
+
+  /// < @brief Belongs to group.
+  static const int EN_MTC_GROUP_RELATION_BELONGS_TO = 4097;
+}
+
+/// @brief Resource ID type.
+abstract class EN_MTC_GROUP_RESOURCE_ID_TYPE {
+  /// < @brief Type for Group ID.
+  static const int EN_MTC_GROUP_RESOURCE_ID_GROUP = 0;
+
+  /// < @brief Type for User ID.
+  static const int EN_MTC_GROUP_RESOURCE_ID_URI = 1;
+
+  /// < @brief Type for other id.
+  static const int EN_MTC_GROUP_RESOURCE_ID_OTHER = 100;
+}
+
+/// @brief Property permission type.
+abstract class EN_MTC_GROUP_PROPERTY_CONTROL_TYPE {
+  /// < @brief Only writeable to owner.
+  static const int EN_MTC_GROUP_PROPERTY_CONTROL_OWNER = 0;
+
+  /// < @brief Writeable to manager and owner.
+  static const int EN_MTC_GROUP_PROPERTY_CONTROL_MANAGER = 1;
+
+  /// < @brief Writeable to all members.
+  static const int EN_MTC_GROUP_PROPERTY_CONTROL_MEMBER = 2;
+}
+
+/// @brief organize remove type.
+abstract class EN_MTC_GROUP_ORG_REMOVE_TYPE {
+  /// < @brief org removed by org deleted.
+  static const int EN_MTC_GROUP_ORG_REMOVE_DEL = 0;
+
+  /// < @brief org removed by kicked.
+  static const int EN_MTC_GROUP_ORG_REMOVE_KICK = 1;
+}
+
 /// @brief The profile media mode type.
 abstract class EN_MTC_PROF_MEDIA_MODE {
   /// <@brief Profile media base.
@@ -6214,6 +7001,196 @@ const String MtcCliActiveNotification = 'MtcCliActiveNotification';
 
 const String MtcCliServerMessageReceivedNotification =
     'MtcCliServerMessageReceivedNotification';
+
+const String MtcGroupPropNameKey = 'Name';
+
+const String MtcGroupPropTypeKey = 'Type';
+
+const String MtcGroupPropUpdateMethodKey = 'UpdateMethod';
+
+const String MtcGroupPropPermissionKey = 'Permission';
+
+const String MtcGroupPropControlKey = 'PropertyControl';
+
+const String MtcGroupReasonCodeKey = 'ReasonCode';
+
+const String MtcGroupReasonDetailKey = 'ReasonDetail';
+
+const String MtcGroupPropertiesKey = 'Properties';
+
+const String MtcGroupRidTypeKey = 'RidType';
+
+const String MtcGroupRidKey = 'Rid';
+
+const String MtcGroupUserUidKey = 'UserUid';
+
+const String MtcGroupInvokerUidKey = 'InvokerUid';
+
+const String MtcGroupInvokerNameKey = 'InvokerName';
+
+const String MtcGroupNameKey = 'GroupName';
+
+const String MtcGroupUserUriKey = 'UserUri';
+
+const String MtcGroupRemovedTypeKey = 'RemovedType';
+
+const String MtcGroupRelationListKey = 'RelationList';
+
+const String MtcGroupAddedRelationListKey = 'AddedRelationList';
+
+const String MtcGroupUpdatedRelationListKey = 'UpdatedRelationList';
+
+const String MtcGroupRemovedRelationListKey = 'RemovedRelationList';
+
+const String MtcGroupUpdatedRelationKey = 'MtcGroupUpdatedRelationKey';
+
+const String MtcGroupListToAddKey = 'ListToAdd';
+
+const String MtcGroupListToUpdateKey = 'ListToUpdate';
+
+const String MtcGroupListToRemoveKey = 'ListToRemove';
+
+const String MtcGroupStatusListKey = 'StatusList';
+
+const String MtcGroupRelationTypeKey = 'RelationType';
+
+const String MtcGroupUpdateTimeKey = 'UpdateTime';
+
+const String MtcGroupBaseTimeKey = 'BaseTime';
+
+const String MtcGroupServerTimeKey = 'ServerTime';
+
+const String MtcGroupIsPartialUpdateKey = 'IsPartialUpdate';
+
+const String MtcGroupDisplayNameKey = 'DisplayName';
+
+const String MtcGroupInviterIdKey = 'InviterId';
+
+const String MtcGroupInviterNameKey = 'InviterName';
+
+const String MtcGroupTagKey = 'Tag';
+
+const String MtcGroupCfgsKey = 'Cfgs';
+
+const String MtcGroupImPushKey = 'ImPush';
+
+const String MtcGroupApplyIdKey = 'ApplyId';
+
+const String MtcGroupInviteIdKey = 'InviteId';
+
+const String MtcGroupMsgIdKey = 'MsgId';
+
+const String MtcGroupBoxKey = 'Box';
+
+const String MtcGroupApplyDescriptionKey = 'Description';
+
+const String MtcGroupCreateOkNotification = 'MtcGroupCreateOkNotification';
+
+const String MtcGroupCreateDidFailNotification =
+    'MtcGroupCreateDidFailNotification';
+
+const String MtcGroupRemoveOkNotification = 'MtcGroupRemoveOkNotification';
+
+const String MtcGroupRemoveDidFailNotification =
+    'MtcGroupRemoveDidFailNotification';
+
+const String MtcGroupSetPropertiesOkNotification =
+    'MtcGroupSetPropertiesOkNotification';
+
+const String MtcGroupSetPropertiesDidFailNotification =
+    'MtcGroupSetPropertiesDidFailNotification';
+
+const String MtcGroupGetPropertiesOkNotification =
+    'MtcGroupGetPropertiesOkNotification';
+
+const String MtcGroupGetPropertiesDidFailNotification =
+    'MtcGroupGetPropertiesDidFailNotification';
+
+const String MtcGroupRefreshOkNotification = 'MtcGroupRefreshOkNotification';
+
+const String MtcGroupRefreshDidFailNotification =
+    'MtcGroupRefreshDidFailNotification';
+
+const String MtcGroupChangedNotification = 'MtcGroupChangedNotification';
+
+const String MtcGroupSyncNotification = 'MtcGroupSyncNotification';
+
+const String MtcGroupAddRelationOkNotification =
+    'MtcGroupAddRelationOkNotification';
+
+const String MtcGroupAddRelationDidFailNotification =
+    'MtcGroupAddRelationDidFailNotification';
+
+const String MtcGroupUpdateRelationOkNotification =
+    'MtcGroupUpdateRelationOkNotification';
+
+const String MtcGroupUpdateRelationDidFailNotification =
+    'MtcGroupUpdateRelationDidFailNotification';
+
+const String MtcGroupRemoveRelationOkNotification =
+    'MtcGroupRemoveRelationOkNotification';
+
+const String MtcGroupRemoveRelationDidFailNotification =
+    'MtcGroupRemoveRelationDidFailNotification';
+
+const String MtcGroupSetRelationsOkNotification =
+    'MtcGroupSetRelationsOkNotification';
+
+const String MtcGroupSetRelationsDidFailNotification =
+    'MtcGroupSetRelationsDidFailNotification';
+
+const String MtcGroupSetRelationStatusOkNotification =
+    'MtcGroupSetRelationStatusOkNotification';
+
+const String MtcGroupSetRelationStatusDidFailNotification =
+    'MtcGroupSetRelationStatusDidFailNotification';
+
+const String MtcGroupGetRelationStatusOkNotification =
+    'MtcGroupGetRelationStatusOkNotification';
+
+const String MtcGroupGetRelationStatusDidFailNotification =
+    'MtcGroupGetRelationStatusDidFailNotification';
+
+const String MtcGroupUpdateIndividualRelationOkNotification =
+    'MtcGroupUpdateIndividualRelationOkNotification';
+
+const String MtcGroupUpdateIndividualRelationDidFailNotification =
+    'MtcGroupUpdateIndividualRelationDidFailNotification';
+
+const String MtcGroupApplyRelationOkNotification =
+    'MtcGroupApplyRelationOkNotification';
+
+const String MtcGroupApplyRelationDidFailNotification =
+    'MtcGroupApplyRelationDidFailNotification';
+
+const String MtcGroupInviteRelationOkNotification =
+    'MtcGroupInviteRelationOkNotification';
+
+const String MtcGroupInviteRelationDidFailNotification =
+    'MtcGroupInviteRelationDidFailNotification';
+
+const String MtcGroupAcceptRelationOkNotification =
+    'MtcGroupAcceptRelationOkNotification';
+
+const String MtcGroupAcceptRelationDidFailNotification =
+    'MtcGroupAcceptRelationDidFailNotification';
+
+const String MtcGroupApplyReceivedNotification =
+    'MtcGroupApplyReceivedNotification';
+
+const String MtcGroupApplyCompletedNotification =
+    'MtcGroupApplyCompletedNotification';
+
+const String MtcGroupInviteReceivedNotification =
+    'MtcGroupInviteReceivedNotification';
+
+const String MtcGroupInviteCompletedNotification =
+    'MtcGroupInviteCompletedNotification';
+
+const String MtcGroupImPushOkNotification = 'MtcGroupImPushOkNotification';
+
+const String MtcGroupImPushDidFailNotification =
+    'MtcGroupImPushDidFailNotification';
 
 const int MTC_PROV_MEDIA_MASK = 255;
 
