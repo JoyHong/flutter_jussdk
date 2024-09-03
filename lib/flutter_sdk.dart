@@ -127,6 +127,12 @@ class FlutterJusSDK {
           completer.complete(data);
           return;
         }
+        if (data is _PGMUpdateGroup) {
+          if (tools.isValidUserId(data.uid)) {
+            (account as FlutterJusAccountImpl).onUpdateRelationsNotification(data.relationDiff, data.relationUpdateTime, data.statusDiff, data.statusUpdateTime);
+          }
+          return;
+        }
         if (data is _PGMUpdateProps) {
           if (tools.isValidUserId(data.uid)) {
             (account as FlutterJusAccountImpl).onUpdatePropertiesNotification(data.props);
@@ -205,19 +211,32 @@ int _pgmLoadGroup(
     Pointer<Int64> plStatusTime,
     Pointer<Pointer<JStrStrMap>> ppcProps) {
   FlutterJusSDK._log('pgmLoadGroup, pcGroupId=${pcGroupId.toDartString()}');
-  ppcRelations.value = jsonEncode({}).toNativePointer();
-  plRelationUpdateTime.value = -1;
-  ppcStatusVersMap.value = jsonEncode({}).toNativePointer();
-  plStatusTime.value = -1;
-  ppcProps.value = jsonEncode((FlutterJusSDK.account as FlutterJusAccountImpl).userProps).toNativePointer();
+  (FlutterJusSDK.account as FlutterJusAccountImpl).onLoadNotification(ppcRelations, plRelationUpdateTime, ppcStatusVersMap, plStatusTime, ppcProps);
   return 0;
 }
 
 int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
     int lUpdateTime, Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
   FlutterJusSDK._log(
-      'pgmUpdateGroup, pcGroupId=${pcGroupId.toDartString()}, pcDiff=${pcDiff.toDartString()}, lUpdateTime=$lUpdateTime,'
+      'pgmUpdateGroup, pcGroupId=${pcGroupId.toDartString()}, pcDiff=${pcDiff.toDartString()}, lUpdateTime=$lUpdateTime, '
       'pcStatusVersMap=${pcStatusVersMap.toDartString()}, lStatusTime=$lStatusTime');
+  final pgmUpdateGroup = _PGMUpdateGroup(
+      pcGroupId.toDartString(),
+      jsonDecode(pcDiff.toDartString()),
+      lUpdateTime,
+      jsonDecode(pcStatusVersMap.toDartString()),
+      lStatusTime);
+  try {
+    FlutterJusSDK._fromPgmIsolateSendPort.send(pgmUpdateGroup);
+  } catch (e) {
+    if (FlutterJusSDK.tools.isValidUserId(pgmUpdateGroup.uid)) {
+      (FlutterJusSDK.account as FlutterJusAccountImpl).onUpdateRelationsNotification(
+            pgmUpdateGroup.relationDiff,
+            pgmUpdateGroup.relationUpdateTime,
+            pgmUpdateGroup.statusDiff,
+            pgmUpdateGroup.statusUpdateTime);
+    }
+  }
   return 0;
 }
 
@@ -263,6 +282,17 @@ DynamicLibrary _openLibrary(String libName) {
     return DynamicLibrary.open('$libName.dll');
   }
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
+}
+
+class _PGMUpdateGroup {
+  final String uid;
+  final Map<String, dynamic> relationDiff;
+  final int relationUpdateTime;
+  final Map<String, dynamic> statusDiff;
+  final int statusUpdateTime;
+
+  const _PGMUpdateGroup(this.uid, this.relationDiff, this.relationUpdateTime,
+      this.statusDiff, this.statusUpdateTime);
 }
 
 class _PGMUpdateProps {

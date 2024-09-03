@@ -4,7 +4,9 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
+import 'package:flutter_jussdk/flutter_database.dart';
 import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
@@ -57,6 +59,11 @@ class FlutterJusAccountConstants {
   static const String PROP_MTC_INFO_TERMINAL_VENDOR_KEY = MTC_INFO_TERMINAL_VENDOR_KEY;
   static const String PROP_MTC_INFO_SOFTWARE_VERSION_KEY = MTC_INFO_SOFTWARE_VERSION_KEY;
   static const String PROP_MTC_INFO_SOFTWARE_VENDOR_KEY = MTC_INFO_SOFTWARE_VENDOR_KEY;
+
+  /// 同步 pgm 回调个人列表的时间戳
+  static const String _propRelationUpdateTime = 'relationUpdateTime';
+  /// 同步 pgm 回调状态的时间戳
+  static const String _propStatusUpdateTime = 'statusUpdateTime';
 
   /// push 类型
   static const String pushTypeGCM = "GCM";
@@ -125,11 +132,16 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
 
-  Map<String, String> get userProps => _userPropsBox!.toMap().castString();
   /// pgm 实时的用户属性
   Box<String>? _userPropsBox;
   /// 未登陆成功的情况下, 将要设置的用户属性
   Box<String>? _pendingPropsBox;
+  /// 自定义的本地用户属性
+  Box<dynamic>? _localPropsBox;
+  /// 数据库
+  FlutterJusAppDatabase? _database;
+  /// 数据库刚打开时, 拿到的 relation 数据
+  List<FlutterJusRelationData>? _initRelations;
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
@@ -177,7 +189,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           _mtc.Mtc_ProfSaveProvision();
         }
         if (_userPropsBox == null) {
-          await _initUserBoxes();
+          await _initUserProfile();
         }
         Pointer<Char> pcErr = ''.toNativePointer();
         if (_pgm.pgm_c_logined('0'.toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
@@ -474,6 +486,54 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     return true;
   }
 
+  void onLoadNotification(
+      Pointer<Pointer<JRelationsMap>> relationMapPointer,
+      Pointer<Int64> relationUpdateTimePointer,
+      Pointer<Pointer<JStatusVersMap>> statusMapPointer,
+      Pointer<Int64> statusUpdateTimePointer,
+      Pointer<Pointer<JStrStrMap>> propMapPointer) {
+    Map<String, dynamic> relationMap = {};
+    Map<String, dynamic> statusMap = {};
+    for (var relation in _initRelations!) {
+      relationMap[relation.uid] = {
+        'cfgs': jsonDecode(relation.cfgs),
+        'tag': relation.tag,
+        'tagName': relation.tagName,
+        'type': relation.type
+      };
+      statusMap[relation.uid] = jsonDecode(relation.status);
+    }
+    relationMapPointer.value = jsonEncode(relationMap).toNativePointer();
+    relationUpdateTimePointer.value = _localPropsBox!.get(FlutterJusAccountConstants._propRelationUpdateTime, defaultValue: -1);
+    statusMapPointer.value = jsonEncode(statusMap).toNativePointer();
+    statusUpdateTimePointer.value = _localPropsBox!.get(FlutterJusAccountConstants._propStatusUpdateTime, defaultValue: -1);
+    propMapPointer.value = jsonEncode(_userPropsBox!.toMap().castString()).toNativePointer();
+  }
+
+  void onUpdateRelationsNotification(Map<String, dynamic> relationDiff, int relationUpdateTime, Map<String, dynamic> statusDiff, int statusUpdateTime) {
+    if (_localPropsBox!.get(FlutterJusAccountConstants._propRelationUpdateTime, defaultValue: -1) == -1) {
+      List<FlutterJusRelationCompanion> users = [];
+      relationDiff.forEach((uid, map) {
+        users.add(FlutterJusRelationCompanion.insert(
+            uid: uid,
+            cfgs: jsonEncode(map['cfgs']),
+            tag: map['tag'],
+            tagName: map['tagName'],
+            type: map['type'],
+            status: jsonEncode(statusDiff[uid])));
+      });
+      if (users.isNotEmpty) {
+        _database!.flutterJusRelation.insertAll(users);
+      }
+    } else {
+      // TODO
+    }
+    _localPropsBox!.putAll({
+      FlutterJusAccountConstants._propRelationUpdateTime: relationUpdateTime,
+      FlutterJusAccountConstants._propStatusUpdateTime: statusUpdateTime
+    });
+  }
+
   void onUpdatePropertiesNotification(Map<String, String> props) {
     _userPropsBox!.putAll(props);
   }
@@ -536,9 +596,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _mtc.Mtc_UeDbSetPassword(password.toNativePointer());
       }
       _mtc.Mtc_ProfSaveProvision();
-      await _releaseUserBoxes();
+      await _releaseUserProfile();
       if (_mtc.Mtc_UeDbGetUid() != nullptr && _mtc.Mtc_UeDbGetUid().toDartString().isNotEmpty) {
-        await _initUserBoxes();
+        await _initUserProfile();
       }
     }
     return result;
@@ -610,7 +670,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeout = 2;
     _reLoggingTimeoutToken?.cancel();
     _reLoggingTimeoutToken = null;
-    _releaseUserBoxes();
+    _releaseUserProfile();
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }
@@ -624,18 +684,26 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
   }
 
-  Future<void> _initUserBoxes() async {
+  Future<void> _initUserProfile() async {
     String path = await FlutterJusTools.getUserPath(_mtc.Mtc_UeDbGetUid().toDartString());
     Directory dir = await Directory(path).create(recursive: true);
     _userPropsBox = await Hive.openBox('userProps', path: dir.path);
     _pendingPropsBox = await Hive.openBox('pendingProps', path: dir.path);
+    _localPropsBox = await Hive.openBox('localProps', path: dir.path);
+    _database = FlutterJusAppDatabase(_mtc.Mtc_UeDbGetUid().toDartString());
+    _initRelations = await _database!.managers.flutterJusRelation.get();
   }
 
-  Future<void> _releaseUserBoxes() async {
+  Future<void> _releaseUserProfile() async {
     await _userPropsBox?.close();
     _userPropsBox = null;
     await _pendingPropsBox?.close();
     _pendingPropsBox = null;
+    await _localPropsBox?.close();
+    _localPropsBox = null;
+    await _database?.close();
+    _database = null;
+    _initRelations = null;
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];
