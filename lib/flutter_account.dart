@@ -177,7 +177,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           _mtc.Mtc_ProfSaveProvision();
         }
         if (_userPropsBox == null) {
-          _initUserBoxes();
+          await _initUserBoxes();
         }
         Pointer<Char> pcErr = ''.toNativePointer();
         if (_pgm.pgm_c_logined('0'.toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
@@ -536,9 +536,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _mtc.Mtc_UeDbSetPassword(password.toNativePointer());
       }
       _mtc.Mtc_ProfSaveProvision();
-      _releaseUserBoxes();
+      await _releaseUserBoxes();
       if (_mtc.Mtc_UeDbGetUid() != nullptr && _mtc.Mtc_UeDbGetUid().toDartString().isNotEmpty) {
-        _initUserBoxes();
+        await _initUserBoxes();
       }
     }
     return result;
