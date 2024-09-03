@@ -457,7 +457,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     }
     /// 注册 Info 消息 push
     void putPayloadMessageInfo(String infoType) {
-      params['Notify.$pushType.Message.Info.$infoType.Payload'] = jsonEncode({
+      params['Notify.$pushType.Message.$infoType.Payload'] = jsonEncode({
         'MtcImDisplayNameKey': '\${Sender}',
         'MtcImSenderUidKey': '\${SenderUid}',
         'MtcImMsgIdKey': '\${MsgIdx}',
