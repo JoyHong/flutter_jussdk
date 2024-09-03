@@ -463,10 +463,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         'MtcImMsgIdKey': '\${MsgIdx}',
         'MtcImImdnIdKey': '\${ImdnId}',
         'MtcImInfoContentKey': '\${Text}',
-        'MtcImInfoTypeKey': infoType,
         'MtcImLabelKey': '\${Box}',
         'MtcImTimeKey': '\${Time}',
-        'MtcImUserDataKey': '\${ImUserData}'
+        'MtcImUserDataKey': '\${ImUserData}',
+        'MtcImInfoTypeKey': infoType
       });
       params['Notify.$pushType.Message.Info.$infoType.Expiration'] = expiration;
       params['Notify.$pushType.Message.Info.$infoType.ResendCount'] = '0';
