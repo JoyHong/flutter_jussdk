@@ -443,11 +443,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         'MtcImDisplayNameKey': '\${Sender}',
         'MtcImSenderUidKey': '\${SenderUid}',
         'MtcImMsgIdKey': '\${MsgIdx}',
-        'MtcImImdnIdKey': '\${ImdnId}',
+        'MtcImImdnIdKey': '\${imdnId}',
         'MtcImTextKey': '\${Text}',
         'MtcImLabelKey': '\${Box}',
         'MtcImTimeKey': '\${Time}',
-        'MtcImUserDataKey': '\${ImUserData}',
+        'MtcImUserDataKey': '\${userData}',
         'MtcImInfoTypeKey': 'Text'
       });
       params['Notify.$pushType.Message.Text.Expiration'] = expiration;
@@ -461,17 +461,17 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         'MtcImDisplayNameKey': '\${Sender}',
         'MtcImSenderUidKey': '\${SenderUid}',
         'MtcImMsgIdKey': '\${MsgIdx}',
-        'MtcImImdnIdKey': '\${ImdnId}',
+        'MtcImImdnIdKey': '\${imdnId}',
         'MtcImInfoContentKey': '\${Text}',
         'MtcImLabelKey': '\${Box}',
         'MtcImTimeKey': '\${Time}',
-        'MtcImUserDataKey': '\${ImUserData}',
+        'MtcImUserDataKey': '\${userData}',
         'MtcImInfoTypeKey': infoType
       });
-      params['Notify.$pushType.Message.Info.$infoType.Expiration'] = expiration;
-      params['Notify.$pushType.Message.Info.$infoType.ResendCount'] = '0';
-      params['Notify.$pushType.Message.Info.$infoType.ResendTimeout'] = '20';
-      params['Notify.$pushType.Message.Info.$infoType.PassThrough'] = '1';
+      params['Notify.$pushType.Message.$infoType.Expiration'] = expiration;
+      params['Notify.$pushType.Message.$infoType.ResendCount'] = '0';
+      params['Notify.$pushType.Message.$infoType.ResendTimeout'] = '20';
+      params['Notify.$pushType.Message.$infoType.PassThrough'] = '1';
     }
 
     putPayloadMessageText();
