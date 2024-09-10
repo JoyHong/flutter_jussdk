@@ -63,13 +63,13 @@ class _MyAppState extends State<MyApp> {
               FlutterJusSDK.account.login(username: '3845955877', password: '123456');
             }),
             button(text: '自动登陆', onPressed: () {
-              FlutterJusSDK.account.autoLogin(username: 'test_0013');
+              FlutterJusSDK.account.autoLogin(username: '3845955877');
             }),
             button(text: '日志上报', onPressed: () {
               FlutterJusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
             }),
             button(text: '自定义测试', onPressed: () {
-              FlutterJusSDK.account.setProperties({'Basic.NickName': 'CCC'});
+              FlutterJusSDK.account.setProperties({'Basic.NickName': 'NameTimestamp#${DateTime.now().millisecondsSinceEpoch}'});
             })
           ],
         ),

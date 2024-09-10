@@ -1,39 +1,35 @@
-import 'dart:io';
+import 'package:realm/realm.dart';
 
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
+part 'flutter_database.realm.dart';
 
-import 'flutter_tools.dart';
-
-part 'flutter_database.g.dart';
-
-class FlutterJusRelation extends Table {
-  TextColumn get uid => text().unique()();
-  TextColumn get cfgs => text()();
-  TextColumn get tag => text()();
-  TextColumn get tagName => text()();
-  IntColumn get type => integer()();
-  TextColumn get status => text()();
-  @override
-  Set<Column<Object>> get primaryKey => {uid};
+@RealmModel()
+class _FlutterJusRelation {
+  @PrimaryKey()
+  late String uid;
+  late String cfgs;
+  late String tag;
+  late String tagName;
+  late int type;
+  late String status;
 }
 
-@DriftDatabase(tables: [FlutterJusRelation])
-class FlutterJusAppDatabase extends _$FlutterJusAppDatabase {
-  // After generating code, this class needs to define a `schemaVersion` getter
-  // and a constructor telling drift where the database should be stored.
-  // These are described in the getting started guide: https://drift.simonbinder.eu/getting-started/#open
-  FlutterJusAppDatabase(String uid) : super(_openConnection(uid));
+@RealmModel()
+class _FlutterJusProperty {
+  @PrimaryKey()
+  late String key;
+  late String value;
+}
 
-  @override
-  int get schemaVersion => 1;
+@RealmModel()
+class _FlutterJusPendingProperty {
+  @PrimaryKey()
+  late String key;
+  late String value;
+}
 
-  static LazyDatabase _openConnection(String uid) {
-    return LazyDatabase(() async {
-      String dirPath = await FlutterJusTools.getUserPath(uid);
-      final file = File(p.join(dirPath, 'database.sqlite'));
-      return NativeDatabase(file);
-    });
-  }
+@RealmModel()
+class _FlutterJusPreference {
+  @PrimaryKey()
+  late String key;
+  late String value;
 }

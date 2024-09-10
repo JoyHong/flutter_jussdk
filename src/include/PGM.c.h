@@ -126,17 +126,18 @@ typedef uint64_t (*PGM_C_GET_TICKS)();
 MTCFUNC void pgm_c_version(char* pcVersion);
 
 /*
-  设置回调函数, 进程拉起即可调用, 生存期内只需调用一次
+  1. 设置回调函数, 进程拉起即可调用, 生存期内只调用一次
+  2. 使用cbInThreadFunc=true pgm_init时, pgm_init返回后需接着调用pgm_cb_thread_func
+  3. 使用cbInThreadFunc=false pgm_init时, 不调用pgm_cb_thread_func
+  4. flutter集成时pgm_init(true, ...) & pgm_cb_thread_func需要在同一子isolate中先后调用
+  5. pgm_logined及以下的接口均需在pgm_init返回后调用, 无论是否在同一线程
 */
-MTCFUNC void pgm_c_init(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb, int cbInIsolate);
-
-MTCFUNC void pgm_c_cb_thread_int(PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb);
+MTCFUNC void pgm_c_init(int cbInThreadFunc, PGM_C_EVENT_PROCESSOR eventProcessorCb, PGM_C_LOAD_GROUP loadGroupCb, PGM_C_UPDATE_GROUP updateGroupCb, PGM_C_UPDATE_STATUSES updateStatusesCb, PGM_C_UPDATE_RPOPS updatePropsCb, PGM_C_INSERT_MSGS insertMsgsCb, PGM_C_GET_TICKS getTicksCb);
 
 /*
-  flutter集成pgm时, 对执行回调的线程有特殊要求, 使用该函数创建专门用于回调的线程
-  必须在pgm_init之后调用且cbInIsolate需为true, 否则返回-1
+此函数不返回
 */
-MTCFUNC int pgm_c_cb_thread_func();
+MTCFUNC void pgm_c_cb_thread_func();
 
 /*
   控制库的内部参数, 暂时未用
@@ -205,7 +206,7 @@ MTCFUNC int pgm_c_change_relations(const char* pcCookie, const char* pcGroupId, 
   3. 尽量只用该接口修改只与显示相关的次要元素, 若用来修改组织消息免打扰,当rpc最终成功前, 可能导致ui效果与实际效果不一致的问题
   4. 调用方式: @groupId是节点所属列表id, @changedId是节点id, changedRel是修改后的节点完整内容
 */
-MTCFUNC int pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* pcChangedId, const JRelation* pcChangedRel, char* pcErr);
+MTCFUNC int pgm_c_nowait_ack_change_relation(const char* pcCookie, const char* pcGroupId, const char* pcChangedId, const JRelation* pcChangedRel, char* pcErr);
 
 /*
   1. 调用方式:
@@ -220,7 +221,7 @@ MTCFUNC int pgm_c_nowait_ack_change_relation(const char* pcGroupId, const char* 
 MTCFUNC int pgm_c_remove_relations(const char* pcCookie, const char* pcGroupId, const JStrSet* pcRemoved, char* pcErr);
 
 /*
-  查询自己在对方列表中的身份级别. CookieEnd value为String(Group::RelationType), 比如13表示Contact,15表示Strange. 其他非整数值表示失败reason
+  查询自己在对方列表中的身份级别. CookieEnd value为String(Group::RelationType), 比如13表示Contact,15表示Strange. 其他非整数值表示失败err
 */
 MTCFUNC int pgm_c_check_relation(const char* pcCookie, const char* pcPeerUid, char* pcErr);
 
@@ -264,13 +265,13 @@ MTCFUNC int pgm_c_set_status_to_peer(const char* pcCookie, const char* pcPeerUid
   1. 设置组织中某节点(可能是自己也可能是他人)的状态. 比如 A设置自己在组织C中的状态为繁忙: A pgm_nowait_ack_set_status(cookie, orgIdC, uidA, 'Busy', '1', err)
   2. 设置self列表中他人的状态, 供其他设备登录时读取. A pgm_nowait_ack_set_status(cookie, uidA, uidB, '...', '1', err), 暂无明确的应用场景
 */
-MTCFUNC int pgm_c_nowait_ack_set_status(const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
+MTCFUNC int pgm_c_nowait_ack_set_status(const char* pcCookie, const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
 
 /*
 1. 设置自己/组织属性(会有组织权限检查), @props传diff
 2. 设置成功后将回调PGM_UPDATE_RPOPS
 */
-MTCFUNC int pgm_c_nowait_ack_set_props(const char* pcGroupId, const JStrStrMap* pcDiffProps, char* pcErr);
+MTCFUNC int pgm_c_nowait_ack_set_props(const char* pcCookie, const char* pcGroupId, const JStrStrMap* pcDiffProps, char* pcErr);
 
 /*
   1. 读取任何人/任何组织的属性, 包括但不限于自己的好友/加入的组织

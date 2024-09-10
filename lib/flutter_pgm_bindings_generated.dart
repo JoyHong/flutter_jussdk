@@ -42,8 +42,13 @@ class FlutterPGMBindings {
   late final _pgm_c_version =
       _pgm_c_versionPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
-  /// 设置回调函数, 进程拉起即可调用, 生存期内只需调用一次
+  /// 1. 设置回调函数, 进程拉起即可调用, 生存期内只调用一次
+  /// 2. 使用cbInThreadFunc=true pgm_init时, pgm_init返回后需接着调用pgm_cb_thread_func
+  /// 3. 使用cbInThreadFunc=false pgm_init时, 不调用pgm_cb_thread_func
+  /// 4. flutter集成时pgm_init(true, ...) & pgm_cb_thread_func需要在同一子isolate中先后调用
+  /// 5. pgm_logined及以下的接口均需在pgm_init返回后调用, 无论是否在同一线程
   void pgm_c_init(
+    int cbInThreadFunc,
     PGM_C_EVENT_PROCESSOR eventProcessorCb,
     PGM_C_LOAD_GROUP loadGroupCb,
     PGM_C_UPDATE_GROUP updateGroupCb,
@@ -51,9 +56,9 @@ class FlutterPGMBindings {
     PGM_C_UPDATE_RPOPS updatePropsCb,
     PGM_C_INSERT_MSGS insertMsgsCb,
     PGM_C_GET_TICKS getTicksCb,
-    int cbInIsolate,
   ) {
     return _pgm_c_init(
+      cbInThreadFunc,
       eventProcessorCb,
       loadGroupCb,
       updateGroupCb,
@@ -61,64 +66,23 @@ class FlutterPGMBindings {
       updatePropsCb,
       insertMsgsCb,
       getTicksCb,
-      cbInIsolate,
     );
   }
 
   late final _pgm_c_initPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(
+              ffi.Int,
               PGM_C_EVENT_PROCESSOR,
               PGM_C_LOAD_GROUP,
               PGM_C_UPDATE_GROUP,
               PGM_C_UPDATE_STATUSES,
               PGM_C_UPDATE_RPOPS,
               PGM_C_INSERT_MSGS,
-              PGM_C_GET_TICKS,
-              ffi.Int)>>('pgm_c_init');
+              PGM_C_GET_TICKS)>>('pgm_c_init');
   late final _pgm_c_init = _pgm_c_initPtr.asFunction<
       void Function(
-          PGM_C_EVENT_PROCESSOR,
-          PGM_C_LOAD_GROUP,
-          PGM_C_UPDATE_GROUP,
-          PGM_C_UPDATE_STATUSES,
-          PGM_C_UPDATE_RPOPS,
-          PGM_C_INSERT_MSGS,
-          PGM_C_GET_TICKS,
-          int)>();
-
-  void pgm_c_cb_thread_int(
-    PGM_C_EVENT_PROCESSOR eventProcessorCb,
-    PGM_C_LOAD_GROUP loadGroupCb,
-    PGM_C_UPDATE_GROUP updateGroupCb,
-    PGM_C_UPDATE_STATUSES updateStatusesCb,
-    PGM_C_UPDATE_RPOPS updatePropsCb,
-    PGM_C_INSERT_MSGS insertMsgsCb,
-    PGM_C_GET_TICKS getTicksCb,
-  ) {
-    return _pgm_c_cb_thread_int(
-      eventProcessorCb,
-      loadGroupCb,
-      updateGroupCb,
-      updateStatusesCb,
-      updatePropsCb,
-      insertMsgsCb,
-      getTicksCb,
-    );
-  }
-
-  late final _pgm_c_cb_thread_intPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              PGM_C_EVENT_PROCESSOR,
-              PGM_C_LOAD_GROUP,
-              PGM_C_UPDATE_GROUP,
-              PGM_C_UPDATE_STATUSES,
-              PGM_C_UPDATE_RPOPS,
-              PGM_C_INSERT_MSGS,
-              PGM_C_GET_TICKS)>>('pgm_c_cb_thread_int');
-  late final _pgm_c_cb_thread_int = _pgm_c_cb_thread_intPtr.asFunction<
-      void Function(
+          int,
           PGM_C_EVENT_PROCESSOR,
           PGM_C_LOAD_GROUP,
           PGM_C_UPDATE_GROUP,
@@ -127,16 +91,15 @@ class FlutterPGMBindings {
           PGM_C_INSERT_MSGS,
           PGM_C_GET_TICKS)>();
 
-  /// flutter集成pgm时, 对执行回调的线程有特殊要求, 使用该函数创建专门用于回调的线程
-  /// 必须在pgm_init之后调用且cbInIsolate需为true, 否则返回-1
-  int pgm_c_cb_thread_func() {
+  /// 此函数不返回
+  void pgm_c_cb_thread_func() {
     return _pgm_c_cb_thread_func();
   }
 
   late final _pgm_c_cb_thread_funcPtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function()>>('pgm_c_cb_thread_func');
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('pgm_c_cb_thread_func');
   late final _pgm_c_cb_thread_func =
-      _pgm_c_cb_thread_funcPtr.asFunction<int Function()>();
+      _pgm_c_cb_thread_funcPtr.asFunction<void Function()>();
 
   /// 控制库的内部参数, 暂时未用
   int pgm_c_set_cfgs(
@@ -264,9 +227,9 @@ class FlutterPGMBindings {
 
   /// 1. 无需对方确认的列表修改
   /// 2. 调用方式:
-  /// a. 好友(批量)添加: pgm_add_relations(cookie, selfUid, map<uid,Relation(Contact,tagName,tag,nullCfgs)>, err)
-  /// b. 直接入群: pgm_add_relations(cookie, selfUid, map<orgId,Relation(Organize,tagName,tag,nullCfgs)>, err), added map size必须为1
-  /// c. 拉人入群: pgm_add_relations(cookie, orgId, map<uid,Relation(Member,tagName,tag,nullCfgs)>, err)
+  /// a. 好友(批量)添加: pgm_add_relations(cookie, selfUid, std::map<uid,Relation(Contact,tagName,tag,nullCfgs)>, err)
+  /// b. 直接入群: pgm_add_relations(cookie, selfUid, std::map<orgId,Relation(Organize,tagName,tag,nullCfgs)>, err), added map size必须为1
+  /// c. 拉人入群: pgm_add_relations(cookie, orgId, std::map<uid,Relation(Member,tagName,tag,nullCfgs)>, err)
   /// 3. CookieEnd 'added_exist'时,表示同时间点发生了异源修改,比如 自己两台正在登录的设备, 同时添加同一个人
   /// 接口保证 会先将这样的列表异源修改flush db, 再回调CookieEnd err!
   int pgm_c_add_relations(
@@ -295,7 +258,7 @@ class FlutterPGMBindings {
           ffi.Pointer<JRelationsMap>, ffi.Pointer<ffi.Char>)>();
 
   /// 1. 调用方式: @groupId是节点所属的列表id, @changed是修改节点id及内容的集合. 比如
-  /// a. 设置组织消息免打扰: pgm_change_relations(cookie, orgId, map<selfUid,Relation(preType,preTagName,preTag,preCfgs['ImPush']='0'>, err)
+  /// a. 设置组织消息免打扰: pgm_change_relations(cookie, orgId, std::map<selfUid,Relation(preType,preTagName,preTag,preCfgs['ImPush']='0'>, err)
   /// 2. 需要将修改节点修改后的全部内容传入. 故目前存在这样的问题: 2个异源修改同时分别修改不同字段时, 最终可能只有一条生效
   /// 3. CookieEnd 'changed_nonexist'时, 表示同时间点发生了异源修改, 比如 修改自己的群内备注名时刚好群主把自己踢了
   /// 接口保证 会先将这样的他源列表修改flush db, 再回调CookieEnd err!
@@ -329,12 +292,14 @@ class FlutterPGMBindings {
   /// 3. 尽量只用该接口修改只与显示相关的次要元素, 若用来修改组织消息免打扰,当rpc最终成功前, 可能导致ui效果与实际效果不一致的问题
   /// 4. 调用方式: @groupId是节点所属列表id, @changedId是节点id, changedRel是修改后的节点完整内容
   int pgm_c_nowait_ack_change_relation(
+    ffi.Pointer<ffi.Char> pcCookie,
     ffi.Pointer<ffi.Char> pcGroupId,
     ffi.Pointer<ffi.Char> pcChangedId,
     ffi.Pointer<JRelation> pcChangedRel,
     ffi.Pointer<ffi.Char> pcErr,
   ) {
     return _pgm_c_nowait_ack_change_relation(
+      pcCookie,
       pcGroupId,
       pcChangedId,
       pcChangedRel,
@@ -347,12 +312,17 @@ class FlutterPGMBindings {
           ffi.Int Function(
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
               ffi.Pointer<JRelation>,
               ffi.Pointer<ffi.Char>)>>('pgm_c_nowait_ack_change_relation');
   late final _pgm_c_nowait_ack_change_relation =
       _pgm_c_nowait_ack_change_relationPtr.asFunction<
-          int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-              ffi.Pointer<JRelation>, ffi.Pointer<ffi.Char>)>();
+          int Function(
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<JRelation>,
+              ffi.Pointer<ffi.Char>)>();
 
   /// 1. 调用方式:
   /// a. 退群: pgm_remove_relations(cookie, selfUid, set<orgId>, err), removed set size必为1
@@ -387,7 +357,7 @@ class FlutterPGMBindings {
       int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
           ffi.Pointer<JStrSet>, ffi.Pointer<ffi.Char>)>();
 
-  /// 查询自己在对方列表中的身份级别. CookieEnd value为String(Group::RelationType), 比如13表示Contact,15表示Strange. 其他非整数值表示失败reason
+  /// 查询自己在对方列表中的身份级别. CookieEnd value为String(Group::RelationType), 比如13表示Contact,15表示Strange. 其他非整数值表示失败err
   int pgm_c_check_relation(
     ffi.Pointer<ffi.Char> pcCookie,
     ffi.Pointer<ffi.Char> pcPeerUid,
@@ -595,6 +565,7 @@ class FlutterPGMBindings {
   /// 1. 设置组织中某节点(可能是自己也可能是他人)的状态. 比如 A设置自己在组织C中的状态为繁忙: A pgm_nowait_ack_set_status(cookie, orgIdC, uidA, 'Busy', '1', err)
   /// 2. 设置self列表中他人的状态, 供其他设备登录时读取. A pgm_nowait_ack_set_status(cookie, uidA, uidB, '...', '1', err), 暂无明确的应用场景
   int pgm_c_nowait_ack_set_status(
+    ffi.Pointer<ffi.Char> pcCookie,
     ffi.Pointer<ffi.Char> pcGroupId,
     ffi.Pointer<ffi.Char> pcTargetId,
     ffi.Pointer<ffi.Char> pcType,
@@ -603,6 +574,7 @@ class FlutterPGMBindings {
     ffi.Pointer<ffi.Char> pcErr,
   ) {
     return _pgm_c_nowait_ack_set_status(
+      pcCookie,
       pcGroupId,
       pcTargetId,
       pcType,
@@ -619,11 +591,13 @@ class FlutterPGMBindings {
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
               ffi.Int64,
               ffi.Pointer<ffi.Char>)>>('pgm_c_nowait_ack_set_status');
   late final _pgm_c_nowait_ack_set_status =
       _pgm_c_nowait_ack_set_statusPtr.asFunction<
           int Function(
+              ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
@@ -634,11 +608,13 @@ class FlutterPGMBindings {
   /// 1. 设置自己/组织属性(会有组织权限检查), @props传diff
   /// 2. 设置成功后将回调PGM_UPDATE_RPOPS
   int pgm_c_nowait_ack_set_props(
+    ffi.Pointer<ffi.Char> pcCookie,
     ffi.Pointer<ffi.Char> pcGroupId,
     ffi.Pointer<JStrStrMap> pcDiffProps,
     ffi.Pointer<ffi.Char> pcErr,
   ) {
     return _pgm_c_nowait_ack_set_props(
+      pcCookie,
       pcGroupId,
       pcDiffProps,
       pcErr,
@@ -647,12 +623,15 @@ class FlutterPGMBindings {
 
   late final _pgm_c_nowait_ack_set_propsPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<JStrStrMap>,
+          ffi.Int Function(
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<JStrStrMap>,
               ffi.Pointer<ffi.Char>)>>('pgm_c_nowait_ack_set_props');
   late final _pgm_c_nowait_ack_set_props =
       _pgm_c_nowait_ack_set_propsPtr.asFunction<
-          int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<JStrStrMap>,
-              ffi.Pointer<ffi.Char>)>();
+          int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<JStrStrMap>, ffi.Pointer<ffi.Char>)>();
 
   /// 1. 读取任何人/任何组织的属性, 包括但不限于自己的好友/加入的组织
   /// 2. @prefixs 传希望获取的属性key前缀的集合. 若要获取所有属性, prefixs = [""]即可(空串是所有key的前缀)

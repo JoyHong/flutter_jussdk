@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:flutter_jussdk/flutter_account.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
+import 'package:flutter_jussdk/flutter_database.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_jussdk/flutter_tools.dart';
 
 import 'flutter_mtc_notify.dart';
 import 'flutter_pgm_bindings_generated.dart';
+import 'flutter_profile.dart';
 
 class FlutterJusSDKConstants {
 
@@ -80,15 +82,6 @@ class FlutterJusSDK {
     if (!Platform.isWindows) {
       _mtc.Mtc_CliInit(profileDir.path.toNativePointer(), nullptr);
     }
-    _pgm.pgm_c_init(
-        Pointer.fromFunction(_pgmEventProcessor, 1),
-        Pointer.fromFunction(_pgmLoadGroup, 1),
-        Pointer.fromFunction(_pgmUpdateGroup, 1),
-        Pointer.fromFunction(_pgmUpdateStatus, 1),
-        Pointer.fromFunction(_pgmUpdateProps, 1),
-        Pointer.fromFunction(_pgmInsertMsgs, 1),
-        nullptr,
-        1);
     if (Platform.isAndroid) {
       const EventChannel('com.jus.flutter_jussdk.MtcNotify')
           .receiveBroadcastStream()
@@ -102,8 +95,7 @@ class FlutterJusSDK {
       });
     }
     _toPgmIsolateSendPort = await _helperIsolateSendPort;
-    _toPgmIsolateSendPort.send(_PGMIsolateInitLogger(appName, buildNumber, deviceId, logDir));
-    _toPgmIsolateSendPort.send(_PGMIsolateInit());
+    _toPgmIsolateSendPort.send(_PgmIsolateInit(appName, buildNumber, deviceId, logDir));
   }
 
   static void _log(String message) {
@@ -127,16 +119,8 @@ class FlutterJusSDK {
           completer.complete(data);
           return;
         }
-        if (data is _PGMUpdateGroup) {
-          if (tools.isValidUserId(data.uid)) {
-            (account as FlutterJusAccountImpl).onUpdateRelationsNotification(data.relationDiff, data.relationUpdateTime, data.statusDiff, data.statusUpdateTime);
-          }
-          return;
-        }
-        if (data is _PGMUpdateProps) {
-          if (tools.isValidUserId(data.uid)) {
-            (account as FlutterJusAccountImpl).onUpdatePropertiesNotification(data.props);
-          }
+        if (data is _PgmIsolateResponse) {
+          _pgmIsolateResponses.remove(data.id)?.complete();
           return;
         }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
@@ -147,15 +131,23 @@ class FlutterJusSDK {
       _fromPgmIsolateSendPort = sendPort;
 
       final ReceivePort helperReceivePort = ReceivePort()
-        ..listen((dynamic data) {
+        ..listen((dynamic data) async {
           // On the helper isolate listen to requests and respond to them.
-          if (data is _PGMIsolateInitLogger) {
+          if (data is _PgmIsolateInit) {
             // 初始化 pgm isolate 的 logger 对象
             logger = FlutterJusLogger(_mtc, data.appName, data.buildNumber, data.deviceId, data.logDir);
+            // 初始化 pgm isolate 的 tools 对象
+            tools = FlutterJusTools(_mtc);
             return;
           }
-          if (data is _PGMIsolateInit) {
-            _pgm.pgm_c_cb_thread_int(
+          if (data is _PgmIsolateInitProfile) {
+            BackgroundIsolateBinaryMessenger.ensureInitialized(data.rootIsolateToken!);
+            await FlutterJusProfile.initialize(data.uid);
+            sendPort.send(_PgmIsolateResponse(data.id));
+            return;
+          }
+          if (data is _PgmIsolateInitPgm) {
+            _pgm.pgm_c_init(1,
               Pointer.fromFunction(_pgmEventProcessor, 1),
               Pointer.fromFunction(_pgmLoadGroup, 1),
               Pointer.fromFunction(_pgmUpdateGroup, 1),
@@ -164,7 +156,13 @@ class FlutterJusSDK {
               Pointer.fromFunction(_pgmInsertMsgs, 1),
               nullptr,
             );
+            sendPort.send(_PgmIsolateResponse(data.id));
             _pgm.pgm_c_cb_thread_func();
+            return;
+          }
+          if (data is _PgmIsolateFinalizeProfile) {
+            FlutterJusProfile.finalize();
+            sendPort.send(_PgmIsolateResponse(data.id));
             return;
           }
           throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
@@ -179,19 +177,85 @@ class FlutterJusSDK {
     return completer.future;
   }();
 
+  static Future initProfile(String uid) async {
+    Future pgmIsolateInitProfile(String uid) async {
+      Completer completer = Completer();
+      int id = _PgmIsolateRequest.getNewId();
+      _pgmIsolateResponses[id] = completer;
+      _toPgmIsolateSendPort.send(_PgmIsolateInitProfile(id, uid));
+      return completer.future;
+    }
+    await FlutterJusProfile.initialize(uid);
+    return pgmIsolateInitProfile(uid);
+  }
+
+  static Future pgmIsolateInitPgm() async {
+    Completer completer = Completer();
+    int id = _PgmIsolateRequest.getNewId();
+    _pgmIsolateResponses[id] = completer;
+    _toPgmIsolateSendPort.send(_PgmIsolateInitPgm(id));
+    return completer.future
+        .then((v) => Future.delayed(const Duration(seconds: 1)));
+  }
+
+  static Future finalizeProfile() async {
+    Future pgmIsolateFinalizeProfile() async {
+      Completer completer = Completer();
+      int id = _PgmIsolateRequest.getNewId();
+      _pgmIsolateResponses[id] = completer;
+      _toPgmIsolateSendPort.send(_PgmIsolateFinalizeProfile(id));
+      return completer.future;
+    }
+    await pgmIsolateFinalizeProfile();
+    FlutterJusProfile.finalize();
+  }
+
 }
 
-class _PGMIsolateInitLogger {
+class _PgmIsolateInit {
   final String appName;
   final String buildNumber;
   final String deviceId;
   final Directory logDir;
 
-  const _PGMIsolateInitLogger(
+  const _PgmIsolateInit(
       this.appName, this.buildNumber, this.deviceId, this.logDir);
 }
 
-class _PGMIsolateInit {}
+class _PgmIsolateInitProfile extends _PgmIsolateRequest {
+  final String uid;
+  final rootIsolateToken = ServicesBinding.rootIsolateToken;
+
+  _PgmIsolateInitProfile(super.id, this.uid);
+}
+
+class _PgmIsolateInitPgm extends _PgmIsolateRequest {
+  const _PgmIsolateInitPgm(super.id);
+}
+
+class _PgmIsolateFinalizeProfile extends _PgmIsolateRequest {
+  const _PgmIsolateFinalizeProfile(super.id);
+}
+
+class _PgmIsolateRequest {
+  final int id;
+
+  const _PgmIsolateRequest(this.id);
+
+  static int _id = 0;
+
+  static int getNewId() {
+    return ++_id;
+  }
+}
+
+class _PgmIsolateResponse {
+  final int id;
+
+  const _PgmIsolateResponse(this.id);
+}
+
+final Map<int, Completer> _pgmIsolateResponses = {};
 
 final DynamicLibrary _library = _openLibrary('mtc');
 final FlutterMtcBindings _mtc = FlutterMtcBindings(_library);
@@ -210,31 +274,57 @@ int _pgmLoadGroup(
     Pointer<Pointer<JStatusVersMap>> ppcStatusVersMap,
     Pointer<Int64> plStatusTime,
     Pointer<Pointer<JStrStrMap>> ppcProps) {
-  FlutterJusSDK._log('pgmLoadGroup, pcGroupId=${pcGroupId.toDartString()}');
-  (FlutterJusSDK.account as FlutterJusAccountImpl).onLoadNotification(ppcRelations, plRelationUpdateTime, ppcStatusVersMap, plStatusTime, ppcProps);
-  return 0;
+  final String uid = pcGroupId.toDartString();
+  FlutterJusSDK._log('pgmLoadGroup, pcGroupId=$uid');
+  FlutterJusProfile profile = FlutterJusProfile();
+  if (FlutterJusSDK.tools.isValidUserId(uid)) {
+    Map<String, dynamic> relationMap = {};
+    Map<String, dynamic> statusMap = {};
+    for (var relation in profile.relations) {
+      relationMap[relation.uid] = {
+        'cfgs': jsonDecode(relation.cfgs),
+        'tag': relation.tag,
+        'tagName': relation.tagName,
+        'type': relation.type
+      };
+      statusMap[relation.uid] = jsonDecode(relation.status);
+    }
+    ppcRelations.value = jsonEncode(relationMap).toNativePointer();
+    plRelationUpdateTime.value = profile.relationUpdateTime;
+    ppcStatusVersMap.value = jsonEncode(statusMap).toNativePointer();
+    plStatusTime.value = profile.statusUpdateTime;
+    ppcProps.value = jsonEncode(profile.properties).toNativePointer();
+    return 0;
+  }
+  return 1;
 }
 
 int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
     int lUpdateTime, Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
+  final String uid = pcGroupId.toDartString();
+  final Map<String, dynamic> relationDiff = jsonDecode(pcDiff.toDartString());
+  final int relationUpdateTime = lUpdateTime;
+  final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
+  final int statusUpdateTime = lStatusTime;
   FlutterJusSDK._log(
-      'pgmUpdateGroup, pcGroupId=${pcGroupId.toDartString()}, pcDiff=${pcDiff.toDartString()}, lUpdateTime=$lUpdateTime, '
-      'pcStatusVersMap=${pcStatusVersMap.toDartString()}, lStatusTime=$lStatusTime');
-  final pgmUpdateGroup = _PGMUpdateGroup(
-      pcGroupId.toDartString(),
-      jsonDecode(pcDiff.toDartString()),
-      lUpdateTime,
-      jsonDecode(pcStatusVersMap.toDartString()),
-      lStatusTime);
-  try {
-    FlutterJusSDK._fromPgmIsolateSendPort.send(pgmUpdateGroup);
-  } catch (e) {
-    if (FlutterJusSDK.tools.isValidUserId(pgmUpdateGroup.uid)) {
-      (FlutterJusSDK.account as FlutterJusAccountImpl).onUpdateRelationsNotification(
-            pgmUpdateGroup.relationDiff,
-            pgmUpdateGroup.relationUpdateTime,
-            pgmUpdateGroup.statusDiff,
-            pgmUpdateGroup.statusUpdateTime);
+      'pgmUpdateGroup, pcGroupId=$uid, pcDiff=$relationDiff, lUpdateTime=$relationUpdateTime, '
+      'pcStatusVersMap=$statusDiff, lStatusTime=$statusUpdateTime');
+  if (FlutterJusSDK.tools.isValidUserId(uid)) {
+    FlutterJusProfile profile = FlutterJusProfile();
+    if (profile.relationUpdateTime == -1) {
+      List<FlutterJusRelation> relations = [];
+      relationDiff.forEach((uid, map) {
+        relations.add(FlutterJusRelation(
+            uid,
+            jsonEncode(map['cfgs']),
+            map['tag'],
+            map['tagName'],
+            map['type'],
+            jsonEncode(statusDiff[uid])));
+      });
+      profile.addRelations(relations, relationUpdateTime, statusUpdateTime);
+    } else {
+      // TODO
     }
   }
   return 0;
@@ -249,17 +339,11 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
 
 /// 更新列表属性, 如果 pcGroupId 是 uid, 则表示已登陆用户的属性; 否则表示对应群组的属性
 int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
-  FlutterJusSDK._log(
-      'pgmUpdateProps, pcGroupId=${pcGroupId.toDartString()}, pcProps=${pcProps.toDartString()}');
-  final pgmUpdateProps = _PGMUpdateProps(
-      pcGroupId.toDartString(),
-      (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).castString());
-  try {
-    FlutterJusSDK._fromPgmIsolateSendPort.send(pgmUpdateProps);
-  } catch (e) {
-    if (FlutterJusSDK.tools.isValidUserId(pgmUpdateProps.uid)) {
-      (FlutterJusSDK.account as FlutterJusAccountImpl).onUpdatePropertiesNotification(pgmUpdateProps.props);
-    }
+  final String uid = pcGroupId.toDartString();
+  final Map<String, String> props = (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).castString();
+  FlutterJusSDK._log('pgmUpdateProps, pcGroupId=$uid, pcProps=$props');
+  if (FlutterJusSDK.tools.isValidUserId(uid)) {
+    FlutterJusProfile().addProperties(props);
   }
   return 0;
 }
@@ -282,22 +366,4 @@ DynamicLibrary _openLibrary(String libName) {
     return DynamicLibrary.open('$libName.dll');
   }
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
-}
-
-class _PGMUpdateGroup {
-  final String uid;
-  final Map<String, dynamic> relationDiff;
-  final int relationUpdateTime;
-  final Map<String, dynamic> statusDiff;
-  final int statusUpdateTime;
-
-  const _PGMUpdateGroup(this.uid, this.relationDiff, this.relationUpdateTime,
-      this.statusDiff, this.statusUpdateTime);
-}
-
-class _PGMUpdateProps {
-  final String uid;
-  final Map<String, String> props;
-
-  const _PGMUpdateProps(this.uid, this.props);
 }
