@@ -21,7 +21,7 @@ class FlutterJusProfile {
 
   static Future initialize(String uid) async {
     if (_instance != null) {
-      throw 'FlutterJusPgmProfile already be initialized';
+      return;
     }
     _instance = FlutterJusProfile._();
     String path = await FlutterJusTools.getUserPath(uid);
