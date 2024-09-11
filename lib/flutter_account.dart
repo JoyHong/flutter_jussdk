@@ -89,7 +89,7 @@ abstract class FlutterJusAccount {
   /// 退出登陆
   Future<bool> logout();
 
-  /// 注册 push, 默认注册了 Text 消息, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 注册 push, 默认注册了 Text 消息以及好友的请求与响应, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// pushType: push 类型 - pushTypeGCM
   /// pushAppId: push 对应的 key, 如 GCM 是 Project ID (Project settings -> General -> Your project -> Project ID)
   /// pushToken: push token
@@ -408,6 +408,23 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       'Notify.GCM.RegId': pushToken
     };
 
+    /// 注册好友请求与响应的 push, infoType 固定必须是 P2PApply 或 P2PApplyResponse
+    void putPayloadFriendRequest(String infoType) {
+      params['Notify.$pushType.Message.System.$infoType.Payload'] = jsonEncode({
+        'MtcImDisplayNameKey': '\${TargetName}',
+        'MtcImSenderUidKey': '\${TargetId}',
+        'MtcImMsgIdKey': '\${ApplyMsgIdx}',
+        'MtcImImdnIdKey': '\${imdnId}',
+        'MtcImTextKey': '\${Desc}',
+        'MtcImTimeKey': '\${Time}',
+        'TargetType': '\${TargetType}',
+        'MtcImInfoTypeKey': infoType,
+      });
+      params['Notify.$pushType.Message.Text.Expiration'] = expiration;
+      params['Notify.$pushType.Message.Text.ResendCount'] = '0';
+      params['Notify.$pushType.Message.Text.ResendTimeout'] = '20';
+      params['Notify.$pushType.Message.Text.PassThrough'] = '1';
+    }
     /// 注册文本消息 push
     void putPayloadMessageText() {
       params['Notify.$pushType.Message.Text.Payload'] = jsonEncode({
@@ -445,6 +462,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       params['Notify.$pushType.Message.$infoType.PassThrough'] = '1';
     }
 
+    putPayloadFriendRequest('P2PApply');
+    putPayloadFriendRequest('P2PApplyResponse');
     putPayloadMessageText();
     infoTypes?.forEach((infoType) {
       putPayloadMessageInfo(infoType);
