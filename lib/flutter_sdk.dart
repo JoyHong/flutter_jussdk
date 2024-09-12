@@ -12,6 +12,7 @@ import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
+import 'package:system_clock/system_clock.dart';
 
 import 'flutter_mtc_notify.dart';
 import 'flutter_pgm_bindings_generated.dart';
@@ -154,7 +155,7 @@ class FlutterJusSDK {
               Pointer.fromFunction(_pgmUpdateStatus, 1),
               Pointer.fromFunction(_pgmUpdateProps, 1),
               Pointer.fromFunction(_pgmInsertMsgs, 1),
-              nullptr,
+              Pointer.fromFunction(_pgmGetTicks, 1),
             );
             sendPort.send(_PgmIsolateResponse(data.id));
             _pgm.pgm_c_cb_thread_func();
@@ -346,6 +347,11 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
     FlutterJusProfile().addProperties(props);
   }
   return 0;
+}
+
+int _pgmGetTicks() {
+  FlutterJusSDK._log('pgmGetTicks');
+  return SystemClock.elapsedRealtime().inMilliseconds;
 }
 
 int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
