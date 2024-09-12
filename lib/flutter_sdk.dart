@@ -310,7 +310,7 @@ final FlutterPGMBindings _pgm = FlutterPGMBindings(_library);
 
 int _pgmEventProcessor(int event, Pointer<JStrStrMap> pcParams) {
   FlutterJusSDK._log(
-      'pgmEventProcessor, event=$event, pcParams=${pcParams.toDartString()}');
+      'pgmEventProcessor, event=${event.toPgmEventName()}, pcParams=${pcParams.toDartString()}');
   FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateEventProcessor(event, jsonDecode(pcParams.toDartString()) as Map<String, dynamic>));
   return 0;
 }

@@ -31,6 +31,23 @@ extension StringMap on Map<String, String> {
   }
 }
 
+extension PgmEventName on int {
+  String toPgmEventName() {
+    switch(this) {
+      case 0:   return 'InvalidEvent(0)';
+      case 1:   return 'CookieEnd(1)';
+      case 2:   return 'OrgRelSync(2)';
+      case 3:   return 'P2PApply(3)';
+      case 4:   return 'OrgApply(4)';
+      case 5:   return 'OrgInvite(5)';
+      case 6:   return 'P2PApplyResponse(6)';
+      case 7:   return 'OrgApplyResponse(7)';
+      case 8:   return 'OrgInviteResponse(8)';
+      default:  return 'Unknown($this)';
+    }
+  }
+}
+
 class FlutterJusTools {
   final FlutterMtcBindings _mtc;
 

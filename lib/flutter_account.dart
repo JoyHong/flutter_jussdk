@@ -101,6 +101,16 @@ abstract class FlutterJusAccount {
   /// 搜索除本人以外的用户信息, 失败则抛出异常 FlutterJusError
   Future<Map<String, Map<String, String>>> searchFriend({required String username});
 
+  /// 发起添加好友请求, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// uid: 对方的 uid
+  /// tagName: 给对方的备注
+  /// desc: 附带信息
+  /// extraParamMap: 额外的键值对参数
+  Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
+
+  /// 接受好友请求
+  Future acceptFriend();
+
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
@@ -294,6 +304,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         true,
         propList != null ? jsonEncode(propList).toNativePointer() : nullptr) != FlutterJusSDKConstants.ZOK) {
       FlutterJusMtcNotify.removeCookie(cookie);
+      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call Mtc_UeCreate2 did fail');
       completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeCreate2 did fail'));
     }
     return completer.future;
@@ -569,16 +580,56 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       if (error.isEmpty) {
         completer.complete({uid: FlutterJusProfile().getCachedProps(uid).filterKeys(_accountPropNames)});
       } else {
-        completer.completeError(FlutterJusError(FlutterJusAccountConstants.errorFailNotification, message: error));
+        completer.completeError(error.toNotificationError());
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, call pgm_c_get_props did fail');
       FlutterJusPgmNotify.removeCookie(cookie);
+      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, call pgm_c_get_props did fail');
       completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
     }
     return completer.future;
+  }
+
+  @override
+  Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'applyFriend($uid, $tagName, $desc, $extraParamMap)');
+    await _pgmLoginedEndTransformer();
+    Completer<bool> completer = Completer();
+    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      if (error.isEmpty) {
+        completer.complete(true);
+      } else {
+        completer.completeError(error.toNotificationError());
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    if (_pgm.pgm_c_apply_relation(cookie.toString().toNativePointer(),
+        uid.toNativePointer(),
+        _mtc.Mtc_UeDbGetUid(),
+        EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT,
+        desc.toNativePointer(),
+        jsonEncode({
+          // 'cfgs': '',
+          // 'tag': '',
+          'tagName': tagName,
+          'type': EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT
+        }).toNativePointer(),
+        jsonEncode(extraParamMap).toNativePointer(),
+        pcErr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      FlutterJusSDK.logger.i(tag: _tag, message: 'applyFriend fail, call pgm_c_apply_relation did fail');
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_apply_relation did fail'));
+    }
+    return completer.future;
+  }
+
+  @override
+  Future acceptFriend() {
+    // TODO: implement acceptFriend
+    throw UnimplementedError();
   }
 
   @override
@@ -802,6 +853,10 @@ extension _FlutterJusAccountError on String {
     message = map[MtcBuddyReasonDetailKey];
     } catch (ignored) {}
     return FlutterJusError(reason, message: message);
+  }
+
+  FlutterJusError toNotificationError() {
+    return FlutterJusError(FlutterJusAccountConstants.errorFailNotification, message: this);
   }
 }
 
