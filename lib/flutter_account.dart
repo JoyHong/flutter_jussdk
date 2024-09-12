@@ -524,9 +524,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
   @override
   Future<Map<String, Map<String, String>>> searchFriend({required String username}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'search($username)');
+    FlutterJusSDK.logger.i(tag: _tag, message: 'searchFriend($username)');
     if (!(await _connectOkTransformer())) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'search fail, not connected');
+      FlutterJusSDK.logger.i(tag: _tag, message: 'searchFriend fail, not connected');
       throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
     Future<String> Mtc_BuddyQueryUserId(String uri) {
@@ -556,10 +556,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     try {
       uid = await Mtc_BuddyQueryUserId(uri);
     } catch (e) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'search fail, $e');
+      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, $e');
       rethrow;
     }
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
+      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, should not search self');
       throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'should not search self');
     }
     Completer<Map<String, Map<String, String>>> completer = Completer();
@@ -573,6 +574,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     });
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, call pgm_c_get_props did fail');
       FlutterJusPgmNotify.removeCookie(cookie);
       completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
     }
