@@ -24,8 +24,6 @@ class FlutterJusAccountConstants {
   static const int errorDeleteWrongPWD = FlutterJusSDKConstants.errorBaseCode - 2;
   /// 搜索用户失败, 未找到匹配的用户
   static const int errorSearchNotFound = FlutterJusSDKConstants.errorBaseCode - 3;
-  /// 搜索用户失败, 不应该搜索自己
-  static const int errorSearchSelf = FlutterJusSDKConstants.errorBaseCode - 4;
 
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
@@ -545,7 +543,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       rethrow;
     }
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      throw const FlutterJusError(FlutterJusAccountConstants.errorSearchSelf, message: 'should not search self');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'should not search self');
     }
     Completer<Map<String, Map<String, String>>> completer = Completer();
     int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
