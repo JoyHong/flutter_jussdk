@@ -99,7 +99,7 @@ abstract class FlutterJusAccount {
   void setProperties(Map<String, String> props);
 
   /// 搜索除本人以外的用户信息, 失败则抛出异常 FlutterJusError
-  Future<Map<String, Map<String, String>>> search({required String username});
+  Future<Map<String, Map<String, String>>> searchFriend({required String username});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -523,7 +523,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  Future<Map<String, Map<String, String>>> search({required String username}) async {
+  Future<Map<String, Map<String, String>>> searchFriend({required String username}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'search($username)');
     if (!(await _connectOkTransformer())) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'search fail, not connected');

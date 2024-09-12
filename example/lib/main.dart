@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
             }),
             button(text: '自定义测试', onPressed: () {
               // FlutterJusSDK.account.setProperties({'Basic.NickName': 'NameTimestamp#${DateTime.now().millisecondsSinceEpoch}'});
-              FlutterJusSDK.account.search(username: '3845955877'); // 102369_40
+              FlutterJusSDK.account.searchFriend(username: '3845955877'); // 102369_40
             })
           ],
         ),
