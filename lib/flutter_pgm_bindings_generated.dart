@@ -140,18 +140,21 @@ class FlutterPGMBindings {
       .asFunction<int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
 
   int pgm_c_get_cur_time(
+    int curTicks,
     ffi.Pointer<ffi.Int64> plCurTimeMs,
   ) {
     return _pgm_c_get_cur_time(
+      curTicks,
       plCurTimeMs,
     );
   }
 
-  late final _pgm_c_get_cur_timePtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Int64>)>>(
-          'pgm_c_get_cur_time');
-  late final _pgm_c_get_cur_time =
-      _pgm_c_get_cur_timePtr.asFunction<int Function(ffi.Pointer<ffi.Int64>)>();
+  late final _pgm_c_get_cur_timePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Uint64, ffi.Pointer<ffi.Int64>)>>('pgm_c_get_cur_time');
+  late final _pgm_c_get_cur_time = _pgm_c_get_cur_timePtr
+      .asFunction<int Function(int, ffi.Pointer<ffi.Int64>)>();
 
   /// 异常实时上报
   /// SELF_USER_ID RECORD_TIME内部自动添加, 不需要传入
@@ -730,6 +733,7 @@ class FlutterPGMBindings {
           ffi.Pointer<ffi.Char>)>();
 }
 
+/// 具体参数解释, 参见PGMDef.h
 typedef PGM_C_EVENT_PROCESSOR = ffi.Pointer<
     ffi.NativeFunction<
         ffi.Int Function(ffi.Int32 event, ffi.Pointer<JStrStrMap> pcParams)>>;
@@ -896,8 +900,8 @@ typedef PGM_C_INSERT_MSGS = ffi.Pointer<
             ffi.Pointer<JStatusTimes> pcMsgStatuses)>>;
 typedef JSortedMsgs = ffi.Char;
 typedef JStatusTimes = ffi.Char;
-typedef PGM_C_GET_TICKS
-    = ffi.Pointer<ffi.NativeFunction<ffi.Uint64 Function()>>;
+typedef PGM_C_GET_TICKS = ffi.Pointer<
+    ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Uint64> ticks)>>;
 typedef JRelation = ffi.Char;
 typedef JStrSet = ffi.Char;
 typedef JMsgContent = ffi.Char;

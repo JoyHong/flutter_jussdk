@@ -349,9 +349,10 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   return 0;
 }
 
-int _pgmGetTicks() {
+int _pgmGetTicks(Pointer<Uint64> ticks) {
   FlutterJusSDK._log('pgmGetTicks');
-  return SystemClock.elapsedRealtime().inMilliseconds;
+  ticks.value = SystemClock.elapsedRealtime().inMilliseconds;
+  return 0;
 }
 
 int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,

@@ -34,6 +34,9 @@ typedef char JSortedMsgs;   // vector<[lIdx, lTime, pcSender, JMsgContent]>
 extern "C" {
 #endif
 
+/*
+  具体参数解释, 参见PGMDef.h
+*/
 typedef int(*PGM_C_EVENT_PROCESSOR)(enum PGM_EVENT event, const JStrStrMap* pcParams);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +122,7 @@ typedef int (*PGM_C_UPDATE_RPOPS)(const char* pcGroupId, const JStrStrMap* pcPro
 */
 typedef int (*PGM_C_INSERT_MSGS)(const char* pcGroupId, const JSortedMsgs* pcMsgs, const JStatusTimes* pcMsgStatuses);
 
-typedef uint64_t (*PGM_C_GET_TICKS)();
+typedef int (*PGM_C_GET_TICKS)(uint64_t* ticks);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -151,7 +154,7 @@ MTCFUNC int pgm_c_set_cfgs(const JStrStrMap* pcCfgs, char* pcErr);
 */
 MTCFUNC int pgm_c_logined(const char* pcCookie, char* pcErr);
 
-MTCFUNC int pgm_c_get_cur_time(int64_t* plCurTimeMs);
+MTCFUNC int pgm_c_get_cur_time(uint64_t curTicks, int64_t* plCurTimeMs);
 
 /*
   异常实时上报
