@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_jussdk/flutter_account.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,13 +18,13 @@ void main() async {
       appName: packageInfo.appName,
       buildNumber: packageInfo.buildNumber,
       deviceId: 'aa6bbff22d7eff98', // 设备 ID
-      accountPropMap: {
-        FlutterJusAccountConstants.PROP_MTC_INFO_TERMINAL_LANGUAGE_KEY: 'en_US', // 设备的系统语言
-        FlutterJusAccountConstants.PROP_MTC_INFO_TERMINAL_VERSION_KEY: '14', // 设备的系统版本
-        FlutterJusAccountConstants.PROP_MTC_INFO_TERMINAL_MODEL_KEY: 'SM-S9080', // 设备的型号
-        FlutterJusAccountConstants.PROP_MTC_INFO_TERMINAL_VENDOR_KEY: 'samsung', // 设备的牌子
-        FlutterJusAccountConstants.PROP_MTC_INFO_SOFTWARE_VERSION_KEY: packageInfo.buildNumber,
-        FlutterJusAccountConstants.PROP_MTC_INFO_SOFTWARE_VENDOR_KEY: 'googleplay', // app 的渠道
+      deviceProps: {
+        FlutterJusSDKConstants.PROP_MTC_INFO_TERMINAL_LANGUAGE_KEY: 'en_US', // 设备的系统语言
+        FlutterJusSDKConstants.PROP_MTC_INFO_TERMINAL_VERSION_KEY: '14', // 设备的系统版本
+        FlutterJusSDKConstants.PROP_MTC_INFO_TERMINAL_MODEL_KEY: 'SM-S9080', // 设备的型号
+        FlutterJusSDKConstants.PROP_MTC_INFO_TERMINAL_VENDOR_KEY: 'samsung', // 设备的牌子
+        FlutterJusSDKConstants.PROP_MTC_INFO_SOFTWARE_VERSION_KEY: packageInfo.buildNumber,
+        FlutterJusSDKConstants.PROP_MTC_INFO_SOFTWARE_VENDOR_KEY: 'googleplay', // app 的渠道
       },
       logDir: logDir,
       profileDir: profileDir);

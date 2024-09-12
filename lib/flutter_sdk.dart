@@ -35,6 +35,13 @@ class FlutterJusSDKConstants {
   /// 无效, 对应 Mtc.INVALIDID
   static const int INVALIDID = -1;
 
+  static const String PROP_MTC_INFO_TERMINAL_LANGUAGE_KEY = MTC_INFO_TERMINAL_LANGUAGE_KEY;
+  static const String PROP_MTC_INFO_TERMINAL_VERSION_KEY = MTC_INFO_TERMINAL_VERSION_KEY;
+  static const String PROP_MTC_INFO_TERMINAL_MODEL_KEY = MTC_INFO_TERMINAL_MODEL_KEY;
+  static const String PROP_MTC_INFO_TERMINAL_VENDOR_KEY = MTC_INFO_TERMINAL_VENDOR_KEY;
+  static const String PROP_MTC_INFO_SOFTWARE_VERSION_KEY = MTC_INFO_SOFTWARE_VERSION_KEY;
+  static const String PROP_MTC_INFO_SOFTWARE_VENDOR_KEY = MTC_INFO_SOFTWARE_VENDOR_KEY;
+
 }
 
 class FlutterJusSDK {
@@ -74,10 +81,10 @@ class FlutterJusSDK {
     required String deviceId,
     required Directory logDir,
     required Directory profileDir,
-    Map<String, String>? accountPropMap}) async {
+    Map<String, String>? deviceProps}) async {
     logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
     connectivity = FlutterJusConnectivity(_mtc);
-    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, accountPropMap, _mtcNotifyEvents);
+    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, _mtcNotifyEvents);
     message = FlutterJusMessage();
     tools = FlutterJusTools(_mtc);
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());

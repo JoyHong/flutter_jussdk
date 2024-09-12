@@ -55,13 +55,6 @@ class FlutterJusAccountConstants {
   /// 已登出
   static const int stateLoggedOut = 4;
 
-  static const String PROP_MTC_INFO_TERMINAL_LANGUAGE_KEY = MTC_INFO_TERMINAL_LANGUAGE_KEY;
-  static const String PROP_MTC_INFO_TERMINAL_VERSION_KEY = MTC_INFO_TERMINAL_VERSION_KEY;
-  static const String PROP_MTC_INFO_TERMINAL_MODEL_KEY = MTC_INFO_TERMINAL_MODEL_KEY;
-  static const String PROP_MTC_INFO_TERMINAL_VENDOR_KEY = MTC_INFO_TERMINAL_VENDOR_KEY;
-  static const String PROP_MTC_INFO_SOFTWARE_VERSION_KEY = MTC_INFO_SOFTWARE_VERSION_KEY;
-  static const String PROP_MTC_INFO_SOFTWARE_VENDOR_KEY = MTC_INFO_SOFTWARE_VENDOR_KEY;
-
   /// push 类型
   static const String pushTypeGCM = "GCM";
 
@@ -142,7 +135,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   final String _router;
   final String _buildNumber;
   final String _deviceId;
-  final Map<String, String>? _propMap;
+  final Map<String, String>? _deviceProps;
 
   FlutterJusAccountImpl(
       this._mtc,
@@ -151,7 +144,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       this._router,
       this._buildNumber,
       this._deviceId,
-      this._propMap,
+      this._deviceProps,
       StreamController<dynamic> mtcNotifyEvents) {
     mtcNotifyEvents.stream.listen((event) async {
       final String name = event['name'];
@@ -613,7 +606,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _mtc.Mtc_CliApplyDevId(_deviceId.toNativePointer());
     _mtc.Mtc_CliCfgSetAppVer(_buildNumber.toNativePointer());
 
-    _propMap?.forEach((key, value) {
+    _deviceProps?.forEach((key, value) {
       _mtc.Mtc_CliSetProperty(key.toNativePointer(), value.toNativePointer());
     });
 
