@@ -11,6 +11,7 @@ import 'package:flutter_jussdk/flutter_database.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
+import 'package:flutter_jussdk/flutter_pgm_notify.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 import 'package:system_clock/system_clock.dart';
 
@@ -122,6 +123,18 @@ class FlutterJusSDK {
         }
         if (data is _PgmIsolateResponse) {
           _pgmIsolateResponses.remove(data.id)?.complete();
+          return;
+        }
+        if (data is _PgmIsolateEventProcessor) {
+          if (data.event == 1) { // 1 表示 CookieEnd
+            data.params.forEach((cookie, error) {
+              FlutterJusPgmNotify.didCallback(int.parse(cookie), error);
+            });
+          }
+          return;
+        }
+        if (data is _PgmIsolateCacheProps) {
+          FlutterJusProfile().cacheProps(data.uid, data.map);
           return;
         }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
@@ -238,6 +251,20 @@ class _PgmIsolateFinalizeProfile extends _PgmIsolateRequest {
   const _PgmIsolateFinalizeProfile(super.id);
 }
 
+class _PgmIsolateEventProcessor {
+  final int event;
+  final Map<String, dynamic> params;
+
+  const _PgmIsolateEventProcessor(this.event, this.params);
+}
+
+class _PgmIsolateCacheProps {
+  final String uid;
+  final Map<String, String> map;
+
+  const _PgmIsolateCacheProps(this.uid, this.map);
+}
+
 class _PgmIsolateRequest {
   final int id;
 
@@ -265,6 +292,7 @@ final FlutterPGMBindings _pgm = FlutterPGMBindings(_library);
 int _pgmEventProcessor(int event, Pointer<JStrStrMap> pcParams) {
   FlutterJusSDK._log(
       'pgmEventProcessor, event=$event, pcParams=${pcParams.toDartString()}');
+  FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateEventProcessor(event, jsonDecode(pcParams.toDartString()) as Map<String, dynamic>));
   return 0;
 }
 
@@ -338,13 +366,19 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
   return 0;
 }
 
-/// 更新列表属性, 如果 pcGroupId 是 uid, 则表示已登陆用户的属性; 否则表示对应群组的属性
+/// 触发属性的上报
 int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   final String uid = pcGroupId.toDartString();
   final Map<String, String> props = (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).castString();
   FlutterJusSDK._log('pgmUpdateProps, pcGroupId=$uid, pcProps=$props');
   if (FlutterJusSDK.tools.isValidUserId(uid)) {
-    FlutterJusProfile().addProperties(props);
+    if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
+      // 本人的属性, 缓存到本地数据库
+      FlutterJusProfile().addProperties(props);
+    } else {
+      // 其它用户的属性, 缓存到内存
+      FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
+    }
   }
   return 0;
 }

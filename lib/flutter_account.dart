@@ -6,6 +6,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
+import 'package:flutter_jussdk/flutter_pgm_notify.dart';
 import 'package:flutter_jussdk/flutter_profile.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
@@ -21,6 +22,10 @@ class FlutterJusAccountConstants {
 
   /// 账号删除失败, 密码错误
   static const int errorDeleteWrongPWD = FlutterJusSDKConstants.errorBaseCode - 2;
+  /// 搜索用户失败, 未找到匹配的用户
+  static const int errorSearchNotFound = FlutterJusSDKConstants.errorBaseCode - 3;
+  /// 搜索用户失败, 不应该搜索自己
+  static const int errorSearchSelf = FlutterJusSDKConstants.errorBaseCode - 4;
 
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
@@ -102,6 +107,9 @@ abstract class FlutterJusAccount {
   /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
   void setProperties(Map<String, String> props);
 
+  /// 搜索除本人以外的用户信息, 失败则抛出异常 FlutterJusError
+  Future<Map<String, Map<String, String>>> search({required String username});
+
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
@@ -169,12 +177,13 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           _mtc.Mtc_UeDbSetUid(_mtc.Mtc_UeGetUid());
           _mtc.Mtc_ProfSaveProvision();
         }
+        FlutterJusSDK.logger.i(tag: _tag, message: 'logined uid is ${_mtc.Mtc_UeDbGetUid().toDartString()}');
         if (!_autoLogging) {
           await FlutterJusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
         }
         await FlutterJusSDK.pgmIsolateInitPgm();
         Pointer<Char> pcErr = ''.toNativePointer();
-        if (_pgm.pgm_c_logined('0'.toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+        if (_pgm.pgm_c_logined(FlutterJusPgmNotify.cookieLogin.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
           FlutterJusSDK.logger.e(tag: _tag, message: 'pgm_c_logined fail, ${pcErr.toDartString()}');
         }
         for (var callback in _loginCallbacks) {
@@ -506,6 +515,63 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
+  Future<Map<String, Map<String, String>>> search({required String username}) async {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'search($username)');
+    if (!(await _connectOkTransformer())) {
+      FlutterJusSDK.logger.i(tag: _tag, message: 'search fail, not connected');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+    }
+    Future<String> Mtc_BuddyQueryUserId(String uri) {
+      Completer<String> completer = Completer();
+      int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
+        FlutterJusMtcNotify.removeCookie(cookie);
+        if (name == MtcBuddyQueryUserIdOkNotification) {
+          // list length 最多是2, 第一个表示 uri, 第二个表示该 uri 对应的 uid(如果有的话)
+          List<dynamic> list = (jsonDecode(info) as List<dynamic>)[0];
+          if (list.length == 2) {
+            completer.complete(list[1]);
+          } else {
+            completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorSearchNotFound, message: 'not found'));
+          }
+        } else {
+          completer.completeError(info.toBuddyError());
+        }
+      });
+      if (_mtc.Mtc_BuddyQueryUserId(cookie, jsonEncode([uri]).toNativePointer()) != FlutterJusSDKConstants.ZOK) {
+        FlutterJusMtcNotify.removeCookie(cookie);
+        completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_BuddyQueryUserId did fail'));
+      }
+      return completer.future;
+    }
+    String uri = _mtc.Mtc_UserFormUriX(_defUserType.toNativePointer(), username.toNativePointer()).toDartString();
+    String uid;
+    try {
+      uid = await Mtc_BuddyQueryUserId(uri);
+    } catch (e) {
+      FlutterJusSDK.logger.e(tag: _tag, message: 'search fail, $e');
+      rethrow;
+    }
+    if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
+      throw const FlutterJusError(FlutterJusAccountConstants.errorSearchSelf, message: 'should not search self');
+    }
+    Completer<Map<String, Map<String, String>>> completer = Completer();
+    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      if (error.isEmpty) {
+        completer.complete({uid: FlutterJusProfile().getCachedProps(uid)});
+      } else {
+        completer.completeError(FlutterJusError(FlutterJusAccountConstants.errorFailNotification, message: error));
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
+    }
+    return completer.future;
+  }
+
+  @override
   String getLoginUid() {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
     return _mtc.Mtc_UeDbGetUid().toDartString();
@@ -681,6 +747,17 @@ extension _FlutterJusAccountError on String {
       dynamic map = jsonDecode(this);
       reason = map[MtcCliStatusCodeKey];
       message = map[MtcCliReasonKey];
+    } catch (ignored) {}
+    return FlutterJusError(reason, message: message);
+  }
+
+  FlutterJusError toBuddyError() {
+    int reason = FlutterJusAccountConstants.errorFailNotification;
+    String message = '';
+    try {
+    dynamic map = jsonDecode(this);
+    reason = map[MtcBuddyReasonKey];
+    message = map[MtcBuddyReasonDetailKey];
     } catch (ignored) {}
     return FlutterJusError(reason, message: message);
   }

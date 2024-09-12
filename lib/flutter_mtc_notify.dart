@@ -13,7 +13,7 @@ class FlutterJusMtcNotify {
     _callbacks.remove(cookie);
   }
 
-  static didCallback(int cookie, String name, String info) {
+  static void didCallback(int cookie, String name, String info) {
     _callbacks[cookie]?.call(cookie, name, info);
   }
 }

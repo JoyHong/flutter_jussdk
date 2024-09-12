@@ -50,6 +50,7 @@ class FlutterJusProfile {
 
   static void finalize() {
     _instance?._realm.close();
+    _instance?._cacheProps.clear();
     _instance = null;
   }
 
@@ -58,6 +59,8 @@ class FlutterJusProfile {
   }
 
   late Realm _realm;
+  /// 查询出来临时保存的非本人的属性集合
+  final Map<String, Map<String, String>> _cacheProps = {};
 
   FlutterJusProfile._();
 
@@ -107,6 +110,14 @@ class FlutterJusProfile {
       });
       _realm.addAll(properties, update: true);
     });
+  }
+
+  void cacheProps(String uid, Map<String, String> map) {
+    _cacheProps[uid] = map;
+  }
+
+  Map<String, String> getCachedProps(String uid) {
+    return _cacheProps[uid]!;
   }
 
 }
