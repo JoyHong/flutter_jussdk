@@ -1,7 +1,5 @@
 class FlutterJusPgmNotify {
 
-  static const int cookieLogin = 1;
-
   static int _cookie = 1;
   static final Map<int, Function(int, String)> _callbacks = {};
 

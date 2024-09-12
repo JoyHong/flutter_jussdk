@@ -122,6 +122,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   bool _autoLogging = false;
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
+  /// pgm_c_logined CookieEnd 是否回来, 回来了表明数据初始化成功了
+  bool _pgmLoginedEnd = false;
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
@@ -175,8 +177,17 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           await FlutterJusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
         }
         await FlutterJusSDK.pgmIsolateInitPgm();
+        int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+          FlutterJusPgmNotify.removeCookie(cookie);
+          _pgmLoginedEnd = true;
+          for (var callback in _pgmLoginedEndCallbacks) {
+            callback.call();
+          }
+          _pgmLoginedEndCallbacks.clear();
+        });
         Pointer<Char> pcErr = ''.toNativePointer();
-        if (_pgm.pgm_c_logined(FlutterJusPgmNotify.cookieLogin.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+        if (_pgm.pgm_c_logined(cookie.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+          FlutterJusPgmNotify.removeCookie(cookie);
           FlutterJusSDK.logger.e(tag: _tag, message: 'pgm_c_logined fail, ${pcErr.toDartString()}');
         }
         for (var callback in _loginCallbacks) {
@@ -481,10 +492,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   @override
   Future<Map<String, String>> getProperties() async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties()');
-    if (!(await _connectOkTransformer())) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties fail, not connected');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
-    }
+    await _pgmLoginedEndTransformer();
     return (FlutterJusProfile().properties
       ..addAll(FlutterJusProfile().pendingProperties)).filterKeys(_accountPropNames);
   }
@@ -496,7 +504,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, no logged user');
       return;
     }
-    if (_state != FlutterJusAccountConstants.stateLoggedIn) {
+    if (!_pgmLoginedEnd) {
       FlutterJusProfile().addPendingProperties(props);
       return;
     }
@@ -665,6 +673,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeout = 2;
     _reLoggingTimeoutToken?.cancel();
     _reLoggingTimeoutToken = null;
+    _pgmLoginedEnd = false;
     FlutterJusSDK.finalizeProfile();
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
@@ -683,31 +692,30 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   static final List<Function(dynamic)> _loginCallbacks = [];
   static final List<Function> _didLogoutCallbacks = [];
   static final List<CancellationToken> _connectCancellationTokens = [];
+  static final List<Function> _pgmLoginedEndCallbacks = [];
 
-  Future<bool> _provisionOkTransformer() {
-    Completer<bool> completer = Completer();
+  Future<bool> _provisionOkTransformer() async {
     if (_clientUserProvisionOk) {
-      completer.complete(true);
-    } else {
-      _provisionCallbacks.add((result) {
-        completer.complete(result);
-      });
+      return true;
     }
+    Completer<bool> completer = Completer();
+    _provisionCallbacks.add((result) {
+      completer.complete(result);
+    });
     return completer.future;
   }
 
-  Future<bool> _connectOkTransformer() {
+  Future<bool> _connectOkTransformer() async {
+    if (_state == FlutterJusAccountConstants.stateLoggedIn) {
+      return true;
+    }
     Future<bool> impl() {
       Completer<bool> completer = Completer();
-      if (_state == FlutterJusAccountConstants.stateLoggedIn) {
-        completer.complete(true);
-      } else {
-        _loginCallbacks.add((result) {
-          if (result == true) {
-            completer.complete(true);
-          }
-        });
-      }
+      _loginCallbacks.add((result) {
+        if (result == true) {
+          completer.complete(true);
+        }
+      });
       return completer.future;
     }
     CancellationToken cancellationToken = CancellationToken();
@@ -717,6 +725,17 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         .asCancellable(cancellationToken)
         .onError((error, stackTrace) => false)
         .whenComplete(() => _connectCancellationTokens.remove(cancellationToken));
+  }
+
+  Future _pgmLoginedEndTransformer() async {
+    if (_pgmLoginedEnd) {
+      return;
+    }
+    Completer completer = Completer();
+    _pgmLoginedEndCallbacks.add(() {
+      completer.complete();
+    });
+    return completer.future;
   }
 
 }
