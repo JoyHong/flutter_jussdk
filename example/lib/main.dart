@@ -18,6 +18,10 @@ void main() async {
       appName: packageInfo.appName,
       buildNumber: packageInfo.buildNumber,
       deviceId: 'aa6bbff22d7eff98', // 设备 ID
+      accountPropNames: [
+        'Basic.Birthday',
+        'SC.duoNumber'
+      ],
       deviceProps: {
         FlutterJusSDKConstants.PROP_MTC_INFO_TERMINAL_LANGUAGE_KEY: 'en_US', // 设备的系统语言
         FlutterJusSDKConstants.PROP_MTC_INFO_TERMINAL_VERSION_KEY: '14', // 设备的系统版本

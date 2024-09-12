@@ -19,9 +19,15 @@ extension DartToNativePointer on String {
   }
 }
 
-extension CastMap on Map<dynamic, dynamic> {
+extension DynamicMap on Map<dynamic, dynamic> {
   Map<String, String> castString() {
     return map((key, value) => MapEntry(key, value.toString()));
+  }
+}
+
+extension StringMap on Map<String, String> {
+  Map<String, String> filterKeys(List<String> keys) {
+    return Map.fromEntries(entries.where((entry) => keys.contains(entry.key)));
   }
 }
 

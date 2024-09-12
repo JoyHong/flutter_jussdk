@@ -133,6 +133,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   final String _router;
   final String _buildNumber;
   final String _deviceId;
+  final List<String> _accountPropNames;
   final Map<String, String>? _deviceProps;
 
   FlutterJusAccountImpl(
@@ -143,6 +144,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       this._buildNumber,
       this._deviceId,
       this._deviceProps,
+      this._accountPropNames,
       StreamController<dynamic> mtcNotifyEvents) {
     mtcNotifyEvents.stream.listen((event) async {
       final String name = event['name'];
@@ -483,8 +485,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties fail, not connected');
       throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    return FlutterJusProfile().properties
-      ..addAll(FlutterJusProfile().pendingProperties);
+    return (FlutterJusProfile().properties
+      ..addAll(FlutterJusProfile().pendingProperties)).filterKeys(_accountPropNames);
   }
 
   @override
@@ -549,7 +551,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
       FlutterJusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete({uid: FlutterJusProfile().getCachedProps(uid)});
+        completer.complete({uid: FlutterJusProfile().getCachedProps(uid).filterKeys(_accountPropNames)});
       } else {
         completer.completeError(FlutterJusError(FlutterJusAccountConstants.errorFailNotification, message: error));
       }

@@ -81,10 +81,11 @@ class FlutterJusSDK {
     required String deviceId,
     required Directory logDir,
     required Directory profileDir,
+    required List<String> accountPropNames,
     Map<String, String>? deviceProps}) async {
     logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
     connectivity = FlutterJusConnectivity(_mtc);
-    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, _mtcNotifyEvents);
+    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps,accountPropNames, _mtcNotifyEvents);
     message = FlutterJusMessage();
     tools = FlutterJusTools(_mtc);
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());
