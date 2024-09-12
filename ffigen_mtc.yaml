@@ -8,6 +8,7 @@ output: 'lib/flutter_mtc_bindings_generated.dart'
 headers:
   entry-points:
     - 'src/include/lemon/mtc/mtc_acv.h'
+    - 'src/include/lemon/mtc/mtc_buddy.h'
     - 'src/include/lemon/mtc/mtc_cli.h'
     - 'src/include/lemon/mtc/mtc_cli_cb.h'
     - 'src/include/lemon/mtc/mtc_cli_cfg.h'
@@ -21,6 +22,7 @@ headers:
     - 'src/include/lemon/mtc/mtc_util.h'
   include-directives:
     - 'src/include/lemon/mtc/mtc_acv.h'
+    - 'src/include/lemon/mtc/mtc_buddy.h'
     - 'src/include/lemon/mtc/mtc_cli.h'
     - 'src/include/lemon/mtc/mtc_cli_cb.h'
     - 'src/include/lemon/mtc/mtc_cli_cfg.h'

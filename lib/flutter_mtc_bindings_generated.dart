@@ -134,6 +134,618 @@ class FlutterMtcBindings {
   late final _Mtc_AcvPack = _Mtc_AcvPackPtr.asFunction<
       int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
 
+  /// @brief Query buddy's property.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcUri The query user's URI.
+  /// @param [in] pcPropInfo The query property's name(s) info. For just one property, using its name directily.
+  /// For multiple propertys, it must be a string in JSON format,
+  /// which contains an array of string. Each string is the name of property.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyQueryPropertyOkNotification
+  /// or @ref MtcBuddyQueryPropertyDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyQueryProperty(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUri,
+    ffi.Pointer<ffi.Char> pcPropInfo,
+  ) {
+    return _Mtc_BuddyQueryProperty(
+      zCookie,
+      pcUri,
+      pcPropInfo,
+    );
+  }
+
+  late final _Mtc_BuddyQueryPropertyPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddyQueryProperty');
+  late final _Mtc_BuddyQueryProperty = _Mtc_BuddyQueryPropertyPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Query buddy's login information.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcUri The query user's URI.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyQueryLoginPropertiesOkNotification
+  /// or @ref MtcBuddyQueryLoginPropertiesDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyQueryLoginProperties(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUri,
+  ) {
+    return _Mtc_BuddyQueryLoginProperties(
+      zCookie,
+      pcUri,
+    );
+  }
+
+  late final _Mtc_BuddyQueryLoginPropertiesPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddyQueryLoginProperties');
+  late final _Mtc_BuddyQueryLoginProperties = _Mtc_BuddyQueryLoginPropertiesPtr
+      .asFunction<int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Query buddy's login information.
+  ///
+  /// @param [in] zCookie The cookie which you want to set.
+  /// @param [in] pcUri The query user's URI.
+  /// @param [in] iExpireSeconds The expiration seconds for query.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyQueryLoginInfoOkNotification
+  /// or @ref MtcBuddyQueryLoginInfoDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyQueryLoginInfo(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUri,
+    int iExpireSeconds,
+  ) {
+    return _Mtc_BuddyQueryLoginInfo(
+      zCookie,
+      pcUri,
+      iExpireSeconds,
+    );
+  }
+
+  late final _Mtc_BuddyQueryLoginInfoPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Int)>>('Mtc_BuddyQueryLoginInfo');
+  late final _Mtc_BuddyQueryLoginInfo = _Mtc_BuddyQueryLoginInfoPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, int)>();
+
+  /// @brief Query buddy's UserId information.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcInfo  The query information. For just one user, using its URI directily.
+  /// For multiple users, it must be a string in JSON format,
+  /// which contains an array of string. Each string is the user's URI
+  /// which wants be queried.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyQueryUserIdOkNotification
+  /// or @ref MtcBuddyQueryUserIdDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyQueryUserId(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_BuddyQueryUserId(
+      zCookie,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_BuddyQueryUserIdPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddyQueryUserId');
+  late final _Mtc_BuddyQueryUserId = _Mtc_BuddyQueryUserIdPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Query buddy's AccountId information.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcInfo  The query information. For just one user, using its UserId directily.
+  /// For multiple users, it must be a string in JSON format,
+  /// which contains an array of string. Each string is the user's UserId
+  /// which wants be queried.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyQueryAccountIdOkNotification
+  /// or @ref MtcBuddyQueryAccountIdDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyQueryAccountId(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_BuddyQueryAccountId(
+      zCookie,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_BuddyQueryAccountIdPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddyQueryAccountId');
+  late final _Mtc_BuddyQueryAccountId = _Mtc_BuddyQueryAccountIdPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Query users' login status.
+  ///
+  /// @param  zCookie The cookie value
+  /// @param  pcInfo  For just one user, using its URI directily.
+  /// For multiple users, it is a JSON array, each item is the string of user's URI.
+  /// @param  pcTypes The query status type. ZNULL for all.
+  /// For just one type, using its type stinrg directily.
+  /// For multiple types, it is a JSON array, each item is the string of type.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyQueryUsersStatusOkNotification
+  /// or @ref MtcBuddyQueryUsersStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyQueryUsersStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+    ffi.Pointer<ffi.Char> pcTypes,
+  ) {
+    return _Mtc_BuddyQueryUsersStatus(
+      zCookie,
+      pcInfo,
+      pcTypes,
+    );
+  }
+
+  late final _Mtc_BuddyQueryUsersStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddyQueryUsersStatus');
+  late final _Mtc_BuddyQueryUsersStatus =
+      _Mtc_BuddyQueryUsersStatusPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Refresh all relations
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  qwUpdateTime The start time point to refresh
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyRefreshOkNotification
+  /// or @ref MtcBuddyRefreshDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyRefresh(
+    int zCookie,
+    int qwUpdateTime,
+  ) {
+    return _Mtc_BuddyRefresh(
+      zCookie,
+      qwUpdateTime,
+    );
+  }
+
+  late final _Mtc_BuddyRefreshPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Size, ffi.LongLong)>>(
+          'Mtc_BuddyRefresh');
+  late final _Mtc_BuddyRefresh =
+      _Mtc_BuddyRefreshPtr.asFunction<int Function(int, int)>();
+
+  /// @brief Add relation
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  iRelationType The relation type, @ref EN_MTC_BUDDY_RELATION_TYPE
+  /// @param  pcUri The user URI.
+  /// @param  pcDisplayName The display name of the relation
+  /// @param  pcTag The tag info of the relation.
+  /// @param  pcCfgs The cfgs info of the relation.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyAddRelationOkNotification
+  /// or @ref MtcBuddyAddRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyAddRelation(
+    int zCookie,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcUri,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcCfgs,
+  ) {
+    return _Mtc_BuddyAddRelation(
+      zCookie,
+      iRelationType,
+      pcUri,
+      pcDisplayName,
+      pcTag,
+      pcCfgs,
+    );
+  }
+
+  late final _Mtc_BuddyAddRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddyAddRelation');
+  late final _Mtc_BuddyAddRelation = _Mtc_BuddyAddRelationPtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Update relation
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  iRelationType The relation type, @ref EN_MTC_BUDDY_RELATION_TYPE
+  /// @param  pcUri The UserID
+  /// @param  pcDisplayName The display name of the relation
+  /// @param  pcTag The tag info of the relation.
+  /// @param  pcInfo The properties information in JSON.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyUpdateRelationOkNotification
+  /// or @ref MtcBuddyUpdateRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyUpdateRelation(
+    int zCookie,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcUri,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcCfgs,
+  ) {
+    return _Mtc_BuddyUpdateRelation(
+      zCookie,
+      iRelationType,
+      pcUri,
+      pcDisplayName,
+      pcTag,
+      pcCfgs,
+    );
+  }
+
+  late final _Mtc_BuddyUpdateRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Int,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddyUpdateRelation');
+  late final _Mtc_BuddyUpdateRelation = _Mtc_BuddyUpdateRelationPtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Remove relation
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUri The UserID
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyRemoveRelationOkNotification
+  /// or @ref MtcBuddyRemoveRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyRemoveRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUri,
+  ) {
+    return _Mtc_BuddyRemoveRelation(
+      zCookie,
+      pcUri,
+    );
+  }
+
+  late final _Mtc_BuddyRemoveRelationPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddyRemoveRelation');
+  late final _Mtc_BuddyRemoveRelation = _Mtc_BuddyRemoveRelationPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set status of mine to one buddy.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUid The uid of the user
+  /// @param  pcKey The status key
+  /// @param  pcValue The status value
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddySetMyStatusOkNotification
+  /// or @ref MtcBuddySetMyStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddySetMyStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUid,
+    ffi.Pointer<ffi.Char> pcKey,
+    ffi.Pointer<ffi.Char> pcValue,
+  ) {
+    return _Mtc_BuddySetMyStatus(
+      zCookie,
+      pcUid,
+      pcKey,
+      pcValue,
+    );
+  }
+
+  late final _Mtc_BuddySetMyStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddySetMyStatus');
+  late final _Mtc_BuddySetMyStatus = _Mtc_BuddySetMyStatusPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Get status of my buddies.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUids The uid of the user, or a string which is a JSON array, each item
+  /// is the uid of the user.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyGetRelationStatusOkNotification
+  /// or @ref MtcBuddyGetRelationStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyGetRelationStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUids,
+  ) {
+    return _Mtc_BuddyGetRelationStatus(
+      zCookie,
+      pcUids,
+    );
+  }
+
+  late final _Mtc_BuddyGetRelationStatusPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddyGetRelationStatus');
+  late final _Mtc_BuddyGetRelationStatus = _Mtc_BuddyGetRelationStatusPtr
+      .asFunction<int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set batch relations
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcInfo The string in JSON, which contains
+  /// @ref MtcBuddyListToAddKey, @ref MtcBuddyListToUpdateKey, @ref MtcBuddyListToRemoveKey.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddySetRelationsOkNotification
+  /// or @ref MtcBuddySetRelationsDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddySetRelations(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcInfo,
+  ) {
+    return _Mtc_BuddySetRelations(
+      zCookie,
+      pcInfo,
+    );
+  }
+
+  late final _Mtc_BuddySetRelationsPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddySetRelations');
+  late final _Mtc_BuddySetRelations = _Mtc_BuddySetRelationsPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Apply relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUri The uri or uid of the user.
+  /// @param  iRelationType The relation type, @ref EN_MTC_BUDDY_RELATION_TYPE.
+  /// @param  pcDescription The description about how you find the relation.
+  /// @param  pcTag The tag of user.
+  /// @param  pcTagName The tagname of user.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyApplyRelationOkNotification
+  /// or @ref MtcBuddyApplyRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyApplyRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUri,
+    int iRelationType,
+    ffi.Pointer<ffi.Char> pcDescription,
+    ffi.Pointer<ffi.Char> pcTag,
+    ffi.Pointer<ffi.Char> pcTagName,
+  ) {
+    return _Mtc_BuddyApplyRelation(
+      zCookie,
+      pcUri,
+      iRelationType,
+      pcDescription,
+      pcTag,
+      pcTagName,
+    );
+  }
+
+  late final _Mtc_BuddyApplyRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.UnsignedInt,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddyApplyRelation');
+  late final _Mtc_BuddyApplyRelation = _Mtc_BuddyApplyRelationPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, int, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Accept relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  dwMsgId The message id of apply request.
+  /// @param  pcDisplayName The display name of the relation.
+  /// @param  pcTag The tag info of the relation that may contains
+  /// @ref MtcGroupTagKey.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyAcceptRelationOkNotification
+  /// or @ref MtcBuddyAcceptRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyAcceptRelation(
+    int zCookie,
+    int dwMsgId,
+    ffi.Pointer<ffi.Char> pcDisplayName,
+    ffi.Pointer<ffi.Char> pcTag,
+  ) {
+    return _Mtc_BuddyAcceptRelation(
+      zCookie,
+      dwMsgId,
+      pcDisplayName,
+      pcTag,
+    );
+  }
+
+  late final _Mtc_BuddyAcceptRelationPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Size, ffi.LongLong, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddyAcceptRelation');
+  late final _Mtc_BuddyAcceptRelation = _Mtc_BuddyAcceptRelationPtr.asFunction<
+      int Function(int, int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Check relation.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcTargetUid The target user uid or uri.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyCheckRelationOkNotification
+  /// or @ref MtcBuddyCheckRelationDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyCheckRelation(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcTargetUid,
+  ) {
+    return _Mtc_BuddyCheckRelation(
+      zCookie,
+      pcTargetUid,
+    );
+  }
+
+  late final _Mtc_BuddyCheckRelationPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Int Function(ffi.Size, ffi.Pointer<ffi.Char>)>>(
+      'Mtc_BuddyCheckRelation');
+  late final _Mtc_BuddyCheckRelation = _Mtc_BuddyCheckRelationPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set transient status of mine to one buddy.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUid The uid of the user
+  /// @param  pcKey The status key
+  /// @param  pcValue The status value
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddySetMyStatusOkNotification
+  /// or @ref MtcBuddySetMyStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddySetTransientStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUid,
+    ffi.Pointer<ffi.Char> pcKey,
+    ffi.Pointer<ffi.Char> pcValue,
+  ) {
+    return _Mtc_BuddySetTransientStatus(
+      zCookie,
+      pcUid,
+      pcKey,
+      pcValue,
+    );
+  }
+
+  late final _Mtc_BuddySetTransientStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddySetTransientStatus');
+  late final _Mtc_BuddySetTransientStatus =
+      _Mtc_BuddySetTransientStatusPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Set persistent status of mine to one buddy.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUid The uid of the user
+  /// @param  pcKey The status key
+  /// @param  pcValue The status value
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddySetMyStatusOkNotification
+  /// or @ref MtcBuddySetMyStatusDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddySetPersistentStatus(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUid,
+    ffi.Pointer<ffi.Char> pcKey,
+    ffi.Pointer<ffi.Char> pcValue,
+  ) {
+    return _Mtc_BuddySetPersistentStatus(
+      zCookie,
+      pcUid,
+      pcKey,
+      pcValue,
+    );
+  }
+
+  late final _Mtc_BuddySetPersistentStatusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>>('Mtc_BuddySetPersistentStatus');
+  late final _Mtc_BuddySetPersistentStatus =
+      _Mtc_BuddySetPersistentStatusPtr.asFunction<
+          int Function(int, ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>)>();
+
+  /// @brief Im Push.
+  ///
+  /// @param  zCookie The cookie value.
+  /// @param  pcUid The uid of the user.
+  /// @param  bImPush is im push.
+  ///
+  /// @retval 0 on invoke this interface successfully. The result will notify
+  /// to user with @ref MtcBuddyImPushOkNotification
+  /// or @ref MtcBuddyImPushDidFailNotification.
+  /// @retval 1 failed
+  int Mtc_BuddyImPush(
+    int zCookie,
+    ffi.Pointer<ffi.Char> pcUid,
+    bool bImPush,
+  ) {
+    return _Mtc_BuddyImPush(
+      zCookie,
+      pcUid,
+      bImPush,
+    );
+  }
+
+  late final _Mtc_BuddyImPushPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Size, ffi.Pointer<ffi.Char>, ffi.Bool)>>('Mtc_BuddyImPush');
+  late final _Mtc_BuddyImPush = _Mtc_BuddyImPushPtr.asFunction<
+      int Function(int, ffi.Pointer<ffi.Char>, bool)>();
+
   /// @brief Initialize Client Resource.
   ///
   /// @param [in] pcProfDir Profile directory
@@ -6295,6 +6907,131 @@ class FlutterMtcBindings {
           ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>();
 }
 
+/// @brief Failure reasons.
+abstract class EN_MTC_BUDDY_REASON_TYPE {
+  /// < @brief Base of reason number.
+  static const int EN_MTC_BUDDY_REASON_BASE = 2000;
+
+  /// < @brief Internal error get agent failed.
+  static const int EN_MTC_BUDDY_REASON_GET_AGENT = 2001;
+
+  /// < @brief Server error.
+  static const int EN_MTC_BUDDY_REASON_SERVER = 2002;
+
+  /// < @brief Server error update time invalid.
+  static const int EN_MTC_BUDDY_REASON_SERVER_UPDATE_TIME_INVALID = 2003;
+
+  /// < @brief Server error permission denied.
+  static const int EN_MTC_BUDDY_REASON_SERVER_PERMISSION_DENIED = 2004;
+
+  /// < @brief Server error uid is not found.
+  static const int EN_MTC_BUDDY_REASON_SERVER_UID_NOT_FOUND = 2005;
+
+  /// < @brief Server error group id invalid.
+  static const int EN_MTC_BUDDY_REASON_SERVER_GROUP_ID_INVALID = 2006;
+
+  /// < @brief Server error change relation that not exists.
+  static const int EN_MTC_BUDDY_REASON_SERVER_CHANGE_NOT_EXISTS = 2007;
+
+  /// < @brief Server error add relation that already exists.
+  static const int EN_MTC_BUDDY_REASON_SERVER_ADD_ALREADY_EXISTS = 2008;
+
+  /// < @brief Server error add self.
+  static const int EN_MTC_BUDDY_REASON_SERVER_ADD_SELF = 2009;
+
+  /// < @brief Server error relation type invalid.
+  static const int EN_MTC_BUDDY_REASON_SERVER_RELATION_TYPE_INVALID = 2010;
+
+  /// < @brief Server error remove relation that not exists.
+  static const int EN_MTC_BUDDY_REASON_SERVER_REMOVE_NOT_EXIST = 2011;
+
+  /// < @brief Server error status type invalid.
+  static const int EN_MTC_BUDDY_REASON_SERVER_STATUS_TYPE_INVALID = 2012;
+
+  /// < @brief Server error only one owner in group.
+  static const int EN_MTC_BUDDY_REASON_SERVER_WRITE_OWNER_ERROR = 2013;
+
+  /// < @brief Server error try to set write only prop.
+  static const int EN_MTC_BUDDY_REASON_SERVER_SET_WRITE_PROP = 2014;
+
+  /// < @brief Server error apply type granted.
+  static const int EN_MTC_BUDDY_REASON_SERVER_APPLY_TYPE_GRANTED = 2015;
+
+  /// < @brief Server error lack of org name.
+  static const int EN_MTC_BUDDY_REASON_SERVER_LACK_OF_ORG_NAME = 2016;
+
+  /// < @brief Server error unknow org type.
+  static const int EN_MTC_BUDDY_REASON_SERVER_UNKNOW_ORG_TYPE = 2017;
+
+  /// < @brief Server error not assign self as owner.
+  static const int EN_MTC_BUDDY_REASON_SERVER_OWNER_NOT_INVOKER = 2018;
+
+  /// < @brief Server error not in relation list of target.
+  static const int EN_MTC_BUDDY_REASON_SERVER_NOT_IN_GROUP = 2019;
+
+  /// < @brief Server error block by blacklist.
+  static const int EN_MTC_BUDDY_REASON_SERVER_BLACKLIST = 2020;
+
+  /// < @brief Server error capacity of the group is full.
+  static const int EN_MTC_BUDDY_REASON_SERVER_CAPACITY_FULL = 2021;
+
+  /// < @brief Server error caller not belong to the group.
+  static const int EN_MTC_BUDDY_REASON_SERVER_NOT_BELOG_OT_ORG = 2022;
+
+  /// < @brief Server error try to change the member who has higher level .
+  static const int EN_MTC_BUDDY_REASON_SERVER_WRITE_EXCEED_RIGHT = 2023;
+
+  /// < @brief Server error try to connect db server .
+  static const int EN_MTC_BUDDY_REASON_SERVER_DBERROR = 2024;
+
+  /// < @brief Server error target type granted.
+  static const int EN_MTC_BUDDY_REASON_SERVER_TARGET_TYPE_GRANTED = 2025;
+
+  /// < @brief Server error apply message expire.
+  static const int EN_MTC_BUDDY_REASON_SERVER_APPLY_MSG_EXPIRE = 2026;
+
+  /// < @brief Query UID failed.
+  static const int EN_MTC_BUDDY_REASON_QUERY_UID = 2027;
+
+  /// < @brief Buddy not found.
+  static const int EN_MTC_BUDDY_REASON_BUDDY_NOT_FOUND = 2028;
+
+  /// < @brief Property not exist.
+  static const int EN_MTC_BUDDY_REASON_NO_PROPERTY = 2029;
+
+  /// < @brief Request timeout.
+  static const int EN_MTC_BUDDY_REASON_TIMEOUT = 2030;
+
+  /// < @brief Request group id deleted.
+  static const int EN_MTC_BUDDY_REASON_SERVER_GROUP_ID_DELETED = 2031;
+}
+
+/// @brief Relation type.
+abstract class EN_MTC_BUDDY_RELATION_TYPE {
+  static const int EN_MTC_BUDDY_RELATION_WITH_PERSON = 11;
+
+  /// < @brief Close friend.
+  static const int EN_MTC_BUDDY_RELATION_CLOSE_FRIEND = 11;
+
+  /// < @brief Friend.
+  static const int EN_MTC_BUDDY_RELATION_FRIEND = 12;
+
+  /// < @brief Contact.
+  static const int EN_MTC_BUDDY_RELATION_CONTACT = 13;
+
+  /// < @brief Follow.
+  static const int EN_MTC_BUDDY_RELATION_FOLLOW = 14;
+
+  /// < @brief Stragner.
+  static const int EN_MTC_BUDDY_RELATION_STRANGER = 15;
+
+  /// < @brief Blacklist.
+  static const int EN_MTC_BUDDY_RELATION_BLACKLIST = 16;
+
+  /// < @brief System.
+  static const int EN_MTC_BUDDY_RELATION_SYSTEM = 18;
+}
+
 /// @brief MTC client state.
 abstract class EN_MTC_CLI_STATE_TYPE {
   /// < @brief Client is invalid.
@@ -6729,6 +7466,195 @@ const String MtcParmAcvCommitPaths = 'Paths';
 const String MtcParmAcvAppInfo = 'AppInfo';
 
 const String MtcParmAcvAppKey = 'AppKey';
+
+const String MtcBuddyUriKey = 'UserUri';
+
+const String MtcBuddyUidKey = 'Rid';
+
+const String MtcBuddyInviteeUidKey = 'InviteeUid';
+
+const String MtcBuddyReasonKey = 'MtcBuddyReasonKey';
+
+const String MtcBuddyReasonDetailKey = 'ReasonDetail';
+
+const String MtcBuddyPropertyKey = 'MtcBuddyPropertyKey';
+
+const String MtcBuddyStatusKey = 'Status';
+
+const String MtcBuddyStatusNameKey = 'MtcBuddyStatusNameKey';
+
+const String MtcBuddyStatusValueKey = 'MtcBuddyStatusValueKey';
+
+const String MtcBuddyPropertyDateKey = 'Date';
+
+const String MtcBuddyPropertyBrandKey = 'Brand';
+
+const String MtcBuddyPropertyModelKey = 'Model';
+
+const String MtcBuddyPropertyVersionKey = 'Ver';
+
+const String MtcBuddyPropertyAppVersionKey = 'AppVer';
+
+const String MtcBuddyUpdateTimeKey = 'UpdateTime';
+
+const String MtcBuddyBaseTimeKey = 'BaseTime';
+
+const String MtcBuddyTimeKey = 'Time';
+
+const String MtcBuddyIsPartialUpdateKey = 'IsPartialUpdate';
+
+const String MtcBuddyRelationTypeKey = 'RelationType';
+
+const String MtcBuddyDisplayNameKey = 'DisplayName';
+
+const String MtcBuddyCfgsKey = 'Cfgs';
+
+const String MtcBuddyTagKey = 'Tag';
+
+const String MtcBuddyRelationListKey = 'RelationList';
+
+const String MtcBuddyAddedRelationListKey = 'AddedRelationList';
+
+const String MtcBuddyUpdatedRelationListKey = 'UpdatedRelationList';
+
+const String MtcBuddyRemovedRelationListKey = 'RemovedRelationList';
+
+const String MtcBuddyUpdatedRelationKey = 'MtcBuddyUpdatedRelationKey';
+
+const String MtcBuddyListToAddKey = 'ListToAdd';
+
+const String MtcBuddyListToUpdateKey = 'ListToUpdate';
+
+const String MtcBuddyListToRemoveKey = 'ListToRemove';
+
+const String MtcBuddyStatusListKey = 'StatusList';
+
+const String MtcBuddyApplyIdKey = 'ApplyId';
+
+const String MtcBuddyMsgIdKey = 'MsgId';
+
+const String MtcBuddyBoxKey = 'Box';
+
+const String MtcBuddyApplyDescriptionKey = 'Description';
+
+const String MtcBuddyImPushKey = 'ImPush';
+
+const String MtcBuddyQueryPropertyOkNotification =
+    'MtcBuddyQueryPropertyOkNotification';
+
+const String MtcBuddyQueryPropertyDidFailNotification =
+    'MtcBuddyQueryPropertyDidFailNotification';
+
+const String MtcBuddyQueryLoginPropertiesOkNotification =
+    'MtcBuddyQueryLoginPropertiesOkNotification';
+
+const String MtcBuddyQueryLoginPropertiesDidFailNotification =
+    'MtcBuddyQueryLoginPropertiesDidFailNotification';
+
+const String MtcBuddyQueryLoginInfoOkNotification =
+    'MtcBuddyQueryLoginInfoOkNotification';
+
+const String MtcBuddyQueryLoginInfoDidFailNotification =
+    'MtcBuddyQueryLoginInfoDidFailNotification';
+
+const String MtcBuddyQueryUserIdOkNotification =
+    'MtcBuddyQueryUserIdOkNotification';
+
+const String MtcBuddyQueryUserIdDidFailNotification =
+    'MtcBuddyQueryUserIdDidFailNotification';
+
+const String MtcBuddyQueryAccountIdOkNotification =
+    'MtcBuddyQueryAccountIdOkNotification';
+
+const String MtcBuddyQueryAccountIdDidFailNotification =
+    'MtcBuddyQueryAccountIdDidFailNotification';
+
+const String MtcBuddyQueryUsersStatusOkNotification =
+    'MtcBuddyQueryUsersStatusOkNotification';
+
+const String MtcBuddyQueryUsersStatusDidFailNotification =
+    'MtcBuddyQueryUsersStatusDidFailNotification';
+
+const String MtcBuddyRefreshOkNotification = 'MtcBuddyRefreshOkNotification';
+
+const String MtcBuddyRefreshDidFailNotification =
+    'MtcBuddyRefreshDidFailNotification';
+
+const String MtcBuddyChangedNotification = 'MtcBuddyChangedNotification';
+
+const String MtcBuddyAddRelationOkNotification =
+    'MtcBuddyAddRelationOkNotification';
+
+const String MtcBuddyAddRelationDidFailNotification =
+    'MtcBuddyAddRelationDidFailNotification';
+
+const String MtcBuddyUpdateRelationOkNotification =
+    'MtcBuddyUpdateRelationOkNotification';
+
+const String MtcBuddyUpdateRelationDidFailNotification =
+    'MtcBuddyUpdateRelationDidFailNotification';
+
+const String MtcBuddyRemoveRelationOkNotification =
+    'MtcBuddyRemoveRelationOkNotification';
+
+const String MtcBuddyRemoveRelationDidFailNotification =
+    'MtcBuddyRemoveRelationDidFailNotification';
+
+const String MtcBuddySetMyStatusOkNotification =
+    'MtcBuddySetMyStatusOkNotification';
+
+const String MtcBuddySetMyStatusDidFailNotification =
+    'MtcBuddySetMyStatusDidFailNotification';
+
+const String MtcBuddyStatusChangedNotification =
+    'MtcBuddyStatusChangedNotification';
+
+const String MtcBuddyGetRelationStatusOkNotification =
+    'MtcBuddyGetRelationStatusOkNotification';
+
+const String MtcBuddyGetRelationStatusDidFailNotification =
+    'MtcBuddyGetRelationStatusDidFailNotification';
+
+const String MtcBuddySetRelationsOkNotification =
+    'MtcBuddySetRelationsOkNotification';
+
+const String MtcBuddySetRelationsDidFailNotification =
+    'MtcBuddySetRelationsDidFailNotification';
+
+const String MtcBuddyApplyRelationOkNotification =
+    'MtcBuddyApplyRelationOkNotification';
+
+const String MtcBuddyApplyRelationDidFailNotification =
+    'MtcBuddyApplyRelationDidFailNotification';
+
+const String MtcBuddyAcceptRelationOkNotification =
+    'MtcBuddyAcceptRelationOkNotification';
+
+const String MtcBuddyAcceptRelationDidFailNotification =
+    'MtcBuddyAcceptRelationDidFailNotification';
+
+const String MtcBuddyApplyReceivedNotification =
+    'MtcBuddyApplyReceivedNotification';
+
+const String MtcBuddyApplyCompletedNotification =
+    'MtcBuddyApplyCompletedNotification';
+
+const String MtcBuddyCheckRelationOkNotification =
+    'MtcBuddyCheckRelationOkNotification';
+
+const String MtcBuddyCheckRelationDidFailNotification =
+    'MtcBuddyCheckRelationDidFailNotification';
+
+const String MtcBuddyImPushOkNotification = 'MtcBuddyImPushOkNotification';
+
+const String MtcBuddyImPushDidFailNotification =
+    'MtcBuddyImPushDidFailNotification';
+
+const String MTC_ERROR_BUDDY_NOT_FOUND = 'MtcBuddy.NotFound';
+
+const String MTC_ERROR_BUDDY_NO_PROPERTY = 'MtcBuddy.NoProperty';
+
+const String MTC_ERROR_BUDDY_TIMEOUT = 'MtcBuddy.Timeout';
 
 const int MTC_REG_STATE_IDLE = 0;
 
