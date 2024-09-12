@@ -124,6 +124,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   CancellationToken? _reLoggingTimeoutToken;
   /// pgm_c_logined CookieEnd 是否回来, 回来了表明数据初始化成功了
   bool _pgmLoginedEnd = false;
+  /// 是否正在 pgm_c_refresh_main 中
+  bool _pgmRefreshing = false;
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
@@ -232,8 +234,13 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _logoutOk(reason, false);
         return;
       }
+      if (name == MtcCliReconnectOkNotification) {
+        pgmRefreshMain();
+        return;
+      }
     });
     FlutterJusSDK.connectivity.addOnConnectivityChangedListener((oldType, newType) {
+      pgmRefreshMain();
       if (oldType == FlutterJusConnectivityConstants.typeUnavailable &&
           _state == FlutterJusAccountConstants.stateLoginFailed &&
           _autoLogging) {
@@ -674,6 +681,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _reLoggingTimeoutToken?.cancel();
     _reLoggingTimeoutToken = null;
     _pgmLoginedEnd = false;
+    _pgmRefreshing = false;
     FlutterJusSDK.finalizeProfile();
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
@@ -686,6 +694,26 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _mtc.Mtc_ProfSaveProvision();
     _mtc.Mtc_CliStop();
     _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
+  }
+
+  /// 刷新消息和个人列表, 一般在3处调用, 网络切换、回到前台以及 ReconnectOk 回调
+  void pgmRefreshMain() {
+    if (!_pgmLoginedEnd || _pgmRefreshing) {
+      return;
+    }
+    FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain()');
+    _pgmRefreshing = true;
+    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      _pgmRefreshing = false;
+      FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain complete, error=$error');
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    if (_pgm.pgm_c_refresh_main(cookie.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      _pgmRefreshing = false;
+      FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain fail, ${pcErr.toDartString()}');
+    }
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];

@@ -108,6 +108,17 @@ class FlutterJusSDK {
     _toPgmIsolateSendPort.send(_PgmIsolateInit(appName, buildNumber, deviceId, logDir));
   }
 
+  /// 记录应用进入了前台
+  static void onAppStart() {
+    logger.i(tag: _tag, message: 'onAppStart');
+    (account as FlutterJusAccountImpl).pgmRefreshMain();
+  }
+
+  /// 记录应用进入了后台
+  static void onAppStop() {
+    logger.i(tag: _tag, message: 'onAppStop');
+  }
+
   static void _log(String message) {
     logger.i(tag: _tag, message: message);
   }
