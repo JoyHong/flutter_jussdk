@@ -12,6 +12,7 @@ import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
+import 'package:flutter_jussdk/flutter_relation.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 import 'package:system_clock/system_clock.dart';
 
@@ -148,10 +149,17 @@ class FlutterJusSDK {
           return;
         }
         if (data is _PgmIsolateEventProcessor) {
-          if (data.event == 1) { // 1 表示 CookieEnd
+          if (data.event == 1) { // CookieEnd
             data.params.forEach((cookie, error) {
               FlutterJusPgmNotify.didCallback(int.parse(cookie), error);
             });
+          } else if (data.event == 3) { // 好友申请、群邀请、群申请
+            if (data.params['ApplicantId'] != _mtc.Mtc_UeDbGetUid().toDartString()) { // ApplicantId 表示申请发起人, 这里过滤本人发起的申请
+              if (data.params['GroupId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
+                // 此时表示收到其他人发起的好友请求
+                (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveApplyFriend(FlutterJusApplyFriend.fromJson(data.params));
+              }
+            }
           }
           return;
         }

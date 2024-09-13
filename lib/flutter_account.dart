@@ -118,7 +118,11 @@ abstract class FlutterJusAccount {
   /// 获取当前的状态
   int getState();
 
+  /// 登陆状态变化监听
   late Stream<FlutterJusAccountState> stateUpdated;
+
+  /// 收到好友关系变化申请的监听
+  late Stream<FlutterJusApplyFriend> applyFriendUpdated;
 }
 
 class FlutterJusAccountImpl extends FlutterJusAccount {
@@ -141,6 +145,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
   @override
   Stream<FlutterJusAccountState> get stateUpdated => _stateEvents.stream;
+
+  final StreamController<FlutterJusApplyFriend> _applyFriendEvents = StreamController.broadcast();
+  @override
+  Stream<FlutterJusApplyFriend> get applyFriendUpdated => _applyFriendEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -768,6 +776,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       _pgmRefreshing = false;
       FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain fail, ${pcErr.toDartString()}');
     }
+  }
+
+  /// 收到好友关系变化的申请回调
+  void onReceiveApplyFriend(FlutterJusApplyFriend applyFriend) {
+    _applyFriendEvents.add(applyFriend);
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];
