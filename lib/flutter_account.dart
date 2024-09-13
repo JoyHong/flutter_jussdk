@@ -208,6 +208,22 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
             callback.call();
           }
           _pgmLoginedEndCallbacks.clear();
+          Map<String, String> pendingProperties = FlutterJusProfile().pendingProperties;
+          if (pendingProperties.isNotEmpty) {
+            FlutterJusProfile().clearPendingProperties();
+            FlutterJusSDK.logger.i(tag: _tag, message: 'setPendingProperties($pendingProperties)');
+            int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+              FlutterJusPgmNotify.removeCookie(cookie);
+              if (error.isNotEmpty) {
+                FlutterJusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, $error');
+              }
+            });
+            Pointer<Char> pcErr = ''.toNativePointer();
+            if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProperties).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+              FlutterJusPgmNotify.removeCookie(cookie);
+              FlutterJusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, ${pcErr.toDartString()}');
+            }
+          }
         });
         Pointer<Char> pcErr = ''.toNativePointer();
         if (_pgm.pgm_c_logined(cookie.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
@@ -535,6 +551,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       return;
     }
     if (!_pgmLoginedEnd) {
+      FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties save to pending');
       FlutterJusProfile().addPendingProperties(props);
       return;
     }

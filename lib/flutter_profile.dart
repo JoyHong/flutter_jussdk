@@ -111,6 +111,15 @@ class FlutterJusProfile {
       _realm.addAll(properties, update: true);
     });
   }
+  
+  void clearPendingProperties() {
+    RealmResults<FlutterJusPendingProperty> results = _realm.query<FlutterJusPendingProperty>('TRUEPREDICATE');
+    if (results.isNotEmpty) {
+      _realm.write(() {
+        _realm.deleteMany(results);
+      });
+    }
+  }
 
   void cacheProps(String uid, Map<String, String> map) {
     _cacheProps[uid] = map;
