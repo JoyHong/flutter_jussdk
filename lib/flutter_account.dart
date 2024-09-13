@@ -538,9 +538,15 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusProfile().addPendingProperties(props);
       return;
     }
+    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      if (error.isNotEmpty) {
+        FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, $error');
+      }
+    });
     Pointer<Char> pcErr = ''.toNativePointer();
-    bool result = _pgm.pgm_c_nowait_ack_set_props(nullptr, _mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) == FlutterJusSDKConstants.ZOK;
-    if (!result) {
+    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusPgmNotify.removeCookie(cookie);
       FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, ${pcErr.toDartString()}');
     }
   }
