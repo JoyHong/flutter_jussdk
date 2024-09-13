@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -20,6 +19,7 @@ void main() async {
       buildNumber: packageInfo.buildNumber,
       deviceId: 'aa6bbff22d7eff98', // 设备 ID
       accountPropNames: [
+        FlutterJusSDKConstants.userPropNickName,
         'Basic.Birthday',
         'SC.duoNumber'
       ],
@@ -57,35 +57,36 @@ class _MyAppState extends State<MyApp> {
           spacing: 12,
           children: [
             button(text: '注册', onPressed: () async {
-              FlutterJusSDK.account.signUp(username: '1234567895', password: '123456', props: {
-                'SC.duoNumber': '1234567895',
+              FlutterJusSDK.account.signUp(username: '1234567896', password: '123456', props: {
+                FlutterJusSDKConstants.userPropNickName: 'NickName96',
+                'SC.duoNumber': '1234567896',
                 'blockStrangers': '1',
                 'signUpDate': DateTime.now().millisecondsSinceEpoch.toString()
               });
             }),
             button(text: '登录', onPressed: () async {
-              FlutterJusSDK.account.login(username: '1234567895', password: '123456');
+              FlutterJusSDK.account.login(username: '1234567896', password: '123456');
             }),
             button(text: '自动登陆', onPressed: () {
-              FlutterJusSDK.account.autoLogin(username: '1234567895');
+              FlutterJusSDK.account.autoLogin(username: '1234567896');
             }),
             button(text: '日志上报', onPressed: () {
               FlutterJusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
             }),
             button(text: '自定义测试', onPressed: () {
-              // FlutterJusSDK.account.setProperties({'Basic.NickName': 'NameTimestamp#${DateTime.now().millisecondsSinceEpoch}'});
+              FlutterJusSDK.account.setProperties({FlutterJusSDKConstants.userPropNickName: 'NameTimestamp#${DateTime.now().millisecondsSinceEpoch}'});
               // FlutterJusSDK.account.searchFriend(username: '3845955877'); // 102369_40
-              FlutterJusSDK.account.applyFriend(
-                      uid: '102369_40',
-                      tagName: 'River Hanqin',
-                      desc: jsonEncode({
-                        'duoNumber': '3845955877',
-                        'message': 'Hi, I am Joy',
-                        'from': 'QRCode'
-                      }),
-                      extraParamMap: {
-                        'imdnId': '{uuid}#${DateTime.now().millisecondsSinceEpoch}'
-                      });
+              // FlutterJusSDK.account.applyFriend(
+              //         uid: '102369_40',
+              //         tagName: 'River Hanqin',
+              //         desc: jsonEncode({
+              //           'duoNumber': '3845955877',
+              //           'message': 'Hi, I am Joy',
+              //           'from': 'QRCode'
+              //         }),
+              //         extraParamMap: {
+              //           'imdnId': '{uuid}#${DateTime.now().millisecondsSinceEpoch}'
+              //         });
                 })
           ],
         ),

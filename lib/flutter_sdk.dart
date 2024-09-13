@@ -42,6 +42,9 @@ class FlutterJusSDKConstants {
   static const String PROP_MTC_INFO_SOFTWARE_VERSION_KEY = MTC_INFO_SOFTWARE_VERSION_KEY;
   static const String PROP_MTC_INFO_SOFTWARE_VENDOR_KEY = MTC_INFO_SOFTWARE_VENDOR_KEY;
 
+  /// 固定值, 服务器端已定义
+  static const String userPropNickName = 'Basic.NickName';
+
 }
 
 class FlutterJusSDK {
