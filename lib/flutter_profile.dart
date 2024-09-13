@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_jussdk/flutter_database.dart';
+import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:path/path.dart' as p;
 import 'package:realm/realm.dart';
 
@@ -29,6 +30,7 @@ class FlutterJusProfile {
     List<int> keyBytes = 'FlutterJusProfile#$uid'.codeUnits;
     _instance!._realm = Realm(Configuration.local([
       FlutterJusRelation.schema,
+      FlutterJusStatus.schema,
       FlutterJusProperty.schema,
       FlutterJusPendingProperty.schema,
       FlutterJusPreference.schema
@@ -70,6 +72,9 @@ class FlutterJusProfile {
   RealmResults<FlutterJusRelation> get relations =>
       _realm.query<FlutterJusRelation>('TRUEPREDICATE');
 
+  RealmResults<FlutterJusStatus> get status =>
+      _realm.query<FlutterJusStatus>('TRUEPREDICATE');
+
   int get relationUpdateTime =>
       int.parse(_realm.query<FlutterJusPreference>('key == \'$propRelationUpdateTime\'').firstOrNull?.value ?? '-1');
 
@@ -82,16 +87,27 @@ class FlutterJusProfile {
   Map<String, String> get pendingProperties =>
       Map.fromEntries(_realm.query<FlutterJusPendingProperty>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
-  void addRelations(List<FlutterJusRelation> relations, int relationUpdateTime,
-      int statusUpdateTime) {
+  void updateRelationsAndStatus(List<FlutterJusRelation> relations, int relationUpdateTime,
+      List<FlutterJusStatus> status, int statusUpdateTime) {
     _realm.write(() {
-      if (relations.isNotEmpty) {
-        _realm.addAll(relations);
+      if (status.isNotEmpty) {
+        _realm.addAll(status, update: true);
       }
-      _realm.addAll([
-        FlutterJusPreference(propRelationUpdateTime, relationUpdateTime.toString()),
-        FlutterJusPreference(propStatusUpdateTime, statusUpdateTime.toString())
-      ], update: true);
+      for (var relation in relations) {
+        FlutterJusRelation? dbRef = _realm.query<FlutterJusRelation>('uid == \'${relation.uid}\'').firstOrNull;
+        if (dbRef != null) {
+          dbRef.updatePgm(relation);
+        } else {
+          dbRef = _realm.add(relation);
+          dbRef.status = _realm.query<FlutterJusStatus>('uid == \'${relation.uid}\'').firstOrNull;
+        }
+      }
+      if (relationUpdateTime > 0) {
+        _realm.add(FlutterJusPreference(propRelationUpdateTime, relationUpdateTime.toString()), update: true);
+      }
+      if (statusUpdateTime > 0) {
+        _realm.add(FlutterJusPreference(propStatusUpdateTime, statusUpdateTime.toString()), update: true);
+      }
     });
   }
 

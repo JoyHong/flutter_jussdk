@@ -14,9 +14,9 @@ class FlutterJusRelation extends _FlutterJusRelation
     String cfgs,
     String tag,
     String tagName,
-    int type,
-    String status,
-  ) {
+    int type, {
+    FlutterJusStatus? status,
+  }) {
     RealmObjectBase.set(this, 'uid', uid);
     RealmObjectBase.set(this, 'cfgs', cfgs);
     RealmObjectBase.set(this, 'tag', tag);
@@ -53,9 +53,12 @@ class FlutterJusRelation extends _FlutterJusRelation
   set type(int value) => RealmObjectBase.set(this, 'type', value);
 
   @override
-  String get status => RealmObjectBase.get<String>(this, 'status') as String;
+  FlutterJusStatus? get status =>
+      RealmObjectBase.get<FlutterJusStatus>(this, 'status')
+          as FlutterJusStatus?;
   @override
-  set status(String value) => RealmObjectBase.set(this, 'status', value);
+  set status(covariant FlutterJusStatus? value) =>
+      RealmObjectBase.set(this, 'status', value);
 
   @override
   Stream<RealmObjectChanges<FlutterJusRelation>> get changes =>
@@ -91,7 +94,6 @@ class FlutterJusRelation extends _FlutterJusRelation
         'tag': EJsonValue tag,
         'tagName': EJsonValue tagName,
         'type': EJsonValue type,
-        'status': EJsonValue status,
       } =>
         FlutterJusRelation(
           fromEJson(uid),
@@ -99,7 +101,7 @@ class FlutterJusRelation extends _FlutterJusRelation
           fromEJson(tag),
           fromEJson(tagName),
           fromEJson(type),
-          fromEJson(status),
+          status: fromEJson(ejson['status']),
         ),
       _ => raiseInvalidEJson(ejson),
     };
@@ -115,6 +117,79 @@ class FlutterJusRelation extends _FlutterJusRelation
       SchemaProperty('tag', RealmPropertyType.string),
       SchemaProperty('tagName', RealmPropertyType.string),
       SchemaProperty('type', RealmPropertyType.int),
+      SchemaProperty('status', RealmPropertyType.object,
+          optional: true, linkTarget: 'FlutterJusStatus'),
+    ]);
+  }();
+
+  @override
+  SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
+}
+
+class FlutterJusStatus extends _FlutterJusStatus
+    with RealmEntity, RealmObjectBase, RealmObject {
+  FlutterJusStatus(
+    String uid,
+    String status,
+  ) {
+    RealmObjectBase.set(this, 'uid', uid);
+    RealmObjectBase.set(this, 'status', status);
+  }
+
+  FlutterJusStatus._();
+
+  @override
+  String get uid => RealmObjectBase.get<String>(this, 'uid') as String;
+  @override
+  set uid(String value) => RealmObjectBase.set(this, 'uid', value);
+
+  @override
+  String get status => RealmObjectBase.get<String>(this, 'status') as String;
+  @override
+  set status(String value) => RealmObjectBase.set(this, 'status', value);
+
+  @override
+  Stream<RealmObjectChanges<FlutterJusStatus>> get changes =>
+      RealmObjectBase.getChanges<FlutterJusStatus>(this);
+
+  @override
+  Stream<RealmObjectChanges<FlutterJusStatus>> changesFor(
+          [List<String>? keyPaths]) =>
+      RealmObjectBase.getChangesFor<FlutterJusStatus>(this, keyPaths);
+
+  @override
+  FlutterJusStatus freeze() =>
+      RealmObjectBase.freezeObject<FlutterJusStatus>(this);
+
+  EJsonValue toEJson() {
+    return <String, dynamic>{
+      'uid': uid.toEJson(),
+      'status': status.toEJson(),
+    };
+  }
+
+  static EJsonValue _toEJson(FlutterJusStatus value) => value.toEJson();
+  static FlutterJusStatus _fromEJson(EJsonValue ejson) {
+    if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
+    return switch (ejson) {
+      {
+        'uid': EJsonValue uid,
+        'status': EJsonValue status,
+      } =>
+        FlutterJusStatus(
+          fromEJson(uid),
+          fromEJson(status),
+        ),
+      _ => raiseInvalidEJson(ejson),
+    };
+  }
+
+  static final schema = () {
+    RealmObjectBase.registerFactory(FlutterJusStatus._);
+    register(_toEJson, _fromEJson);
+    return const SchemaObject(
+        ObjectType.realmObject, FlutterJusStatus, 'FlutterJusStatus', [
+      SchemaProperty('uid', RealmPropertyType.string, primaryKey: true),
       SchemaProperty('status', RealmPropertyType.string),
     ]);
   }();

@@ -10,6 +10,13 @@ class _FlutterJusRelation {
   late String tag;
   late String tagName;
   late int type;
+  late _FlutterJusStatus? status;
+}
+
+@RealmModel()
+class _FlutterJusStatus {
+  @PrimaryKey()
+  late String uid;
   late String status;
 }
 

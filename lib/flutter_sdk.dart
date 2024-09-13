@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_jussdk/flutter_account.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_database.dart';
+import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
@@ -343,13 +344,10 @@ int _pgmLoadGroup(
     Map<String, dynamic> relationMap = {};
     Map<String, dynamic> statusMap = {};
     for (var relation in profile.relations) {
-      relationMap[relation.uid] = {
-        'cfgs': jsonDecode(relation.cfgs),
-        'tag': relation.tag,
-        'tagName': relation.tagName,
-        'type': relation.type
-      };
-      statusMap[relation.uid] = jsonDecode(relation.status);
+      relationMap[relation.uid] = relation.toPgmJson();
+    }
+    for (var status in profile.status) {
+      statusMap[status.uid] = jsonDecode(status.status);
     }
     ppcRelations.value = jsonEncode(relationMap).toNativePointer();
     plRelationUpdateTime.value = profile.relationUpdateTime;
@@ -369,34 +367,37 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
   final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
   final int statusUpdateTime = lStatusTime;
   FlutterJusSDK._log(
-      'pgmUpdateGroup, pcGroupId=$uid, pcDiff=$relationDiff, lUpdateTime=$relationUpdateTime, '
-      'pcStatusVersMap=$statusDiff, lStatusTime=$statusUpdateTime');
+      'pgmUpdateGroup, pcGroupId=$uid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
+      'lStatusTime=$statusUpdateTime, pcStatusVersMap=$statusDiff');
   if (FlutterJusSDK.tools.isValidUserId(uid)) {
-    FlutterJusProfile profile = FlutterJusProfile();
-    if (profile.relationUpdateTime == -1) {
       List<FlutterJusRelation> relations = [];
       relationDiff.forEach((uid, map) {
-        relations.add(FlutterJusRelation(
-            uid,
-            jsonEncode(map['cfgs']),
-            map['tag'],
-            map['tagName'],
-            map['type'],
-            jsonEncode(statusDiff[uid])));
+        relations.add(FlutterJusRelationUtils.factoryFromPgmJson(uid, map));
       });
-      profile.addRelations(relations, relationUpdateTime, statusUpdateTime);
-    } else {
-      // TODO
-    }
+      List<FlutterJusStatus> status = [];
+      statusDiff.forEach((uid, statusMap) {
+        status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
+      });
+      FlutterJusProfile().updateRelationsAndStatus(relations, relationUpdateTime, status, statusUpdateTime);
+    return 0;
   }
-  return 0;
+  return 1;
 }
 
 int _pgmUpdateStatus(Pointer<Char> pcGroupId,
     Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
-  FlutterJusSDK._log(
-      'pgmUpdateStatus, pcGroupId=${pcGroupId.toDartString()}, pcStatusVersMap=${pcStatusVersMap.toDartString()}, lStatusTime=$lStatusTime');
-  return 0;
+  String uid = pcGroupId.toDartString();
+  final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
+  FlutterJusSDK._log('pgmUpdateStatus, pcGroupId=$uid, lStatusTime=$lStatusTime, pcStatusVersMap=$statusDiff');
+  if (FlutterJusSDK.tools.isValidUserId(uid)) {
+    List<FlutterJusStatus> status = [];
+    statusDiff.forEach((uid, statusMap) {
+      status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
+    });
+    FlutterJusProfile().updateRelationsAndStatus([], -1, status, lStatusTime);
+    return 0;
+  }
+  return 1;
 }
 
 /// 触发属性的上报
@@ -412,8 +413,9 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
       // 其它用户的属性, 缓存到内存
       FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
     }
+    return 0;
   }
-  return 0;
+  return 1;
 }
 
 int _pgmGetTicks(Pointer<Uint64> ticks) {
