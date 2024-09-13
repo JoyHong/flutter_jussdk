@@ -1,6 +1,6 @@
 class FlutterJusPgmNotify {
 
-  static int _cookie = 1;
+  static int _cookie = 0;
   static final Map<int, Function(int, String)> _callbacks = {};
 
   static int addCookie(Function(int, String) callback) {
