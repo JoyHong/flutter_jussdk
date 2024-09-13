@@ -44,6 +44,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   package_info_plus: ^8.0.2
   realm: ^3.4.1
+  platform_device_id: ^1.0.1
 
 dev_dependencies:
   flutter_test:

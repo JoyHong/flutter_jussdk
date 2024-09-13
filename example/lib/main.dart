@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:platform_device_id/platform_device_id.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,7 @@ void main() async {
       router: 'udp:test.api.justalkcloud.com:8000;udp:47.101.139.97:8000;udp:148.153.45.251:8000;http:test.api.justalkcloud.com:8080;http:47.101.139.97:8080;http:148.153.45.251:8080;',
       appName: packageInfo.appName,
       buildNumber: packageInfo.buildNumber,
-      deviceId: 'aa6bbff22d7eff98', // 设备 ID
+      deviceId: (await PlatformDeviceId.getDeviceId)!,
       accountPropNames: [
         FlutterJusSDKConstants.userPropNickName,
         'Basic.Birthday',

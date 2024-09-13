@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_jussdk
+  platform_device_id_windows
   realm
 )
 
