@@ -87,6 +87,9 @@ class FlutterJusSDK {
     required Directory profileDir,
     required List<String> accountPropNames,
     Map<String, String>? deviceProps}) async {
+    if (!accountPropNames.contains(FlutterJusSDKConstants.userPropNickName)) {
+      accountPropNames.add(FlutterJusSDKConstants.userPropNickName);
+    }
     logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
     connectivity = FlutterJusConnectivity(_mtc);
     account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps,accountPropNames, _mtcNotifyEvents);
