@@ -655,7 +655,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     if (_pgm.pgm_c_accept_relation(cookie.toString().toNativePointer(),
         msgId,
         tagName.toNativePointer(),
-        nullptr,
+        ''.toNativePointer(),
         nullptr,
         jsonEncode(extraParamMap).toNativePointer(),
         pcErr) != FlutterJusSDKConstants.ZOK) {
