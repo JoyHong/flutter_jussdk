@@ -309,6 +309,33 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call provisionOkTransformer did fail');
       throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call provisionOkTransformer did fail');
     }
+    Future<int> Mtc_UeQueryAccountX() {
+      Completer<int> completer = Completer();
+      int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
+        FlutterJusMtcNotify.removeCookie(cookie);
+        if (name == MtcUeQueryAccountOkNotification) {
+          completer.complete(jsonDecode(info)[MtcUeReasonKey]);
+        } else {
+          completer.completeError(info.toUeError());
+        }
+      });
+      if (_mtc.Mtc_UeQueryAccountX(cookie,
+          _defUserType.toNativePointer(),
+          username.toNativePointer()) != FlutterJusSDKConstants.ZOK) {
+        FlutterJusMtcNotify.removeCookie(cookie);
+        completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeQueryAccountX did fail'));
+      }
+      return completer.future;
+    }
+    try {
+      if (await Mtc_UeQueryAccountX() == EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST) {
+        FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, account exist');
+        throw const FlutterJusError(FlutterJusAccountConstants.errorSignUpExist, message: 'account exist');
+      }
+    } catch (e) {
+      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, $e');
+      rethrow;
+    }
     Completer<bool> completer = Completer();
     int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
       FlutterJusMtcNotify.removeCookie(cookie);
