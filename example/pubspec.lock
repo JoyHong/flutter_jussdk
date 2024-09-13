@@ -546,10 +546,11 @@ packages:
   platform_device_id:
     dependency: "direct main"
     description:
-      name: platform_device_id
-      sha256: "7a12ec84de4a823bb10eba2f0e1ad29e2365abba17790489a0d78029904f562e"
-      url: "https://pub.dev"
-    source: hosted
+      path: platform_device_id
+      ref: HEAD
+      resolved-ref: "6a3b996c8fa0512c49d27d15ad2467a153c04d23"
+      url: "https://github.com/cjltgb520/platform_device_id.git"
+    source: git
     version: "1.0.1"
   platform_device_id_linux:
     dependency: transitive
