@@ -68,18 +68,18 @@ class _MyAppState extends State<MyApp> {
           spacing: 12,
           children: [
             button(text: '注册', onPressed: () async {
-              FlutterJusSDK.account.signUp(username: '1234567896', password: '123456', props: {
-                FlutterJusSDKConstants.userPropNickName: 'NickName96',
-                'SC.duoNumber': '1234567896',
+              FlutterJusSDK.account.signUp(username: '12345678901', password: '123456', props: {
+                FlutterJusSDKConstants.userPropNickName: 'NickName01',
+                'SC.duoNumber': '12345678901',
                 'blockStrangers': '1',
                 'signUpDate': DateTime.now().millisecondsSinceEpoch.toString()
               });
             }),
             button(text: '登录', onPressed: () async {
-              FlutterJusSDK.account.login(username: '1234567896', password: '123456');
+              FlutterJusSDK.account.login(username: '12345678901', password: '123456');
             }),
             button(text: '自动登陆', onPressed: () {
-              FlutterJusSDK.account.autoLogin(username: '1234567896');
+              FlutterJusSDK.account.autoLogin(username: '12345678901');
             }),
             button(text: '日志上报', onPressed: () {
               FlutterJusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
               // FlutterJusSDK.account.setProperties({FlutterJusSDKConstants.userPropNickName: 'NameTimestamp#${DateTime.now().millisecondsSinceEpoch}'});
               // FlutterJusSDK.account.searchFriend(username: '3845955877'); // 102369_40
               FlutterJusSDK.account.applyFriend(
-                      uid: '102369_738',
+                      uid: '102369_755', // 12345678901:102369_755
                       tagName: 'River Hanqin',
                       desc: jsonEncode({
                         'duoNumber': '1234567897',

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_jussdk/flutter_database.dart';
 import 'package:path/path.dart' as p;
@@ -25,6 +26,7 @@ class FlutterJusProfile {
     }
     _instance = FlutterJusProfile._();
     String path = await FlutterJusTools.getUserPath(uid);
+    List<int> keyBytes = 'FlutterJusProfile#$uid'.codeUnits;
     _instance!._realm = Realm(Configuration.local([
       FlutterJusRelation.schema,
       FlutterJusProperty.schema,
@@ -32,6 +34,7 @@ class FlutterJusProfile {
       FlutterJusPreference.schema
     ],
         path: File(p.join(path, 'default.realm')).path,
+        encryptionKey: Int64List(64)..setRange(0, keyBytes.length, keyBytes),
         schemaVersion: _schemaVersion,
         migrationCallback: (migration, oldSchemaVersion) {
       /// Whether old schema version realm has the schema
