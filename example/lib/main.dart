@@ -69,7 +69,7 @@ class _MyAppState extends State<MyApp> {
           children: [
             button(text: '注册', onPressed: () async {
               FlutterJusSDK.account.signUp(username: '1234567896', password: '123456', props: {
-                FlutterJusSDKConstants.userPropNickName: 'NickName97',
+                FlutterJusSDKConstants.userPropNickName: 'NickName96',
                 'SC.duoNumber': '1234567896',
                 'blockStrangers': '1',
                 'signUpDate': DateTime.now().millisecondsSinceEpoch.toString()

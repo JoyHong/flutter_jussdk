@@ -110,7 +110,10 @@ abstract class FlutterJusAccount {
   Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
   /// 接受好友请求
-  Future acceptFriend();
+  /// msgId: 收到 applyFriend 上报时附带的参数
+  /// tagName: 给对方的备注
+  /// extraParamMap: 额外的键值对参数
+  Future acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -636,9 +639,31 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  Future acceptFriend() {
-    // TODO: implement acceptFriend
-    throw UnimplementedError();
+  Future acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'acceptFriend($msgId, $tagName, $extraParamMap)');
+    await _pgmLoginedEndTransformer();
+    Completer<bool> completer = Completer();
+    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      if (error.isEmpty) {
+        completer.complete(true);
+      } else {
+        completer.completeError(error.toNotificationError());
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    if (_pgm.pgm_c_accept_relation(cookie.toString().toNativePointer(),
+        msgId,
+        tagName.toNativePointer(),
+        nullptr,
+        nullptr,
+        jsonEncode(extraParamMap).toNativePointer(),
+        pcErr) != FlutterJusSDKConstants.ZOK) {
+      FlutterJusPgmNotify.removeCookie(cookie);
+      FlutterJusSDK.logger.i(tag: _tag, message: 'acceptFriend fail, call pgm_c_accept_relation did fail');
+      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail'));
+    }
+    return completer.future;
   }
 
   @override
