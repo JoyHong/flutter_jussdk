@@ -13,6 +13,7 @@ import 'package:flutter_jussdk/flutter_tools.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
+import 'flutter_relation.dart';
 
 class FlutterJusAccountConstants {
 
@@ -99,7 +100,7 @@ abstract class FlutterJusAccount {
   void setProperties(Map<String, String> props);
 
   /// 搜索除本人以外的用户信息, 失败则抛出异常 FlutterJusError
-  Future<Map<String, Map<String, String>>> searchFriend({required String username});
+  Future<FlutterJusFriend> searchFriend({required String username});
 
   /// 发起添加好友请求, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// uid: 对方的 uid
@@ -534,7 +535,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  Future<Map<String, Map<String, String>>> searchFriend({required String username}) async {
+  Future<FlutterJusFriend> searchFriend({required String username}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'searchFriend($username)');
     if (!(await _connectOkTransformer())) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'searchFriend fail, not connected');
@@ -574,11 +575,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, should not search self');
       throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'should not search self');
     }
-    Completer<Map<String, Map<String, String>>> completer = Completer();
+    Completer<FlutterJusFriend> completer = Completer();
     int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
       FlutterJusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete({uid: FlutterJusProfile().getCachedProps(uid).filterKeys(_accountPropNames)});
+        completer.complete(FlutterJusFriend(uid, FlutterJusProfile().getCachedProps(uid).filterKeys(_accountPropNames)));
       } else {
         completer.completeError(error.toNotificationError());
       }
