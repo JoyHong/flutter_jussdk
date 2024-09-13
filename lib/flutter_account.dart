@@ -109,11 +109,11 @@ abstract class FlutterJusAccount {
   /// extraParamMap: 额外的键值对参数
   Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
-  /// 接受好友请求
+  /// 接受好友请求, 成功返回 true, 失败则抛出异常 FlutterJusError
   /// msgId: 收到 applyFriend 上报时附带的参数
   /// tagName: 给对方的备注
   /// extraParamMap: 额外的键值对参数
-  Future acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap});
+  Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -645,7 +645,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
-  Future acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
+  Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'acceptFriend($msgId, $tagName, $extraParamMap)');
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
