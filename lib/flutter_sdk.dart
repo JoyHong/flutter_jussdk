@@ -417,7 +417,6 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
 }
 
 int _pgmGetTicks(Pointer<Uint64> ticks) {
-  FlutterJusSDK._log('pgmGetTicks');
   ticks.value = SystemClock.elapsedRealtime().inMilliseconds;
   return 0;
 }
