@@ -679,7 +679,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         msgId,
         tagName.toNativePointer(),
         ''.toNativePointer(),
-        nullptr,
+        '{}'.toNativePointer(),
         jsonEncode(extraParamMap).toNativePointer(),
         pcErr) != FlutterJusSDKConstants.ZOK) {
       FlutterJusPgmNotify.removeCookie(cookie);
