@@ -72,21 +72,26 @@ class FlutterJusApplyFriend {
 
 /// 收到他人通过我的好友申请的对象
 class FlutterJusApplyResponseFriend {
-  /// 通过者的 Friend 对象
-  late FlutterJusFriend friend;
+  /// 通过者的 uid
+  late String uid;
   /// 通过后当前是什么关系
   late int type;
   /// 通过时的时间戳
   late int timestamp;
 
   FlutterJusApplyResponseFriend.fromJson(Map<String, dynamic> map) {
-    friend = FlutterJusProfile().getRelation(map['GroupId'])!.toFriend();
+    uid = map['GroupId'];
     type = int.parse(map['TargetType']);
     timestamp = int.parse(map['Time']);
   }
 
+  /// 通过者的 Friend 对象
+  FlutterJusFriend getFriendObject() {
+    return FlutterJusProfile().getRelation(uid)!.toFriend();
+  }
+
   @override
   String toString() {
-    return 'FlutterJusApplyResponseFriend{friend: $friend, timestamp: $timestamp}';
+    return 'FlutterJusApplyResponseFriend{uid: $uid, type: $type, timestamp: $timestamp}';
   }
 }
