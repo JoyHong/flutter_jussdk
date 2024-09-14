@@ -27,6 +27,9 @@ class JusAccountConstants {
   /// 搜索用户失败, 未找到匹配的用户
   static const int errorSearchNotFound = JusSDKConstants.errorBaseCode - 3;
 
+  /// 申请关系变化失败, 当前已是期望的关系
+  static const int errorApplyUserRelationAlreadyGranted = JusSDKConstants.errorBaseCode - 4;
+
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
 
@@ -103,7 +106,7 @@ abstract class JusAccount {
   /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError
   Future<JusUserRelation> searchUser({required String username});
 
-  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError
+  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError; 注意错误码 errorApplyUserRelationAlreadyGranted 的处理
   /// uid: 对方的 uid
   /// tagName: 给对方的备注
   /// desc: 附带信息
@@ -687,6 +690,8 @@ class JusAccountImpl extends JusAccount {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
         completer.complete(true);
+      } else if (error.contains('target_type_granted')) {
+        completer.completeError(JusError(JusAccountConstants.errorApplyUserRelationAlreadyGranted, message: error));
       } else {
         completer.completeError(error.toNotificationError());
       }
