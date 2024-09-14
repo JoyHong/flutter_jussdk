@@ -657,6 +657,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   @override
   Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'applyFriend($uid, $tagName, $desc, $extraParamMap)');
+    if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
+      FlutterJusSDK.logger.e(tag: _tag, message: 'applyFriend fail, should not apply self');
+      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'should not apply self');
+    }
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
     int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
