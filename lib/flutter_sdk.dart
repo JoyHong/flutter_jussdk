@@ -21,7 +21,7 @@ import 'flutter_pgm_bindings_generated.dart';
 import 'flutter_profile.dart';
 import 'flutter_relation.dart';
 
-class FlutterJusSDKConstants {
+class JusSDKConstants {
 
   /// 开发问题, 需要开发排查
   static const int errorDevIntegration = -1;
@@ -49,9 +49,9 @@ class FlutterJusSDKConstants {
 
 }
 
-class FlutterJusSDK {
+class JusSDK {
 
-  static const _tag = 'FlutterJusSDK';
+  static const _tag = 'JusSDK';
 
   static final StreamController<dynamic> _mtcNotifyEvents = StreamController<dynamic>();
   /// ui isolate 发送数据到 pgm isolate
@@ -60,15 +60,15 @@ class FlutterJusSDK {
   static late SendPort _fromPgmIsolateSendPort;
 
   /// 日志模块对象
-  static late FlutterJusLogger logger;
+  static late JusLogger logger;
   /// 网络模块对象
-  static late FlutterJusConnectivity connectivity;
+  static late JusConnectivity connectivity;
   /// 账号模块对象
-  static late FlutterJusAccount account;
+  static late JusAccount account;
   /// 消息模块对象
-  static late FlutterJusMessage message;
+  static late JusMessage message;
   /// 工具模块对象
-  static late FlutterJusTools tools;
+  static late JusTools tools;
 
   /// 全局的用户属性的配置信息
   static late List<String> _accountPropNames;
@@ -94,14 +94,14 @@ class FlutterJusSDK {
     required List<String> accountPropNames,
     Map<String, String>? deviceProps}) async {
     _accountPropNames = List.from(accountPropNames);
-    if (!_accountPropNames.contains(FlutterJusSDKConstants.userPropNickName)) {
-      _accountPropNames.add(FlutterJusSDKConstants.userPropNickName);
+    if (!_accountPropNames.contains(JusSDKConstants.userPropNickName)) {
+      _accountPropNames.add(JusSDKConstants.userPropNickName);
     }
-    logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
-    connectivity = FlutterJusConnectivity(_mtc);
-    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, _mtcNotifyEvents);
-    message = FlutterJusMessage();
-    tools = FlutterJusTools(_mtc);
+    logger = JusLogger(_mtc, appName, buildNumber, deviceId, logDir);
+    connectivity = JusConnectivity(_mtc);
+    account = JusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, _mtcNotifyEvents);
+    message = JusMessage();
+    tools = JusTools(_mtc);
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());
     if (!Platform.isWindows) {
       _mtc.Mtc_CliInit(profileDir.path.toNativePointer(), nullptr);
@@ -112,7 +112,7 @@ class FlutterJusSDK {
           .listen((event) {
             _log('MtcNotify:$event');
             if (event['cookie'] > 0) {
-              FlutterJusMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
+              JusMtcNotify.didCallback(event['cookie'], event['name'], event['info'] ?? '');
             } else {
               _mtcNotifyEvents.sink.add(event);
             }
@@ -125,7 +125,7 @@ class FlutterJusSDK {
   /// 记录应用进入了前台
   static void onAppStart() {
     logger.i(tag: _tag, message: 'onAppStart');
-    (account as FlutterJusAccountImpl).pgmRefreshMain();
+    (account as JusAccountImpl).pgmRefreshMain();
   }
 
   /// 记录应用进入了后台
@@ -161,31 +161,31 @@ class FlutterJusSDK {
         if (data is _PgmIsolateEventProcessor) {
           if (data.event == 1) { // CookieEnd
             data.params.forEach((cookie, error) {
-              FlutterJusPgmNotify.didCallback(int.parse(cookie), error);
+              JusPgmNotify.didCallback(int.parse(cookie), error);
             });
           } else if (data.event == 3) { // 好友申请的回调
             if (data.params['TargetId'] != _mtc.Mtc_UeDbGetUid().toDartString()) {
               if (data.params['GroupId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
                 // 此时表示收到他人发起的好友请求
-                (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveApplyFriend(FlutterJusApplyFriend.fromJson(data.params));
+                (JusSDK.account as JusAccountImpl).onReceiveApplyFriend(JusApplyFriend.fromJson(data.params));
               }
             }
           } else if (data.event == 6) { // 好友申请通过的回调
             if (data.params['TargetId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
-              (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveResponseFriend(FlutterJusResponseFriend.fromJson(data.params));
+              (JusSDK.account as JusAccountImpl).onReceiveResponseFriend(JusResponseFriend.fromJson(data.params));
             }
           }
           return;
         }
         if (data is _PgmIsolateCacheProps) {
-          FlutterJusProfile().cacheProps(data.uid, data.map);
+          JusProfile().cacheProps(data.uid, data.map);
           return;
         }
         if (data is _PgmIsolateFriendsUpdated) {
-          (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveFriendsUpdated(
-              FlutterJusFriendsUpdated(data.baseTime,
-                  FlutterJusProfile().userRelationUpdateTime,
-                  FlutterJusProfile().getDiffUserRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
+          (JusSDK.account as JusAccountImpl).onReceiveFriendsUpdated(
+              JusFriendsUpdated(data.baseTime,
+                  JusProfile().userRelationUpdateTime,
+                  JusProfile().getDiffUserRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
           return;
         }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
@@ -200,14 +200,14 @@ class FlutterJusSDK {
           // On the helper isolate listen to requests and respond to them.
           if (data is _PgmIsolateInit) {
             // 初始化 pgm isolate 的 logger 对象
-            logger = FlutterJusLogger(_mtc, data.appName, data.buildNumber, data.deviceId, data.logDir);
+            logger = JusLogger(_mtc, data.appName, data.buildNumber, data.deviceId, data.logDir);
             // 初始化 pgm isolate 的 tools 对象
-            tools = FlutterJusTools(_mtc);
+            tools = JusTools(_mtc);
             return;
           }
           if (data is _PgmIsolateInitProfile) {
             BackgroundIsolateBinaryMessenger.ensureInitialized(data.rootIsolateToken!);
-            await FlutterJusProfile.initialize(data.uid);
+            await JusProfile.initialize(data.uid);
             sendPort.send(_PgmIsolateResponse(data.id));
             return;
           }
@@ -226,7 +226,7 @@ class FlutterJusSDK {
             return;
           }
           if (data is _PgmIsolateFinalizeProfile) {
-            FlutterJusProfile.finalize();
+            JusProfile.finalize();
             sendPort.send(_PgmIsolateResponse(data.id));
             return;
           }
@@ -250,7 +250,7 @@ class FlutterJusSDK {
       _toPgmIsolateSendPort.send(_PgmIsolateInitProfile(id, uid));
       return completer.future;
     }
-    await FlutterJusProfile.initialize(uid);
+    await JusProfile.initialize(uid);
     return pgmIsolateInitProfile(uid);
   }
 
@@ -272,7 +272,7 @@ class FlutterJusSDK {
       return completer.future;
     }
     await pgmIsolateFinalizeProfile();
-    FlutterJusProfile.finalize();
+    JusProfile.finalize();
   }
 
 }
@@ -347,9 +347,9 @@ final FlutterMtcBindings _mtc = FlutterMtcBindings(_library);
 final FlutterPGMBindings _pgm = FlutterPGMBindings(_library);
 
 int _pgmEventProcessor(int event, Pointer<JStrStrMap> pcParams) {
-  FlutterJusSDK._log(
+  JusSDK._log(
       'pgmEventProcessor, event=${event.toPgmEventName()}, pcParams=${pcParams.toDartString()}');
-  FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateEventProcessor(event, jsonDecode(pcParams.toDartString()) as Map<String, dynamic>));
+  JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateEventProcessor(event, jsonDecode(pcParams.toDartString()) as Map<String, dynamic>));
   return 0;
 }
 
@@ -361,9 +361,9 @@ int _pgmLoadGroup(
     Pointer<Int64> plStatusTime,
     Pointer<Pointer<JStrStrMap>> ppcProps) {
   final String uid = pcGroupId.toDartString();
-  FlutterJusSDK._log('pgmLoadGroup, pcGroupId=$uid');
-  FlutterJusProfile profile = FlutterJusProfile();
-  if (FlutterJusSDK.tools.isValidUserId(uid)) {
+  JusSDK._log('pgmLoadGroup, pcGroupId=$uid');
+  JusProfile profile = JusProfile();
+  if (JusSDK.tools.isValidUserId(uid)) {
     Map<String, dynamic> relationMap = {};
     Map<String, dynamic> statusMap = {};
     for (var relation in profile.userRelations) {
@@ -389,22 +389,22 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
   final int relationUpdateTime = lUpdateTime;
   final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
   final int statusUpdateTime = lStatusTime;
-  FlutterJusSDK._log(
+  JusSDK._log(
       'pgmUpdateGroup, pcGroupId=$uid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
       'lStatusTime=$statusUpdateTime, pcStatusVersMap=$statusDiff');
-  if (FlutterJusSDK.tools.isValidUserId(uid)) {
-      List<FlutterJusUserRelation> relations = [];
+  if (JusSDK.tools.isValidUserId(uid)) {
+      List<JusUserRelation> relations = [];
       relationDiff.forEach((uid, map) {
-        relations.add(FlutterJusUserRelationUtils.factoryFromPgmJson(uid, map, relationUpdateTime));
+        relations.add(JusUserRelationUtils.factoryFromPgmJson(uid, map, relationUpdateTime));
       });
-      List<FlutterJusStatus> status = [];
+      List<JusStatus> status = [];
       statusDiff.forEach((uid, statusMap) {
-        status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
+        status.add(JusStatus(uid, jsonEncode(statusMap)));
       });
-      int baseRelationUpdateTime = FlutterJusProfile().userRelationUpdateTime;
-      FlutterJusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
+      int baseRelationUpdateTime = JusProfile().userRelationUpdateTime;
+      JusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
       if (relationUpdateTime > 0) {
-        FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateFriendsUpdated(baseRelationUpdateTime));
+        JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateFriendsUpdated(baseRelationUpdateTime));
       }
     return 0;
   }
@@ -415,13 +415,13 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
     Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
   String uid = pcGroupId.toDartString();
   final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
-  FlutterJusSDK._log('pgmUpdateStatus, pcGroupId=$uid, lStatusTime=$lStatusTime, pcStatusVersMap=$statusDiff');
-  if (FlutterJusSDK.tools.isValidUserId(uid)) {
-    List<FlutterJusStatus> status = [];
+  JusSDK._log('pgmUpdateStatus, pcGroupId=$uid, lStatusTime=$lStatusTime, pcStatusVersMap=$statusDiff');
+  if (JusSDK.tools.isValidUserId(uid)) {
+    List<JusStatus> status = [];
     statusDiff.forEach((uid, statusMap) {
-      status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
+      status.add(JusStatus(uid, jsonEncode(statusMap)));
     });
-    FlutterJusProfile().updatePgmUserProfile([], -1, status, lStatusTime);
+    JusProfile().updatePgmUserProfile([], -1, status, lStatusTime);
     return 0;
   }
   return 1;
@@ -431,14 +431,14 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
 int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   final String uid = pcGroupId.toDartString();
   final Map<String, String> props = (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).castString();
-  FlutterJusSDK._log('pgmUpdateProps, pcGroupId=$uid, pcProps=$props');
-  if (FlutterJusSDK.tools.isValidUserId(uid)) {
+  JusSDK._log('pgmUpdateProps, pcGroupId=$uid, pcProps=$props');
+  if (JusSDK.tools.isValidUserId(uid)) {
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
       // 本人的属性, 缓存到本地数据库
-      FlutterJusProfile().updatePgmUserProps(props);
+      JusProfile().updatePgmUserProps(props);
     } else {
       // 其它用户的属性, 缓存到内存
-      FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
+      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
     }
     return 0;
   }
@@ -452,7 +452,7 @@ int _pgmGetTicks(Pointer<Uint64> ticks) {
 
 int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
     Pointer<JStatusTimes> pcMsgStatuses) {
-  FlutterJusSDK._log(
+  JusSDK._log(
       'pgmInsertMsgs, pcGroupId=${pcGroupId.toDartString()}, pcMsgs=${pcMsgs.toDartString()}, pcMsgStatuses=${pcMsgStatuses.toDartString()}');
   return 0;
 }

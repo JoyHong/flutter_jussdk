@@ -9,7 +9,7 @@ import 'package:realm/realm.dart';
 
 import 'flutter_tools.dart';
 
-class FlutterJusProfile {
+class JusProfile {
 
   /// 同步 pgm 个人节点里列表的时间戳
   static const String propUserRelationUpdateTime = 'userRelationUpdateTime';
@@ -19,21 +19,21 @@ class FlutterJusProfile {
   // 数据库新删改后务必自增 realm 版本号
   static const _schemaVersion = 1;
 
-  static FlutterJusProfile? _instance;
+  static JusProfile? _instance;
 
   static Future initialize(String uid) async {
     if (_instance != null) {
       return;
     }
-    _instance = FlutterJusProfile._();
-    String path = await FlutterJusTools.getUserPath(uid);
-    List<int> keyBytes = 'FlutterJusProfile#$uid'.codeUnits;
+    _instance = JusProfile._();
+    String path = await JusTools.getUserPath(uid);
+    List<int> keyBytes = 'JusProfile#$uid'.codeUnits;
     _instance!._realm = Realm(Configuration.local([
-      FlutterJusUserRelation.schema,
-      FlutterJusStatus.schema,
-      FlutterJusUserProp.schema,
-      FlutterJusUserPendingProp.schema,
-      FlutterJusPreference.schema
+      JusUserRelation.schema,
+      JusStatus.schema,
+      JusUserProp.schema,
+      JusUserPendingProp.schema,
+      JusPreference.schema
     ],
         path: File(p.join(path, 'default.realm')).path,
         encryptionKey: Int64List(64)..setRange(0, keyBytes.length, keyBytes),
@@ -59,7 +59,7 @@ class FlutterJusProfile {
     _instance = null;
   }
 
-  factory FlutterJusProfile() {
+  factory JusProfile() {
     return _instance!;
   }
 
@@ -67,57 +67,55 @@ class FlutterJusProfile {
   /// 查询出来临时保存的本人以外的属性集合
   final Map<String, Map<String, String>> _cacheProps = {};
 
-  FlutterJusProfile._();
+  JusProfile._();
 
   /// 用户个人节点上的关系列表
-  RealmResults<FlutterJusUserRelation> get userRelations =>
-      _realm.query<FlutterJusUserRelation>('TRUEPREDICATE');
+  RealmResults<JusUserRelation> get userRelations => _realm.query<JusUserRelation>('TRUEPREDICATE');
 
   /// 用户个人节点上的状态列表
-  RealmResults<FlutterJusStatus> get userStatus =>
-      _realm.query<FlutterJusStatus>('TRUEPREDICATE');
+  RealmResults<JusStatus> get userStatus => _realm.query<JusStatus>('TRUEPREDICATE');
 
   /// 用户个人节点上的关系列表同步的时间戳
   int get userRelationUpdateTime =>
-      int.parse(_realm.query<FlutterJusPreference>('key == \'$propUserRelationUpdateTime\'').firstOrNull?.value ?? '-1');
+      int.parse(_realm.query<JusPreference>('key == \'$propUserRelationUpdateTime\'').firstOrNull?.value ?? '-1');
 
   /// 用户个人节点上的状态列表同步的时间戳
   int get userStatusUpdateTime =>
-      int.parse(_realm.query<FlutterJusPreference>('key == \'$propUserStatusUpdateTime\'').firstOrNull?.value ?? '-1');
+      int.parse(_realm.query<JusPreference>('key == \'$propUserStatusUpdateTime\'').firstOrNull?.value ?? '-1');
 
   /// 用户个人节点上已同步的实时个人属性
   Map<String, String> get userProps =>
-      Map.fromEntries(_realm.query<FlutterJusUserProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+      Map.fromEntries(_realm.query<JusUserProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
   /// 用户将要同步的个人属性
   Map<String, String> get userPendingProps =>
-      Map.fromEntries(_realm.query<FlutterJusUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+      Map.fromEntries(_realm.query<JusUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
   /// 收到 pgm 个人节点回调时, 同步数据到本地
   void updatePgmUserProfile(
-      List<FlutterJusUserRelation> relations,
+      List<JusUserRelation> relations,
       int relationUpdateTime,
-      List<FlutterJusStatus> status,
+      List<JusStatus> status,
       int statusUpdateTime) {
     _realm.write(() {
       if (status.isNotEmpty) {
         _realm.addAll(status, update: true);
       }
       for (var relation in relations) {
-        FlutterJusUserRelation? dbRef = _realm.query<FlutterJusUserRelation>('uid == \'${relation.uid}\'').firstOrNull;
+        JusUserRelation? dbRef = _realm.query<JusUserRelation>('uid == \'${relation.uid}\'').firstOrNull;
         if (dbRef != null) {
           dbRef.updatePgm(relation);
           dbRef.updateTime = relation.updateTime;
         } else {
           dbRef = _realm.add(relation);
-          dbRef.status = _realm.query<FlutterJusStatus>('uid == \'${relation.uid}\'').firstOrNull;
+          dbRef.status = _realm.query<JusStatus>('uid == \'${relation.uid}\'').firstOrNull;
         }
       }
       if (relationUpdateTime > 0) {
-        _realm.add(FlutterJusPreference(propUserRelationUpdateTime, relationUpdateTime.toString()), update: true);
+        _realm.add(JusPreference(propUserRelationUpdateTime, relationUpdateTime.toString()), update: true);
       }
       if (statusUpdateTime > 0) {
-        _realm.add(FlutterJusPreference(propUserStatusUpdateTime, statusUpdateTime.toString()), update: true);
+        _realm.add(JusPreference(propUserStatusUpdateTime, statusUpdateTime.toString()), update: true);
       }
     });
   }
@@ -125,9 +123,9 @@ class FlutterJusProfile {
   /// 收到 pgm 个人属性回调时, 同步数据到本地
   void updatePgmUserProps(Map<String, String> map) {
     _realm.write(() {
-      List<FlutterJusUserProp> properties = [];
+      List<JusUserProp> properties = [];
       map.forEach((key, value) {
-        properties.add(FlutterJusUserProp(key, value));
+        properties.add(JusUserProp(key, value));
       });
       _realm.addAll(properties, update: true);
     });
@@ -136,16 +134,16 @@ class FlutterJusProfile {
   /// 当 pgm 还未 logined ok, 此时暂缓存到本地
   void addUserPendingProps(Map<String, String> map) {
     _realm.write(() {
-      List<FlutterJusUserPendingProp> properties = [];
+      List<JusUserPendingProp> properties = [];
       map.forEach((key, value) {
-        properties.add(FlutterJusUserPendingProp(key, value));
+        properties.add(JusUserPendingProp(key, value));
       });
       _realm.addAll(properties, update: true);
     });
   }
   
   void clearUserPendingProps() {
-    RealmResults<FlutterJusUserPendingProp> results = _realm.query<FlutterJusUserPendingProp>('TRUEPREDICATE');
+    RealmResults<JusUserPendingProp> results = _realm.query<JusUserPendingProp>('TRUEPREDICATE');
     if (results.isNotEmpty) {
       _realm.write(() {
         _realm.deleteMany(results);
@@ -162,13 +160,13 @@ class FlutterJusProfile {
   }
 
   /// 根据 uid 获取个人节点列表上的某一关系对象
-  FlutterJusUserRelation? getUserRelation(String uid) {
-    return _realm.query<FlutterJusUserRelation>('uid == \'$uid\'').firstOrNull;
+  JusUserRelation? getUserRelation(String uid) {
+    return _realm.query<JusUserRelation>('uid == \'$uid\'').firstOrNull;
   }
 
   /// 根据 baseTime 获取个人节点列表上的变化集合
-  RealmResults<FlutterJusUserRelation> getDiffUserRelations(int baseTime) {
-    return _realm.query<FlutterJusUserRelation>('updateTime > $baseTime');
+  RealmResults<JusUserRelation> getDiffUserRelations(int baseTime) {
+    return _realm.query<JusUserRelation>('updateTime > $baseTime');
   }
 
 }

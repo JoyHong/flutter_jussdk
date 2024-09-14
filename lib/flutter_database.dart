@@ -3,40 +3,40 @@ import 'package:realm/realm.dart';
 part 'flutter_database.realm.dart';
 
 @RealmModel()
-class _FlutterJusUserRelation {
+class _JusUserRelation {
   @PrimaryKey()
   late String uid;
   late String cfgs;
   late String tag;
   late String tagName;
   late int type;
-  late _FlutterJusStatus? status;
+  late _JusStatus? status;
   late int updateTime;
 }
 
 @RealmModel()
-class _FlutterJusStatus {
+class _JusStatus {
   @PrimaryKey()
   late String uid;
   late String status;
 }
 
 @RealmModel()
-class _FlutterJusUserProp {
+class _JusUserProp {
   @PrimaryKey()
   late String key;
   late String value;
 }
 
 @RealmModel()
-class _FlutterJusUserPendingProp {
+class _JusUserPendingProp {
   @PrimaryKey()
   late String key;
   late String value;
 }
 
 @RealmModel()
-class _FlutterJusPreference {
+class _JusPreference {
   @PrimaryKey()
   late String key;
   late String value;

@@ -1,4 +1,4 @@
-class FlutterJusMtcNotify {
+class JusMtcNotify {
 
   static int _cookie = 0;
   static final Map<int, Function(int, String, String)> _callbacks = {};

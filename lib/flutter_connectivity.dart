@@ -2,7 +2,7 @@ import 'package:flutter_jussdk/flutter_sdk.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
-class FlutterJusConnectivityConstants {
+class JusConnectivityConstants {
   static const int typeWifi = MTC_ANET_WIFI;
   static const int typeMobile = MTC_ANET_MOBILE;
   static const int typeEthernet = MTC_ANET_ETHERNET;
@@ -10,20 +10,20 @@ class FlutterJusConnectivityConstants {
   static const int typeUnavailable = MTC_ANET_UNAVAILABLE;
 }
 
-class FlutterJusConnectivity {
+class JusConnectivity {
 
-  static const String _tag = 'FlutterJusConnectivity';
+  static const String _tag = 'JusConnectivity';
 
   final FlutterMtcBindings _mtc;
   final List<Function(int, int)> _onConnectivityChangedListeners = [];
 
-  int _type = FlutterJusConnectivityConstants.typeUnknown;
+  int _type = JusConnectivityConstants.typeUnknown;
 
-  FlutterJusConnectivity(this._mtc);
+  JusConnectivity(this._mtc);
 
   void notifyChanged(int type) {
     if (_type != type) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'notifyChanged:${type.toConnectivityName()}');
+      JusSDK.logger.i(tag: _tag, message: 'notifyChanged:${type.toConnectivityName()}');
       int oldType = _type;
       _type = type;
       _mtc.Mtc_CliNetworkChanged(type);
@@ -47,18 +47,18 @@ class FlutterJusConnectivity {
 
 }
 
-extension _ConnectivityTypeName on int {
+extension _JusConnectivityTypeName on int {
   String toConnectivityName() {
-    if (this == FlutterJusConnectivityConstants.typeWifi) {
+    if (this == JusConnectivityConstants.typeWifi) {
       return 'Wifi';
     }
-    if (this == FlutterJusConnectivityConstants.typeMobile) {
+    if (this == JusConnectivityConstants.typeMobile) {
       return 'Mobile';
     }
-    if (this == FlutterJusConnectivityConstants.typeEthernet) {
+    if (this == JusConnectivityConstants.typeEthernet) {
       return 'Ethernet';
     }
-    if (this == FlutterJusConnectivityConstants.typeUnavailable) {
+    if (this == JusConnectivityConstants.typeUnavailable) {
       return 'Unavailable';
     }
     return 'Unknown';

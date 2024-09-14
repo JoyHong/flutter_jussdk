@@ -4,7 +4,7 @@ import 'package:flutter_jussdk/flutter_sdk.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
-class FlutterJusFriend {
+class JusFriend {
   /// 未知
   static const int typeUnknown = -1;
   /// 好友
@@ -21,18 +21,18 @@ class FlutterJusFriend {
   /// 所属关系
   final int type;
 
-  const FlutterJusFriend(this.uid, this.properties, {this.tagName = '', this.type = typeUnknown});
+  const JusFriend(this.uid, this.properties, {this.tagName = '', this.type = typeUnknown});
 
   @override
   String toString() {
-    return 'FlutterJusFriend{uid: $uid, properties: $properties, tagName: $tagName, type: $type}';
+    return 'JusFriend{uid: $uid, properties: $properties, tagName: $tagName, type: $type}';
   }
 }
 
 /// 收到他人的关系变化申请(目前指好友请求)
-class FlutterJusApplyFriend {
+class JusApplyFriend {
   /// 发起者的 Friend 对象
-  late FlutterJusFriend friend;
+  late JusFriend friend;
   /// 确认时候用到的值
   late int msgIdx;
   /// 期望变成什么关系
@@ -44,8 +44,8 @@ class FlutterJusApplyFriend {
   /// 发起时的时间戳
   late int timestamp;
 
-  FlutterJusApplyFriend.fromJson(Map<String, dynamic> map) {
-    friend = FlutterJusFriend(map['TargetId'], {FlutterJusSDKConstants.userPropNickName: map['TargetName']});
+  JusApplyFriend.fromJson(Map<String, dynamic> map) {
+    friend = JusFriend(map['TargetId'], {JusSDKConstants.userPropNickName: map['TargetName']});
     msgIdx = int.parse(map['ApplyMsgIdx']);
     type = int.parse(map['TargetType']);
     desc = map['Desc'];
@@ -67,12 +67,12 @@ class FlutterJusApplyFriend {
 
   @override
   String toString() {
-    return 'FlutterJusApplyFriend{friend: $friend, msgIdx: $msgIdx, type: $type, desc: $desc, extraParamMap: $extraParamMap, timestamp: $timestamp}';
+    return 'JusApplyFriend{friend: $friend, msgIdx: $msgIdx, type: $type, desc: $desc, extraParamMap: $extraParamMap, timestamp: $timestamp}';
   }
 }
 
 /// 收到他人通过我的关系变化申请(目前指好友请求)
-class FlutterJusResponseFriend {
+class JusResponseFriend {
   /// 通过者的 uid
   late String uid;
   /// 通过后当前是什么关系
@@ -80,33 +80,33 @@ class FlutterJusResponseFriend {
   /// 通过时的时间戳
   late int timestamp;
 
-  FlutterJusResponseFriend.fromJson(Map<String, dynamic> map) {
+  JusResponseFriend.fromJson(Map<String, dynamic> map) {
     uid = map['GroupId'];
     type = int.parse(map['TargetType']);
     timestamp = int.parse(map['Time']);
   }
 
   /// 通过者的 Friend 对象
-  FlutterJusFriend getFriendObject() {
-    return FlutterJusProfile().getUserRelation(uid)!.toFriend();
+  JusFriend getFriendObject() {
+    return JusProfile().getUserRelation(uid)!.toFriend();
   }
 
   @override
   String toString() {
-    return 'FlutterJusApplyResponseFriend{uid: $uid, type: $type, timestamp: $timestamp}';
+    return 'JusApplyResponseFriend{uid: $uid, type: $type, timestamp: $timestamp}';
   }
 }
 
 /// 个人节点的好友变化
-class FlutterJusFriendsUpdated {
+class JusFriendsUpdated {
   late int baseTime;
   late int updateTime;
-  late List<FlutterJusFriend> diff;
+  late List<JusFriend> diff;
 
-  FlutterJusFriendsUpdated(this.baseTime, this.updateTime, this.diff);
+  JusFriendsUpdated(this.baseTime, this.updateTime, this.diff);
 
   @override
   String toString() {
-    return 'FlutterJusFriendsUpdated{baseTime: $baseTime, updateTime: $updateTime, diff: $diff}';
+    return 'JusFriendsUpdated{baseTime: $baseTime, updateTime: $updateTime, diff: $diff}';
   }
 }

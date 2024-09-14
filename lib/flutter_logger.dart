@@ -5,14 +5,14 @@ import 'package:flutter_jussdk/flutter_tools.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
-class FlutterJusLogger {
+class JusLogger {
   final FlutterMtcBindings _mtc;
   final String _appName;
   final String _buildNumber;
   final String _deviceId;
   final Directory _logDir;
 
-  FlutterJusLogger(this._mtc, this._appName, this._buildNumber,
+  JusLogger(this._mtc, this._appName, this._buildNumber,
       this._deviceId, this._logDir);
 
   void i({required String tag, required String message}) {

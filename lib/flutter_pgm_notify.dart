@@ -1,4 +1,4 @@
-class FlutterJusPgmNotify {
+class JusPgmNotify {
 
   static int _cookie = 0;
   static final Map<int, Function(int, String)> _callbacks = {};

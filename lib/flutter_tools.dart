@@ -7,31 +7,31 @@ import 'package:path_provider/path_provider.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
-extension NativeToDartString on Pointer {
+extension JusNativeToDartString on Pointer {
   String toDartString() {
     return cast<Utf8>().toDartString();
   }
 }
 
-extension DartToNativePointer on String {
+extension JusDartToNativePointer on String {
   Pointer<Char> toNativePointer() {
     return toNativeUtf8().cast();
   }
 }
 
-extension DynamicMap on Map<dynamic, dynamic> {
+extension JusDynamicMap on Map<dynamic, dynamic> {
   Map<String, String> castString() {
     return map((key, value) => MapEntry(key, value.toString()));
   }
 }
 
-extension StringMap on Map<String, String> {
+extension JusStringMap on Map<String, String> {
   Map<String, String> filterKeys(List<String> keys) {
     return Map.fromEntries(entries.where((entry) => keys.contains(entry.key)));
   }
 }
 
-extension PgmEventName on int {
+extension JusPgmEventName on int {
   String toPgmEventName() {
     switch(this) {
       case 0:   return 'InvalidEvent(0)';
@@ -48,10 +48,10 @@ extension PgmEventName on int {
   }
 }
 
-class FlutterJusTools {
+class JusTools {
   final FlutterMtcBindings _mtc;
 
-  FlutterJusTools(this._mtc);
+  JusTools(this._mtc);
 
   /// 是否是有效的正常用户的 uid
   bool isValidUserId(String uid) {

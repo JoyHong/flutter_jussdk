@@ -1,11 +1,11 @@
-class FlutterJusError {
+class JusError {
   final int reason;
   final String message;
 
-  const FlutterJusError(this.reason, {this.message = ''});
+  const JusError(this.reason, {this.message = ''});
 
   @override
   String toString() {
-    return 'FlutterJusError{reason: $reason, message: $message}';
+    return 'JusError{reason: $reason, message: $message}';
   }
 }

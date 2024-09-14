@@ -16,16 +16,16 @@ import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
 import 'flutter_relation.dart';
 
-class FlutterJusAccountConstants {
+class JusAccountConstants {
 
-  static const int errorDevIntegration = FlutterJusSDKConstants.errorDevIntegration;
-  static const int errorFailNotification = FlutterJusSDKConstants.errorFailNotification;
-  static const int errorNotConnected = FlutterJusSDKConstants.errorBaseCode - 1;
+  static const int errorDevIntegration = JusSDKConstants.errorDevIntegration;
+  static const int errorFailNotification = JusSDKConstants.errorFailNotification;
+  static const int errorNotConnected = JusSDKConstants.errorBaseCode - 1;
 
   /// 账号删除失败, 密码错误
-  static const int errorDeleteWrongPWD = FlutterJusSDKConstants.errorBaseCode - 2;
+  static const int errorDeleteWrongPWD = JusSDKConstants.errorBaseCode - 2;
   /// 搜索用户失败, 未找到匹配的用户
-  static const int errorSearchNotFound = FlutterJusSDKConstants.errorBaseCode - 3;
+  static const int errorSearchNotFound = JusSDKConstants.errorBaseCode - 3;
 
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
@@ -60,14 +60,14 @@ class FlutterJusAccountConstants {
 
 }
 
-abstract class FlutterJusAccount {
+abstract class JusAccount {
 
-  /// 注册账号, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 注册账号, 成功返回 true, 失败则抛出异常 JusError
   /// username: 用户名
   /// password: 密码
   Future<bool> signUp({required String username, required String password, Map<String, String>? props});
 
-  /// 账号密码登陆, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 账号密码登陆, 成功返回 true, 失败则抛出异常 JusError
   /// username: 用户名
   /// password: 密码
   Future<bool> login({required String username, required String password});
@@ -75,52 +75,52 @@ abstract class FlutterJusAccount {
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
   Future<void> autoLogin({required String username});
 
-  /// 修改密码, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 修改密码, 成功返回 true, 失败则抛出异常 JusError
   /// oldPassword: 原密码
   /// newPassword: 新密码
   Future<bool> changePassword({required String oldPassword, required String newPassword});
 
-  /// 删除账号, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 删除账号, 成功返回 true, 失败则抛出异常 JusError
   /// 注: 需要在登陆成功的状态下才能进行删除操作
   Future<bool> delete({required String password});
 
   /// 退出登陆
   Future<bool> logout();
 
-  /// 注册 push, 默认注册了 Text 消息以及好友的请求与响应, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 注册 push, 默认注册了 Text 消息以及好友的请求与响应, 成功返回 true, 失败则抛出异常 JusError
   /// pushType: push 类型 - pushTypeGCM
   /// pushAppId: push 对应的 key, 如 GCM 是 Project ID (Project settings -> General -> Your project -> Project ID)
   /// pushToken: push token
   /// infoTypes: 需要注册的 info 消息列表
   Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
 
-  /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 FlutterJusError
+  /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 JusError
   Future<Map<String, String>> getProperties();
 
   /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
   void setProperties(Map<String, String> props);
 
-  /// 搜索除本人以外的用户信息, 失败则抛出异常 FlutterJusError
-  Future<FlutterJusFriend> searchFriend({required String username});
+  /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError
+  Future<JusFriend> searchFriend({required String username});
 
-  /// 发起添加好友请求, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 发起添加好友请求, 成功返回 true, 失败则抛出异常 JusError
   /// uid: 对方的 uid
   /// tagName: 给对方的备注
   /// desc: 附带信息
   /// extraParamMap: 额外的键值对参数
   Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
-  /// 接受好友请求, 成功返回 true, 失败则抛出异常 FlutterJusError
+  /// 接受好友请求, 成功返回 true, 失败则抛出异常 JusError
   /// msgId: 收到 applyFriend 上报时附带的参数
   /// tagName: 给对方的备注
   /// extraParamMap: 额外的键值对参数
   Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap});
 
   /// 根据 baseTime 立马获取与插件内部的差异
-  FlutterJusFriendsUpdated getFriendsUpdated(int baseTime);
+  JusFriendsUpdated getFriendsUpdated(int baseTime);
 
   /// 根据 baseTime 获取最新的差异
-  Future<FlutterJusFriendsUpdated> getFriendsUpdatedAsync(int baseTime);
+  Future<JusFriendsUpdated> getFriendsUpdatedAsync(int baseTime);
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -129,27 +129,27 @@ abstract class FlutterJusAccount {
   int getState();
 
   /// 登陆状态变化监听
-  late Stream<FlutterJusAccountState> stateUpdated;
+  late Stream<JusAccountState> stateUpdated;
 
   /// 收到好友关系变化申请的监听
-  late Stream<FlutterJusApplyFriend> applyFriendUpdated;
+  late Stream<JusApplyFriend> applyFriendUpdated;
 
   /// 收到他人通过我的好友关系变化申请的监听
-  late Stream<FlutterJusResponseFriend> responseFriendUpdated;
+  late Stream<JusResponseFriend> responseFriendUpdated;
 
   /// 好友列表变化监听
-  late Stream<FlutterJusFriendsUpdated> friendsUpdated;
+  late Stream<JusFriendsUpdated> friendsUpdated;
 }
 
-class FlutterJusAccountImpl extends FlutterJusAccount {
+class JusAccountImpl extends JusAccount {
 
-  static const String _tag = 'FlutterJusAccount';
+  static const String _tag = 'JusAccount';
 
   static const String _defUserType = 'duoNumber';
 
   String _clientUser = '';
   bool _clientUserProvisionOk = false;
-  int _state = FlutterJusAccountConstants.stateInit;
+  int _state = JusAccountConstants.stateInit;
   bool _autoLogging = false;
   int _reLoggingTimeout = 2;
   CancellationToken? _reLoggingTimeoutToken;
@@ -158,23 +158,23 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   /// 是否正在 pgm_c_refresh_main 中
   bool _pgmRefreshing = false;
 
-  final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
+  final StreamController<JusAccountState> _stateEvents = StreamController.broadcast();
   /// 登陆状态变化更新
   @override
-  Stream<FlutterJusAccountState> get stateUpdated => _stateEvents.stream;
+  Stream<JusAccountState> get stateUpdated => _stateEvents.stream;
 
-  final StreamController<FlutterJusApplyFriend> _applyFriendEvents = StreamController.broadcast();
+  final StreamController<JusApplyFriend> _applyFriendEvents = StreamController.broadcast();
   /// 收到他人发起的添加好友请求
   @override
-  Stream<FlutterJusApplyFriend> get applyFriendUpdated => _applyFriendEvents.stream;
+  Stream<JusApplyFriend> get applyFriendUpdated => _applyFriendEvents.stream;
 
-  final StreamController<FlutterJusResponseFriend> responseFriendEvents = StreamController.broadcast();
+  final StreamController<JusResponseFriend> responseFriendEvents = StreamController.broadcast();
   @override
-  Stream<FlutterJusResponseFriend> get responseFriendUpdated => responseFriendEvents.stream;
+  Stream<JusResponseFriend> get responseFriendUpdated => responseFriendEvents.stream;
 
-  final StreamController<FlutterJusFriendsUpdated> _friendUpdatedEvents = StreamController.broadcast();
+  final StreamController<JusFriendsUpdated> _friendUpdatedEvents = StreamController.broadcast();
   @override
-  Stream<FlutterJusFriendsUpdated> get friendsUpdated => _friendUpdatedEvents.stream;
+  Stream<JusFriendsUpdated> get friendsUpdated => _friendUpdatedEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -184,7 +184,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   final String _deviceId;
   final Map<String, String>? _deviceProps;
 
-  FlutterJusAccountImpl(
+  JusAccountImpl(
       this._mtc,
       this._pgm,
       this._appKey,
@@ -217,39 +217,39 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           _mtc.Mtc_UeDbSetUid(_mtc.Mtc_UeGetUid());
           _mtc.Mtc_ProfSaveProvision();
         }
-        FlutterJusSDK.logger.i(tag: _tag, message: 'logined uid is ${_mtc.Mtc_UeDbGetUid().toDartString()}');
+        JusSDK.logger.i(tag: _tag, message: 'logined uid is ${_mtc.Mtc_UeDbGetUid().toDartString()}');
         if (!_autoLogging) {
-          await FlutterJusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
+          await JusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
         }
-        await FlutterJusSDK.pgmIsolateInitPgm();
-        int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-          FlutterJusPgmNotify.removeCookie(cookie);
+        await JusSDK.pgmIsolateInitPgm();
+        int cookie = JusPgmNotify.addCookie((cookie, error) {
+          JusPgmNotify.removeCookie(cookie);
           _pgmLoginedEnd = true;
           for (var callback in _pgmLoginedEndCallbacks) {
             callback.call();
           }
           _pgmLoginedEndCallbacks.clear();
-          Map<String, String> pendingProperties = FlutterJusProfile().userPendingProps;
+          Map<String, String> pendingProperties = JusProfile().userPendingProps;
           if (pendingProperties.isNotEmpty) {
-            FlutterJusProfile().clearUserPendingProps();
-            FlutterJusSDK.logger.i(tag: _tag, message: 'setPendingProperties($pendingProperties)');
-            int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-              FlutterJusPgmNotify.removeCookie(cookie);
+            JusProfile().clearUserPendingProps();
+            JusSDK.logger.i(tag: _tag, message: 'setPendingProperties($pendingProperties)');
+            int cookie = JusPgmNotify.addCookie((cookie, error) {
+              JusPgmNotify.removeCookie(cookie);
               if (error.isNotEmpty) {
-                FlutterJusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, $error');
+                JusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, $error');
               }
             });
             Pointer<Char> pcErr = ''.toNativePointer();
-            if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProperties).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
-              FlutterJusPgmNotify.removeCookie(cookie);
-              FlutterJusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, ${pcErr.toDartString()}');
+            if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProperties).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+              JusPgmNotify.removeCookie(cookie);
+              JusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, ${pcErr.toDartString()}');
             }
           }
         });
         Pointer<Char> pcErr = ''.toNativePointer();
-        if (_pgm.pgm_c_logined(cookie.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
-          FlutterJusPgmNotify.removeCookie(cookie);
-          FlutterJusSDK.logger.e(tag: _tag, message: 'pgm_c_logined fail, ${pcErr.toDartString()}');
+        if (_pgm.pgm_c_logined(cookie.toString().toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+          JusPgmNotify.removeCookie(cookie);
+          JusSDK.logger.e(tag: _tag, message: 'pgm_c_logined fail, ${pcErr.toDartString()}');
         }
         for (var callback in _loginCallbacks) {
           callback.call(true);
@@ -259,7 +259,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         return;
       }
       if (name == MtcCliServerLoginDidFailNotification) { // 登陆失败的回调
-        FlutterJusError error = info.toCliError();
+        JusError error = info.toCliError();
         for (var callback in _loginCallbacks) {
           callback.call(error);
         }
@@ -286,7 +286,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         return;
       }
       if (name == MtcCliServerLogoutedNotification) { // 被登出
-        int reason = FlutterJusAccountConstants.errorFailNotification;
+        int reason = JusAccountConstants.errorFailNotification;
         try {
           reason = jsonDecode(info)[MtcCliStatusCodeKey];
         } catch (ignored) {}
@@ -298,10 +298,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         return;
       }
     });
-    FlutterJusSDK.connectivity.addOnConnectivityChangedListener((oldType, newType) {
+    JusSDK.connectivity.addOnConnectivityChangedListener((oldType, newType) {
       pgmRefreshMain();
-      if (oldType == FlutterJusConnectivityConstants.typeUnavailable &&
-          _state == FlutterJusAccountConstants.stateLoginFailed &&
+      if (oldType == JusConnectivityConstants.typeUnavailable &&
+          _state == JusAccountConstants.stateLoginFailed &&
           _autoLogging) {
         // 从没有网络到有网络, 且上一次自动登陆失败, 则继续重试自动登陆
         _reLoggingTimeoutToken?.cancel();
@@ -314,26 +314,26 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
   @override
   Future<bool> signUp({required String username, required String password, Map<String, String>? props}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
-    dynamic result = (await _cliOpen(_defUserType, username)) == FlutterJusSDKConstants.ZOK;
+    JusSDK.logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
+    dynamic result = (await _cliOpen(_defUserType, username)) == JusSDKConstants.ZOK;
     if (!result) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliOpen did fail');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
+      JusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliOpen did fail');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
     }
-    result = _cliStart() == FlutterJusSDKConstants.ZOK;
+    result = _cliStart() == JusSDKConstants.ZOK;
     if (!result) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliStart did fail');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliStart did fail');
+      JusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliStart did fail');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'call cliStart did fail');
     }
     result = await _provisionOkTransformer();
     if (result != true) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call provisionOkTransformer did fail');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call provisionOkTransformer did fail');
+      JusSDK.logger.e(tag: _tag, message: 'signUp fail, call provisionOkTransformer did fail');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'call provisionOkTransformer did fail');
     }
     Future<int> Mtc_UeQueryAccountX() {
       Completer<int> completer = Completer();
-      int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
-        FlutterJusMtcNotify.removeCookie(cookie);
+      int cookie = JusMtcNotify.addCookie((cookie, name, info) {
+        JusMtcNotify.removeCookie(cookie);
         if (name == MtcUeQueryAccountOkNotification) {
           completer.complete(jsonDecode(info)[MtcUeReasonKey]);
         } else {
@@ -342,24 +342,24 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       });
       if (_mtc.Mtc_UeQueryAccountX(cookie,
           _defUserType.toNativePointer(),
-          username.toNativePointer()) != FlutterJusSDKConstants.ZOK) {
-        FlutterJusMtcNotify.removeCookie(cookie);
-        completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeQueryAccountX did fail'));
+          username.toNativePointer()) != JusSDKConstants.ZOK) {
+        JusMtcNotify.removeCookie(cookie);
+        completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call Mtc_UeQueryAccountX did fail'));
       }
       return completer.future;
     }
     try {
       if (await Mtc_UeQueryAccountX() == EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST) {
-        FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, account exist');
-        throw const FlutterJusError(FlutterJusAccountConstants.errorSignUpExist, message: 'account exist');
+        JusSDK.logger.e(tag: _tag, message: 'signUp fail, account exist');
+        throw const JusError(JusAccountConstants.errorSignUpExist, message: 'account exist');
       }
     } catch (e) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, $e');
+      JusSDK.logger.e(tag: _tag, message: 'signUp fail, $e');
       rethrow;
     }
     Completer<bool> completer = Completer();
-    int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
-      FlutterJusMtcNotify.removeCookie(cookie);
+    int cookie = JusMtcNotify.addCookie((cookie, name, info) {
+      JusMtcNotify.removeCookie(cookie);
       if (name == MtcUeCreateOkNotification) {
         completer.complete(true);
       } else {
@@ -378,21 +378,21 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         jsonEncode([{MtcUeRelationTypeKey: _defUserType, MtcUeRelationIdKey: username}]).toNativePointer(),
         password.toNativePointer(),
         true,
-        propList != null ? jsonEncode(propList).toNativePointer() : nullptr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusMtcNotify.removeCookie(cookie);
-      FlutterJusSDK.logger.e(tag: _tag, message: 'signUp fail, call Mtc_UeCreate2 did fail');
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeCreate2 did fail'));
+        propList != null ? jsonEncode(propList).toNativePointer() : nullptr) != JusSDKConstants.ZOK) {
+      JusMtcNotify.removeCookie(cookie);
+      JusSDK.logger.e(tag: _tag, message: 'signUp fail, call Mtc_UeCreate2 did fail');
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call Mtc_UeCreate2 did fail'));
     }
     return completer.future;
   }
 
   @override
   Future<bool> login({required String username, required String password}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'login($username, $password)');
-    bool result = (await _cliOpen(_defUserType, username, password: password)) == FlutterJusSDKConstants.ZOK;
+    JusSDK.logger.i(tag: _tag, message: 'login($username, $password)');
+    bool result = (await _cliOpen(_defUserType, username, password: password)) == JusSDKConstants.ZOK;
     if (!result) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'login fail, call cliOpen did fail');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
+      JusSDK.logger.e(tag: _tag, message: 'login fail, call cliOpen did fail');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
     }
     Completer<bool> completer = Completer();
     callback(result) {
@@ -403,10 +403,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       }
     }
     _loginCallbacks.add(callback);
-    if (_login(MTC_LOGIN_OPTION_PREEMPTIVE) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'login fail, call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail');
+    if (_login(MTC_LOGIN_OPTION_PREEMPTIVE) != JusSDKConstants.ZOK) {
+      JusSDK.logger.e(tag: _tag, message: 'login fail, call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail');
       _loginCallbacks.remove(callback);
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail'));
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call login(MTC_LOGIN_OPTION_PREEMPTIVE) did fail'));
     } else {
       _loggingIn(false);
     }
@@ -415,14 +415,14 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
   @override
   Future<void> autoLogin({required String username}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'autoLogin($username)');
-    bool result = (await _cliOpen(_defUserType, username)) == FlutterJusSDKConstants.ZOK;
+    JusSDK.logger.i(tag: _tag, message: 'autoLogin($username)');
+    bool result = (await _cliOpen(_defUserType, username)) == JusSDKConstants.ZOK;
     if (!result) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'autoLogin fail, cliOpen did fail');
+      JusSDK.logger.e(tag: _tag, message: 'autoLogin fail, cliOpen did fail');
       return;
     }
-    if (_login(MTC_LOGIN_OPTION_NONE) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'autoLogin fail, login(MTC_LOGIN_OPTION_NONE) did fail');
+    if (_login(MTC_LOGIN_OPTION_NONE) != JusSDKConstants.ZOK) {
+      JusSDK.logger.e(tag: _tag, message: 'autoLogin fail, login(MTC_LOGIN_OPTION_NONE) did fail');
     } else {
       _loggingIn(true);
     }
@@ -430,14 +430,14 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
   @override
   Future<bool> changePassword({required String oldPassword, required String newPassword}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
+    JusSDK.logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
     if (!(await _connectOkTransformer())) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'changePassword fail, not connected');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      JusSDK.logger.i(tag: _tag, message: 'changePassword fail, not connected');
+      throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
     Completer<bool> completer = Completer();
-    int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
-      FlutterJusMtcNotify.removeCookie(cookie);
+    int cookie = JusMtcNotify.addCookie((cookie, name, info) {
+      JusMtcNotify.removeCookie(cookie);
       if (name == MtcUeChangePasswordOkNotification) {
         _mtc.Mtc_ProfSaveProvision();
         completer.complete(true);
@@ -445,51 +445,51 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         completer.completeError(info.toUeError());
       }
     });
-    if (_mtc.Mtc_UeChangePassword(cookie, oldPassword.toNativePointer(), newPassword.toNativePointer()) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'changePassword fail, call Mtc_UeChangePassword did fail');
-      FlutterJusMtcNotify.removeCookie(cookie);
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_UeChangePassword did fail'));
+    if (_mtc.Mtc_UeChangePassword(cookie, oldPassword.toNativePointer(), newPassword.toNativePointer()) != JusSDKConstants.ZOK) {
+      JusSDK.logger.e(tag: _tag, message: 'changePassword fail, call Mtc_UeChangePassword did fail');
+      JusMtcNotify.removeCookie(cookie);
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call Mtc_UeChangePassword did fail'));
     }
     return completer.future;
   }
 
   @override
   Future<bool> delete({required String password}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'delete($password)');
+    JusSDK.logger.i(tag: _tag, message: 'delete($password)');
     if (password != _mtc.Mtc_UeDbGetPassword().toDartString()) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'delete fail, wrong password');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDeleteWrongPWD, message: 'wrong password');
+      JusSDK.logger.i(tag: _tag, message: 'delete fail, wrong password');
+      throw const JusError(JusAccountConstants.errorDeleteWrongPWD, message: 'wrong password');
     }
     if (!(await _connectOkTransformer())) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'delete fail, not connected');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      JusSDK.logger.i(tag: _tag, message: 'delete fail, not connected');
+      throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
     Completer<bool> completer = Completer();
-    int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
-      FlutterJusMtcNotify.removeCookie(cookie);
+    int cookie = JusMtcNotify.addCookie((cookie, name, info) {
+      JusMtcNotify.removeCookie(cookie);
       if (name == MtcUeDeleteUserOkNotifcation) {
         completer.complete(true);
       } else {
         completer.completeError(info.toUeError());
       }
     });
-    if (_mtc.Mtc_UeDeleteUser(cookie, 0) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'delete fail, call Mtc_UeDeleteUser did fail');
-      FlutterJusMtcNotify.removeCookie(cookie);
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'Mtc_UeDeleteUser did fail'));
+    if (_mtc.Mtc_UeDeleteUser(cookie, 0) != JusSDKConstants.ZOK) {
+      JusSDK.logger.e(tag: _tag, message: 'delete fail, call Mtc_UeDeleteUser did fail');
+      JusMtcNotify.removeCookie(cookie);
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'Mtc_UeDeleteUser did fail'));
     }
     return completer.future;
   }
 
   @override
   Future<bool> logout() async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'logout()');
+    JusSDK.logger.i(tag: _tag, message: 'logout()');
     Completer<bool> completer = Completer();
     callback() {
       completer.complete(true);
     }
     _didLogoutCallbacks.add(callback);
-    if (_mtc.Mtc_CliLogout() != FlutterJusSDKConstants.ZOK) {
+    if (_mtc.Mtc_CliLogout() != JusSDKConstants.ZOK) {
       _didLogoutCallbacks.remove(callback);
       _logoutOk(0, true);
       completer.complete(true);
@@ -499,14 +499,14 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
   @override
   Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $infoTypes)');
-    if (pushType != FlutterJusAccountConstants.pushTypeGCM) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'registerPush fail, pushType must be FlutterJusAccountConstants.pushTypeGCM');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'pushType must be FlutterJusAccountConstants.pushTypeGCM');
+    JusSDK.logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $infoTypes)');
+    if (pushType != JusAccountConstants.pushTypeGCM) {
+      JusSDK.logger.e(tag: _tag, message: 'registerPush fail, pushType must be JusAccountConstants.pushTypeGCM');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'pushType must be JusAccountConstants.pushTypeGCM');
     }
     if (!(await _connectOkTransformer())) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'registerPush fail, not connected');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      JusSDK.logger.i(tag: _tag, message: 'registerPush fail, not connected');
+      throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
 
     String expiration = (4 * 7 * 24 * 60 * 60).toString(); // 4 weeks
@@ -576,72 +576,72 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       putPayloadMessageInfo(infoType);
     });
 
-    if (_mtc.Mtc_CliSetPushParm(jsonEncode(params).toNativePointer()) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'registerPush fail, Mtc_CliSetPushParm did fail');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'Mtc_CliSetPushParm did fail');
+    if (_mtc.Mtc_CliSetPushParm(jsonEncode(params).toNativePointer()) != JusSDKConstants.ZOK) {
+      JusSDK.logger.e(tag: _tag, message: 'registerPush fail, Mtc_CliSetPushParm did fail');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'Mtc_CliSetPushParm did fail');
     }
     return true;
   }
 
   @override
   Future<Map<String, String>> getProperties() async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties()');
+    JusSDK.logger.i(tag: _tag, message: 'getProperties()');
     await _pgmLoginedEndTransformer();
-    return (FlutterJusProfile().userProps
-      ..addAll(FlutterJusProfile().userPendingProps)).filterKeys(FlutterJusSDK.accountPropNames);
+    return (JusProfile().userProps
+      ..addAll(JusProfile().userPendingProps)).filterKeys(JusSDK.accountPropNames);
   }
 
   @override
   void setProperties(Map<String, String> props) {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties($props)');
+    JusSDK.logger.i(tag: _tag, message: 'setProperties($props)');
     if (_mtc.Mtc_UeDbGetUid() == nullptr || _mtc.Mtc_UeDbGetUid().toDartString().isEmpty) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, no logged user');
+      JusSDK.logger.e(tag: _tag, message: 'setProperties fail, no logged user');
       return;
     }
     if (!_pgmLoginedEnd) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties save to pending');
-      FlutterJusProfile().addUserPendingProps(props);
+      JusSDK.logger.i(tag: _tag, message: 'setProperties save to pending');
+      JusProfile().addUserPendingProps(props);
       return;
     }
-    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-      FlutterJusPgmNotify.removeCookie(cookie);
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
       if (error.isNotEmpty) {
-        FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, $error');
+        JusSDK.logger.e(tag: _tag, message: 'setProperties fail, $error');
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusPgmNotify.removeCookie(cookie);
-      FlutterJusSDK.logger.e(tag: _tag, message: 'setProperties fail, ${pcErr.toDartString()}');
+    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.e(tag: _tag, message: 'setProperties fail, ${pcErr.toDartString()}');
     }
   }
 
   @override
-  Future<FlutterJusFriend> searchFriend({required String username}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'searchFriend($username)');
+  Future<JusFriend> searchFriend({required String username}) async {
+    JusSDK.logger.i(tag: _tag, message: 'searchFriend($username)');
     if (!(await _connectOkTransformer())) {
-      FlutterJusSDK.logger.i(tag: _tag, message: 'searchFriend fail, not connected');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorNotConnected, message: 'not connected');
+      JusSDK.logger.i(tag: _tag, message: 'searchFriend fail, not connected');
+      throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
     Future<String> Mtc_BuddyQueryUserId(String uri) {
       Completer<String> completer = Completer();
-      int cookie = FlutterJusMtcNotify.addCookie((cookie, name, info) {
-        FlutterJusMtcNotify.removeCookie(cookie);
+      int cookie = JusMtcNotify.addCookie((cookie, name, info) {
+        JusMtcNotify.removeCookie(cookie);
         if (name == MtcBuddyQueryUserIdOkNotification) {
           // list length 最多是2, 第一个表示 uri, 第二个表示该 uri 对应的 uid(如果有的话)
           List<dynamic> list = (jsonDecode(info) as List<dynamic>)[0];
           if (list.length == 2) {
             completer.complete(list[1]);
           } else {
-            completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorSearchNotFound, message: 'not found'));
+            completer.completeError(const JusError(JusAccountConstants.errorSearchNotFound, message: 'not found'));
           }
         } else {
           completer.completeError(info.toBuddyError());
         }
       });
-      if (_mtc.Mtc_BuddyQueryUserId(cookie, jsonEncode([uri]).toNativePointer()) != FlutterJusSDKConstants.ZOK) {
-        FlutterJusMtcNotify.removeCookie(cookie);
-        completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call Mtc_BuddyQueryUserId did fail'));
+      if (_mtc.Mtc_BuddyQueryUserId(cookie, jsonEncode([uri]).toNativePointer()) != JusSDKConstants.ZOK) {
+        JusMtcNotify.removeCookie(cookie);
+        completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call Mtc_BuddyQueryUserId did fail'));
       }
       return completer.future;
     }
@@ -650,42 +650,42 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     try {
       uid = await Mtc_BuddyQueryUserId(uri);
     } catch (e) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, $e');
+      JusSDK.logger.e(tag: _tag, message: 'searchFriend fail, $e');
       rethrow;
     }
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, should not search self');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'should not search self');
+      JusSDK.logger.e(tag: _tag, message: 'searchFriend fail, should not search self');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'should not search self');
     }
-    Completer<FlutterJusFriend> completer = Completer();
-    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-      FlutterJusPgmNotify.removeCookie(cookie);
+    Completer<JusFriend> completer = Completer();
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(FlutterJusFriend(uid, FlutterJusProfile().getCachedProps(uid).filterKeys(FlutterJusSDK.accountPropNames)));
+        completer.complete(JusFriend(uid, JusProfile().getCachedProps(uid).filterKeys(JusSDK.accountPropNames)));
       } else {
         completer.completeError(error.toNotificationError());
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusPgmNotify.removeCookie(cookie);
-      FlutterJusSDK.logger.e(tag: _tag, message: 'searchFriend fail, call pgm_c_get_props did fail');
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
+    if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.e(tag: _tag, message: 'searchFriend fail, call pgm_c_get_props did fail');
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
     }
     return completer.future;
   }
 
   @override
   Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'applyFriend($uid, $tagName, $desc, $extraParamMap)');
+    JusSDK.logger.i(tag: _tag, message: 'applyFriend($uid, $tagName, $desc, $extraParamMap)');
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      FlutterJusSDK.logger.e(tag: _tag, message: 'applyFriend fail, should not apply self');
-      throw const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'should not apply self');
+      JusSDK.logger.e(tag: _tag, message: 'applyFriend fail, should not apply self');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'should not apply self');
     }
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
-    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-      FlutterJusPgmNotify.removeCookie(cookie);
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
         completer.complete(true);
       } else {
@@ -705,21 +705,21 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
           'type': EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT
         }).toNativePointer(),
         jsonEncode(extraParamMap).toNativePointer(),
-        pcErr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusPgmNotify.removeCookie(cookie);
-      FlutterJusSDK.logger.i(tag: _tag, message: 'applyFriend fail, call pgm_c_apply_relation did fail');
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_apply_relation did fail'));
+        pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.i(tag: _tag, message: 'applyFriend fail, call pgm_c_apply_relation did fail');
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_apply_relation did fail'));
     }
     return completer.future;
   }
 
   @override
   Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'acceptFriend($msgId, $tagName, $extraParamMap)');
+    JusSDK.logger.i(tag: _tag, message: 'acceptFriend($msgId, $tagName, $extraParamMap)');
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
-    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-      FlutterJusPgmNotify.removeCookie(cookie);
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
         completer.complete(true);
       } else {
@@ -733,36 +733,36 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         ''.toNativePointer(),
         '{}'.toNativePointer(),
         jsonEncode(extraParamMap).toNativePointer(),
-        pcErr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusPgmNotify.removeCookie(cookie);
-      FlutterJusSDK.logger.i(tag: _tag, message: 'acceptFriend fail, call pgm_c_accept_relation did fail');
-      completer.completeError(const FlutterJusError(FlutterJusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail'));
+        pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.i(tag: _tag, message: 'acceptFriend fail, call pgm_c_accept_relation did fail');
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail'));
     }
     return completer.future;
   }
 
   @override
-  FlutterJusFriendsUpdated getFriendsUpdated(int baseTime) {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'getFriendsUpdated($baseTime)');
-    return FlutterJusFriendsUpdated(
+  JusFriendsUpdated getFriendsUpdated(int baseTime) {
+    JusSDK.logger.i(tag: _tag, message: 'getFriendsUpdated($baseTime)');
+    return JusFriendsUpdated(
         baseTime,
-        FlutterJusProfile().userRelationUpdateTime,
-        FlutterJusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
+        JusProfile().userRelationUpdateTime,
+        JusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
   }
 
   @override
-  Future<FlutterJusFriendsUpdated> getFriendsUpdatedAsync(int baseTime) async {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'getFriendsUpdatedAsync($baseTime)');
+  Future<JusFriendsUpdated> getFriendsUpdatedAsync(int baseTime) async {
+    JusSDK.logger.i(tag: _tag, message: 'getFriendsUpdatedAsync($baseTime)');
     await _pgmLoginedEndTransformer();
-    return FlutterJusFriendsUpdated(
+    return JusFriendsUpdated(
         baseTime,
-        FlutterJusProfile().userRelationUpdateTime,
-        FlutterJusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
+        JusProfile().userRelationUpdateTime,
+        JusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
   }
 
   @override
   String getLoginUid() {
-    FlutterJusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
+    JusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
     return _mtc.Mtc_UeDbGetUid().toDartString();
   }
 
@@ -774,7 +774,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   Future<int> _cliOpen(String userType, String username, {String? password}) async {
     String clientUser = '$userType)$username';
     int result = _mtc.Mtc_CliOpen(clientUser.toNativePointer());
-    if (result == FlutterJusSDKConstants.ZOK) {
+    if (result == JusSDKConstants.ZOK) {
       if (_clientUser != clientUser) {
         _clientUser = clientUser;
         _clientUserProvisionOk = false;
@@ -789,7 +789,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       }
       _mtc.Mtc_ProfSaveProvision();
       if (_mtc.Mtc_UeDbGetUid() != nullptr && _mtc.Mtc_UeDbGetUid().toDartString().isNotEmpty) {
-        await FlutterJusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
+        await JusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
       }
     }
     return result;
@@ -820,28 +820,28 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   ///       MTC_LOGIN_OPTION_PREEMPTIVE(1) 抢占式, 登录了就会把其它设备踢掉
   int _login(int option) {
     int result = _cliStart();
-    if (result == FlutterJusSDKConstants.ZOK) {
+    if (result == JusSDKConstants.ZOK) {
       result = _mtc.Mtc_CliLogin(option, '0.0.0.0'.toNativePointer());
     }
     return result;
   }
 
   void _loggingIn(bool auto) {
-    _state = FlutterJusAccountConstants.stateLoggingIn;
+    _state = JusAccountConstants.stateLoggingIn;
     _autoLogging = auto;
-    _stateEvents.add(FlutterJusAccountState(_state));
+    _stateEvents.add(JusAccountState(_state));
   }
 
   /// 登陆成功后的统一逻辑处理
   void _loginOk() {
-    _state = FlutterJusAccountConstants.stateLoggedIn;
-    _stateEvents.add(FlutterJusAccountState(_state));
+    _state = JusAccountConstants.stateLoggedIn;
+    _stateEvents.add(JusAccountState(_state));
   }
 
   /// 登陆失败的逻辑处理
   void _loginFailed(int reason, String message) {
-    _state = FlutterJusAccountConstants.stateLoginFailed;
-    if (_autoLogging && FlutterJusSDK.connectivity.getType() != FlutterJusConnectivityConstants.typeUnavailable) {
+    _state = JusAccountConstants.stateLoginFailed;
+    if (_autoLogging && JusSDK.connectivity.getType() != JusConnectivityConstants.typeUnavailable) {
       _reLoggingTimeoutToken = CancellationToken();
       CancellableFuture.delayed(Duration(seconds: _reLoggingTimeout), _reLoggingTimeoutToken, () {
         _login(MTC_LOGIN_OPTION_NONE);
@@ -851,19 +851,19 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
         _reLoggingTimeout *= 2;
       }
     }
-    _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message));
+    _stateEvents.add(JusAccountState(_state, reason: reason, message: message));
   }
 
   /// 退出登陆后的统一逻辑处理
   void _logoutOk(int reason, bool manual, {String message = ''}) {
-    _state = FlutterJusAccountConstants.stateLoggedOut;
+    _state = JusAccountConstants.stateLoggedOut;
     _autoLogging = false;
     _reLoggingTimeout = 2;
     _reLoggingTimeoutToken?.cancel();
     _reLoggingTimeoutToken = null;
     _pgmLoginedEnd = false;
     _pgmRefreshing = false;
-    FlutterJusSDK.finalizeProfile();
+    JusSDK.finalizeProfile();
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }
@@ -874,7 +874,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     _mtc.Mtc_UeDbSetUid(nullptr);
     _mtc.Mtc_ProfSaveProvision();
     _mtc.Mtc_CliStop();
-    _stateEvents.add(FlutterJusAccountState(_state, reason: reason, message: message, manual: manual));
+    _stateEvents.add(JusAccountState(_state, reason: reason, message: message, manual: manual));
   }
 
   /// 刷新消息和个人列表, 一般在3处调用, 网络切换、回到前台以及 ReconnectOk 回调
@@ -882,33 +882,33 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     if (!_pgmLoginedEnd || _pgmRefreshing) {
       return;
     }
-    FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain()');
+    JusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain()');
     _pgmRefreshing = true;
-    int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
-      FlutterJusPgmNotify.removeCookie(cookie);
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
       _pgmRefreshing = false;
-      FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain complete, error=$error');
+      JusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain complete, error=$error');
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    if (_pgm.pgm_c_refresh_main(cookie.toString().toNativePointer(), pcErr) != FlutterJusSDKConstants.ZOK) {
-      FlutterJusPgmNotify.removeCookie(cookie);
+    if (_pgm.pgm_c_refresh_main(cookie.toString().toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
       _pgmRefreshing = false;
-      FlutterJusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain fail, ${pcErr.toDartString()}');
+      JusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain fail, ${pcErr.toDartString()}');
     }
   }
 
   /// 收到好友关系变化申请的回调
-  void onReceiveApplyFriend(FlutterJusApplyFriend applyFriend) {
+  void onReceiveApplyFriend(JusApplyFriend applyFriend) {
     _applyFriendEvents.add(applyFriend);
   }
 
   /// 收到他人通过了我的好友关系变化申请的回调
-  void onReceiveResponseFriend(FlutterJusResponseFriend responseFriend) {
+  void onReceiveResponseFriend(JusResponseFriend responseFriend) {
     responseFriendEvents.add(responseFriend);
   }
 
   /// 收到好友列表变化的回调
-  void onReceiveFriendsUpdated(FlutterJusFriendsUpdated friendsUpdated) {
+  void onReceiveFriendsUpdated(JusFriendsUpdated friendsUpdated) {
     _friendUpdatedEvents.add(friendsUpdated);
   }
 
@@ -930,7 +930,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   Future<bool> _connectOkTransformer() async {
-    if (_state == FlutterJusAccountConstants.stateLoggedIn) {
+    if (_state == JusAccountConstants.stateLoggedIn) {
       return true;
     }
     Future<bool> impl() {
@@ -964,56 +964,56 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
 
 }
 
-extension _FlutterJusAccountError on String {
-  FlutterJusError toUeError() {
-    int reason = FlutterJusAccountConstants.errorFailNotification;
+extension _JusAccountError on String {
+  JusError toUeError() {
+    int reason = JusAccountConstants.errorFailNotification;
     String message = '';
     try {
       dynamic map = jsonDecode(this);
       reason = map[MtcUeReasonKey];
       message = map[MtcUeReasonDetailKey];
     } catch (ignored) {}
-    return FlutterJusError(reason, message: message);
+    return JusError(reason, message: message);
   }
 
-  FlutterJusError toCliError() {
-    int reason = FlutterJusAccountConstants.errorFailNotification;
+  JusError toCliError() {
+    int reason = JusAccountConstants.errorFailNotification;
     String message = '';
     try {
       dynamic map = jsonDecode(this);
       reason = map[MtcCliStatusCodeKey];
       message = map[MtcCliReasonKey];
     } catch (ignored) {}
-    return FlutterJusError(reason, message: message);
+    return JusError(reason, message: message);
   }
 
-  FlutterJusError toBuddyError() {
-    int reason = FlutterJusAccountConstants.errorFailNotification;
+  JusError toBuddyError() {
+    int reason = JusAccountConstants.errorFailNotification;
     String message = '';
     try {
     dynamic map = jsonDecode(this);
     reason = map[MtcBuddyReasonKey];
     message = map[MtcBuddyReasonDetailKey];
     } catch (ignored) {}
-    return FlutterJusError(reason, message: message);
+    return JusError(reason, message: message);
   }
 
-  FlutterJusError toNotificationError() {
-    return FlutterJusError(FlutterJusAccountConstants.errorFailNotification, message: this);
+  JusError toNotificationError() {
+    return JusError(JusAccountConstants.errorFailNotification, message: this);
   }
 }
 
-class FlutterJusAccountState {
+class JusAccountState {
   final int state;
   final int reason;
   final String message;
   final bool manual;
 
-  const FlutterJusAccountState(this.state,
+  const JusAccountState(this.state,
       {this.reason = -1, this.message = '', this.manual = false});
 
   @override
   String toString() {
-    return 'FlutterJusAccountState{state: $state, reason: $reason, message: $message, manual: $manual}';
+    return 'JusAccountState{state: $state, reason: $reason, message: $message, manual: $manual}';
   }
 }
