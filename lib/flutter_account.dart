@@ -126,6 +126,9 @@ abstract class FlutterJusAccount {
 
   /// 收到好友关系变化申请的监听
   late Stream<FlutterJusApplyFriend> applyFriendUpdated;
+
+  /// 收到他人通过我的好友关系变化申请的监听
+  late Stream<FlutterJusApplyResponseFriend> applyResponseFriendUpdated;
 }
 
 class FlutterJusAccountImpl extends FlutterJusAccount {
@@ -146,12 +149,18 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   bool _pgmRefreshing = false;
 
   final StreamController<FlutterJusAccountState> _stateEvents = StreamController.broadcast();
+  /// 登陆状态变化更新
   @override
   Stream<FlutterJusAccountState> get stateUpdated => _stateEvents.stream;
 
   final StreamController<FlutterJusApplyFriend> _applyFriendEvents = StreamController.broadcast();
+  /// 收到他人发起的添加好友请求
   @override
   Stream<FlutterJusApplyFriend> get applyFriendUpdated => _applyFriendEvents.stream;
+
+  final StreamController<FlutterJusApplyResponseFriend> _applyResponseFriendEvents = StreamController.broadcast();
+  @override
+  Stream<FlutterJusApplyResponseFriend> get applyResponseFriendUpdated => _applyResponseFriendEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -159,7 +168,6 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   final String _router;
   final String _buildNumber;
   final String _deviceId;
-  final List<String> _accountPropNames;
   final Map<String, String>? _deviceProps;
 
   FlutterJusAccountImpl(
@@ -170,7 +178,6 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
       this._buildNumber,
       this._deviceId,
       this._deviceProps,
-      this._accountPropNames,
       StreamController<dynamic> mtcNotifyEvents) {
     mtcNotifyEvents.stream.listen((event) async {
       final String name = event['name'];
@@ -567,7 +574,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties()');
     await _pgmLoginedEndTransformer();
     return (FlutterJusProfile().properties
-      ..addAll(FlutterJusProfile().pendingProperties)).filterKeys(_accountPropNames);
+      ..addAll(FlutterJusProfile().pendingProperties)).filterKeys(FlutterJusSDK.accountPropNames);
   }
 
   @override
@@ -640,7 +647,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
       FlutterJusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(FlutterJusFriend(uid, FlutterJusProfile().getCachedProps(uid).filterKeys(_accountPropNames)));
+        completer.complete(FlutterJusFriend(uid, FlutterJusProfile().getCachedProps(uid).filterKeys(FlutterJusSDK.accountPropNames)));
       } else {
         completer.completeError(error.toNotificationError());
       }
@@ -857,9 +864,14 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     }
   }
 
-  /// 收到好友关系变化的申请回调
+  /// 收到好友关系变化申请的回调
   void onReceiveApplyFriend(FlutterJusApplyFriend applyFriend) {
     _applyFriendEvents.add(applyFriend);
+  }
+
+  /// 收到他人通过了我的好友关系变化申请的回调
+  void onReceiveApplyResponseFriend(FlutterJusApplyResponseFriend applyResponseFriend) {
+    _applyResponseFriendEvents.add(applyResponseFriend);
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];

@@ -13,13 +13,13 @@ import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
-import 'package:flutter_jussdk/flutter_relation.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 import 'package:system_clock/system_clock.dart';
 
 import 'flutter_mtc_notify.dart';
 import 'flutter_pgm_bindings_generated.dart';
 import 'flutter_profile.dart';
+import 'flutter_relation.dart';
 
 class FlutterJusSDKConstants {
 
@@ -70,6 +70,11 @@ class FlutterJusSDK {
   /// 工具模块对象
   static late FlutterJusTools tools;
 
+  /// 全局的用户属性的配置信息
+  static late List<String> _accountPropNames;
+
+  static List<String> get accountPropNames => _accountPropNames;
+
   /// 初始化 Sdk
   /// appKey: Juphoon sdk 的 app key
   /// router: router 地址
@@ -88,12 +93,13 @@ class FlutterJusSDK {
     required Directory profileDir,
     required List<String> accountPropNames,
     Map<String, String>? deviceProps}) async {
-    if (!accountPropNames.contains(FlutterJusSDKConstants.userPropNickName)) {
-      accountPropNames.add(FlutterJusSDKConstants.userPropNickName);
+    _accountPropNames = List.from(accountPropNames);
+    if (!_accountPropNames.contains(FlutterJusSDKConstants.userPropNickName)) {
+      _accountPropNames.add(FlutterJusSDKConstants.userPropNickName);
     }
     logger = FlutterJusLogger(_mtc, appName, buildNumber, deviceId, logDir);
     connectivity = FlutterJusConnectivity(_mtc);
-    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, accountPropNames, _mtcNotifyEvents);
+    account = FlutterJusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, _mtcNotifyEvents);
     message = FlutterJusMessage();
     tools = FlutterJusTools(_mtc);
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());
@@ -157,12 +163,16 @@ class FlutterJusSDK {
             data.params.forEach((cookie, error) {
               FlutterJusPgmNotify.didCallback(int.parse(cookie), error);
             });
-          } else if (data.event == 3) { // 好友申请、群邀请、群申请
-            if (data.params['ApplicantId'] != _mtc.Mtc_UeDbGetUid().toDartString()) { // ApplicantId 表示申请发起人, 这里过滤本人发起的申请
+          } else if (data.event == 3) { // 好友申请的回调
+            if (data.params['TargetId'] != _mtc.Mtc_UeDbGetUid().toDartString()) {
               if (data.params['GroupId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
-                // 此时表示收到其他人发起的好友请求
+                // 此时表示收到他人发起的好友请求
                 (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveApplyFriend(FlutterJusApplyFriend.fromJson(data.params));
               }
+            }
+          } else if (data.event == 6) { // 好友申请通过的回调
+            if (data.params['TargetId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
+              (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveApplyResponseFriend(FlutterJusApplyResponseFriend.fromJson(data.params));
             }
           }
           return;

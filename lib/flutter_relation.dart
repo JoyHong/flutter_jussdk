@@ -1,3 +1,5 @@
+import 'package:flutter_jussdk/flutter_database_extension.dart';
+import 'package:flutter_jussdk/flutter_profile.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
@@ -42,7 +44,7 @@ class FlutterJusApplyFriend {
   late int timestamp;
 
   FlutterJusApplyFriend.fromJson(Map<String, dynamic> map) {
-    friend = FlutterJusFriend(map['ApplicantId'], {FlutterJusSDKConstants.userPropNickName: map['ApplicantName']});
+    friend = FlutterJusFriend(map['TargetId'], {FlutterJusSDKConstants.userPropNickName: map['TargetName']});
     msgIdx = int.parse(map['ApplyMsgIdx']);
     type = int.parse(map['TargetType']);
     desc = map['Desc'];
@@ -65,5 +67,26 @@ class FlutterJusApplyFriend {
   @override
   String toString() {
     return 'FlutterJusApplyFriend{friend: $friend, msgIdx: $msgIdx, type: $type, desc: $desc, extraParamMap: $extraParamMap, timestamp: $timestamp}';
+  }
+}
+
+/// 收到他人通过我的好友申请的对象
+class FlutterJusApplyResponseFriend {
+  /// 通过者的 Friend 对象
+  late FlutterJusFriend friend;
+  /// 通过后当前是什么关系
+  late int type;
+  /// 通过时的时间戳
+  late int timestamp;
+
+  FlutterJusApplyResponseFriend.fromJson(Map<String, dynamic> map) {
+    friend = FlutterJusProfile().getRelation(map['GroupId'])!.toFriend();
+    type = int.parse(map['TargetType']);
+    timestamp = int.parse(map['Time']);
+  }
+
+  @override
+  String toString() {
+    return 'FlutterJusApplyResponseFriend{friend: $friend, timestamp: $timestamp}';
   }
 }

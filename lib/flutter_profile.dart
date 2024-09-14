@@ -148,4 +148,8 @@ class FlutterJusProfile {
     return _cacheProps[uid]!;
   }
 
+  FlutterJusRelation? getRelation(String uid) {
+    return _realm.query<FlutterJusRelation>('uid == \'$uid\'').firstOrNull;
+  }
+
 }

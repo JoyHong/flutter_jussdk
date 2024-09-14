@@ -51,6 +51,9 @@ class _MyAppState extends State<MyApp> {
   final applyFriendUpdated = FlutterJusSDK.account.applyFriendUpdated.listen((v) {
   });
 
+  final applyResponseFriendUpdated = FlutterJusSDK.account.applyResponseFriendUpdated.listen((v) {
+  });
+
   @override
   void dispose() {
     applyFriendUpdated.cancel();
@@ -69,28 +72,28 @@ class _MyAppState extends State<MyApp> {
           spacing: 12,
           children: [
             button(text: '注册', onPressed: () async {
-              FlutterJusSDK.account.signUp(username: '12345678901', password: '123456', props: {
-                FlutterJusSDKConstants.userPropNickName: 'NickName01',
-                'SC.duoNumber': '12345678901',
+              FlutterJusSDK.account.signUp(username: '12345678906', password: '123456', props: {
+                FlutterJusSDKConstants.userPropNickName: 'NickName06',
+                'SC.duoNumber': '12345678906',
                 'blockStrangers': '1',
                 'signUpDate': DateTime.now().millisecondsSinceEpoch.toString()
               });
             }),
             button(text: '登录', onPressed: () async {
-              FlutterJusSDK.account.login(username: '12345678901', password: '123456');
+              FlutterJusSDK.account.login(username: '12345678906', password: '123456');
             }),
             button(text: '自动登陆', onPressed: () {
-              FlutterJusSDK.account.autoLogin(username: '12345678901');
+              FlutterJusSDK.account.autoLogin(username: '12345678906');
             }),
             button(text: '日志上报', onPressed: () {
               FlutterJusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
             }),
             button(text: '自定义测试', onPressed: () {
-              // FlutterJusSDK.account.setProperties({FlutterJusSDKConstants.userPropNickName: 'NameTimestamp#${DateTime.now().millisecondsSinceEpoch}'});
+              // FlutterJusSDK.account.setProperties({FlutterJusSDKConstants.userPropNickName: 'NickName04'});
               // FlutterJusSDK.account.searchFriend(username: '3845955877'); // 102369_40
               FlutterJusSDK.account.applyFriend(
-                      uid: '102369_755', // 12345678901:102369_755
-                      tagName: 'River Hanqin',
+                      uid: '102369_769', // 12345678901:102369_769
+                      tagName: '备注名',
                       desc: jsonEncode({
                         'duoNumber': '1234567897',
                         'message': 'Hi, I am Joy',
