@@ -181,6 +181,13 @@ class FlutterJusSDK {
           FlutterJusProfile().cacheProps(data.uid, data.map);
           return;
         }
+        if (data is _PgmIsolateFriendsUpdated) {
+          (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveFriendsUpdated(
+              FlutterJusFriendsUpdated(data.baseTime,
+                  FlutterJusProfile().relationUpdateTime,
+                  FlutterJusProfile().getDiffRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
+          return;
+        }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
       });
 
@@ -309,6 +316,12 @@ class _PgmIsolateCacheProps {
   const _PgmIsolateCacheProps(this.uid, this.map);
 }
 
+class _PgmIsolateFriendsUpdated {
+  final int baseTime;
+
+  const _PgmIsolateFriendsUpdated(this.baseTime);
+}
+
 class _PgmIsolateRequest {
   final int id;
 
@@ -382,13 +395,17 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
   if (FlutterJusSDK.tools.isValidUserId(uid)) {
       List<FlutterJusRelation> relations = [];
       relationDiff.forEach((uid, map) {
-        relations.add(FlutterJusRelationUtils.factoryFromPgmJson(uid, map));
+        relations.add(FlutterJusRelationUtils.factoryFromPgmJson(uid, map, relationUpdateTime));
       });
       List<FlutterJusStatus> status = [];
       statusDiff.forEach((uid, statusMap) {
         status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
       });
+      int baseRelationUpdateTime = FlutterJusProfile().relationUpdateTime;
       FlutterJusProfile().updateRelationsAndStatus(relations, relationUpdateTime, status, statusUpdateTime);
+      if (relationUpdateTime > 0) {
+        FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateFriendsUpdated(baseRelationUpdateTime));
+      }
     return 0;
   }
   return 1;

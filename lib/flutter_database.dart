@@ -11,6 +11,7 @@ class _FlutterJusRelation {
   late String tagName;
   late int type;
   late _FlutterJusStatus? status;
+  late int updateTime;
 }
 
 @RealmModel()

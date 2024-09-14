@@ -95,3 +95,17 @@ class FlutterJusApplyResponseFriend {
     return 'FlutterJusApplyResponseFriend{uid: $uid, type: $type, timestamp: $timestamp}';
   }
 }
+
+/// 个人节点的好友变化
+class FlutterJusFriendsUpdated {
+  late int baseTime;
+  late int updateTime;
+  late List<FlutterJusFriend> diff;
+
+  FlutterJusFriendsUpdated(this.baseTime, this.updateTime, this.diff);
+
+  @override
+  String toString() {
+    return 'FlutterJusFriendsUpdated{baseTime: $baseTime, updateTime: $updateTime, diff: $diff}';
+  }
+}

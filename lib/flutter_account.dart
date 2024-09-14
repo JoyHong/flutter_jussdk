@@ -4,6 +4,7 @@ import 'dart:ffi';
 
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
+import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
@@ -115,6 +116,12 @@ abstract class FlutterJusAccount {
   /// extraParamMap: 额外的键值对参数
   Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap});
 
+  /// 根据 baseTime 立马获取与插件内部的差异
+  FlutterJusFriendsUpdated getFriendsUpdated(int baseTime);
+
+  /// 根据 baseTime 获取最新的差异
+  Future<FlutterJusFriendsUpdated> getFriendsUpdatedAsync(int baseTime);
+
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
@@ -129,6 +136,9 @@ abstract class FlutterJusAccount {
 
   /// 收到他人通过我的好友关系变化申请的监听
   late Stream<FlutterJusApplyResponseFriend> applyResponseFriendUpdated;
+
+  /// 好友列表变化监听
+  late Stream<FlutterJusFriendsUpdated> friendsUpdated;
 }
 
 class FlutterJusAccountImpl extends FlutterJusAccount {
@@ -161,6 +171,10 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   final StreamController<FlutterJusApplyResponseFriend> _applyResponseFriendEvents = StreamController.broadcast();
   @override
   Stream<FlutterJusApplyResponseFriend> get applyResponseFriendUpdated => _applyResponseFriendEvents.stream;
+
+  final StreamController<FlutterJusFriendsUpdated> _friendUpdatedEvents = StreamController.broadcast();
+  @override
+  Stream<FlutterJusFriendsUpdated> get friendsUpdated => _friendUpdatedEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -728,6 +742,25 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   @override
+  FlutterJusFriendsUpdated getFriendsUpdated(int baseTime) {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'getFriendsUpdated($baseTime)');
+    return FlutterJusFriendsUpdated(
+        baseTime,
+        FlutterJusProfile().relationUpdateTime,
+        FlutterJusProfile().getDiffRelations(baseTime).map((relation) => relation.toFriend()).toList());
+  }
+
+  @override
+  Future<FlutterJusFriendsUpdated> getFriendsUpdatedAsync(int baseTime) async {
+    FlutterJusSDK.logger.i(tag: _tag, message: 'getFriendsUpdatedAsync($baseTime)');
+    await _pgmLoginedEndTransformer();
+    return FlutterJusFriendsUpdated(
+        baseTime,
+        FlutterJusProfile().relationUpdateTime,
+        FlutterJusProfile().getDiffRelations(baseTime).map((relation) => relation.toFriend()).toList());
+  }
+
+  @override
   String getLoginUid() {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
     return _mtc.Mtc_UeDbGetUid().toDartString();
@@ -872,6 +905,11 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   /// 收到他人通过了我的好友关系变化申请的回调
   void onReceiveApplyResponseFriend(FlutterJusApplyResponseFriend applyResponseFriend) {
     _applyResponseFriendEvents.add(applyResponseFriend);
+  }
+
+  /// 收到好友列表变化的回调
+  void onReceiveFriendsUpdated(FlutterJusFriendsUpdated friendsUpdated) {
+    _friendUpdatedEvents.add(friendsUpdated);
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];

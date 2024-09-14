@@ -97,6 +97,7 @@ class FlutterJusProfile {
         FlutterJusRelation? dbRef = _realm.query<FlutterJusRelation>('uid == \'${relation.uid}\'').firstOrNull;
         if (dbRef != null) {
           dbRef.updatePgm(relation);
+          dbRef.updateTime = relation.updateTime;
         } else {
           dbRef = _realm.add(relation);
           dbRef.status = _realm.query<FlutterJusStatus>('uid == \'${relation.uid}\'').firstOrNull;
@@ -150,6 +151,10 @@ class FlutterJusProfile {
 
   FlutterJusRelation? getRelation(String uid) {
     return _realm.query<FlutterJusRelation>('uid == \'$uid\'').firstOrNull;
+  }
+
+  RealmResults<FlutterJusRelation> getDiffRelations(int baseTime) {
+    return _realm.query<FlutterJusRelation>('updateTime > $baseTime');
   }
 
 }

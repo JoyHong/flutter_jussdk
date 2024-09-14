@@ -36,8 +36,8 @@ extension FlutterJusRelationExt on FlutterJusRelation {
 class FlutterJusRelationUtils {
 
   /// 根据 pgm 下发的 json 转成 对象
-  static FlutterJusRelation factoryFromPgmJson(String uid, dynamic map) {
+  static FlutterJusRelation factoryFromPgmJson(String uid, dynamic map, int updateTime) {
     return FlutterJusRelation(
-        uid, jsonEncode(map['cfgs']), map['tag'], map['tagName'], map['type']);
+        uid, jsonEncode(map['cfgs']), map['tag'], map['tagName'], map['type'], updateTime);
   }
 }

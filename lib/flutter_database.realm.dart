@@ -14,7 +14,8 @@ class FlutterJusRelation extends _FlutterJusRelation
     String cfgs,
     String tag,
     String tagName,
-    int type, {
+    int type,
+    int updateTime, {
     FlutterJusStatus? status,
   }) {
     RealmObjectBase.set(this, 'uid', uid);
@@ -23,6 +24,7 @@ class FlutterJusRelation extends _FlutterJusRelation
     RealmObjectBase.set(this, 'tagName', tagName);
     RealmObjectBase.set(this, 'type', type);
     RealmObjectBase.set(this, 'status', status);
+    RealmObjectBase.set(this, 'updateTime', updateTime);
   }
 
   FlutterJusRelation._();
@@ -61,6 +63,11 @@ class FlutterJusRelation extends _FlutterJusRelation
       RealmObjectBase.set(this, 'status', value);
 
   @override
+  int get updateTime => RealmObjectBase.get<int>(this, 'updateTime') as int;
+  @override
+  set updateTime(int value) => RealmObjectBase.set(this, 'updateTime', value);
+
+  @override
   Stream<RealmObjectChanges<FlutterJusRelation>> get changes =>
       RealmObjectBase.getChanges<FlutterJusRelation>(this);
 
@@ -81,6 +88,7 @@ class FlutterJusRelation extends _FlutterJusRelation
       'tagName': tagName.toEJson(),
       'type': type.toEJson(),
       'status': status.toEJson(),
+      'updateTime': updateTime.toEJson(),
     };
   }
 
@@ -94,6 +102,7 @@ class FlutterJusRelation extends _FlutterJusRelation
         'tag': EJsonValue tag,
         'tagName': EJsonValue tagName,
         'type': EJsonValue type,
+        'updateTime': EJsonValue updateTime,
       } =>
         FlutterJusRelation(
           fromEJson(uid),
@@ -101,6 +110,7 @@ class FlutterJusRelation extends _FlutterJusRelation
           fromEJson(tag),
           fromEJson(tagName),
           fromEJson(type),
+          fromEJson(updateTime),
           status: fromEJson(ejson['status']),
         ),
       _ => raiseInvalidEJson(ejson),
@@ -119,6 +129,7 @@ class FlutterJusRelation extends _FlutterJusRelation
       SchemaProperty('type', RealmPropertyType.int),
       SchemaProperty('status', RealmPropertyType.object,
           optional: true, linkTarget: 'FlutterJusStatus'),
+      SchemaProperty('updateTime', RealmPropertyType.int),
     ]);
   }();
 
