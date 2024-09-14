@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
   final applyFriendUpdated = FlutterJusSDK.account.applyFriendUpdated.listen((v) {
   });
 
-  final applyResponseFriendUpdated = FlutterJusSDK.account.applyResponseFriendUpdated.listen((v) {
+  final applyResponseFriendUpdated = FlutterJusSDK.account.responseFriendUpdated.listen((v) {
   });
 
   @override

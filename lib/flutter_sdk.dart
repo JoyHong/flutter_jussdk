@@ -172,7 +172,7 @@ class FlutterJusSDK {
             }
           } else if (data.event == 6) { // 好友申请通过的回调
             if (data.params['TargetId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
-              (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveApplyResponseFriend(FlutterJusApplyResponseFriend.fromJson(data.params));
+              (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveResponseFriend(FlutterJusResponseFriend.fromJson(data.params));
             }
           }
           return;
@@ -184,8 +184,8 @@ class FlutterJusSDK {
         if (data is _PgmIsolateFriendsUpdated) {
           (FlutterJusSDK.account as FlutterJusAccountImpl).onReceiveFriendsUpdated(
               FlutterJusFriendsUpdated(data.baseTime,
-                  FlutterJusProfile().relationUpdateTime,
-                  FlutterJusProfile().getDiffRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
+                  FlutterJusProfile().userRelationUpdateTime,
+                  FlutterJusProfile().getDiffUserRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
           return;
         }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
@@ -366,17 +366,17 @@ int _pgmLoadGroup(
   if (FlutterJusSDK.tools.isValidUserId(uid)) {
     Map<String, dynamic> relationMap = {};
     Map<String, dynamic> statusMap = {};
-    for (var relation in profile.relations) {
+    for (var relation in profile.userRelations) {
       relationMap[relation.uid] = relation.toPgmJson();
     }
-    for (var status in profile.status) {
+    for (var status in profile.userStatus) {
       statusMap[status.uid] = jsonDecode(status.status);
     }
     ppcRelations.value = jsonEncode(relationMap).toNativePointer();
-    plRelationUpdateTime.value = profile.relationUpdateTime;
+    plRelationUpdateTime.value = profile.userRelationUpdateTime;
     ppcStatusVersMap.value = jsonEncode(statusMap).toNativePointer();
-    plStatusTime.value = profile.statusUpdateTime;
-    ppcProps.value = jsonEncode(profile.properties).toNativePointer();
+    plStatusTime.value = profile.userStatusUpdateTime;
+    ppcProps.value = jsonEncode(profile.userProps).toNativePointer();
     return 0;
   }
   return 1;
@@ -393,16 +393,16 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
       'pgmUpdateGroup, pcGroupId=$uid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
       'lStatusTime=$statusUpdateTime, pcStatusVersMap=$statusDiff');
   if (FlutterJusSDK.tools.isValidUserId(uid)) {
-      List<FlutterJusRelation> relations = [];
+      List<FlutterJusUserRelation> relations = [];
       relationDiff.forEach((uid, map) {
-        relations.add(FlutterJusRelationUtils.factoryFromPgmJson(uid, map, relationUpdateTime));
+        relations.add(FlutterJusUserRelationUtils.factoryFromPgmJson(uid, map, relationUpdateTime));
       });
       List<FlutterJusStatus> status = [];
       statusDiff.forEach((uid, statusMap) {
         status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
       });
-      int baseRelationUpdateTime = FlutterJusProfile().relationUpdateTime;
-      FlutterJusProfile().updateRelationsAndStatus(relations, relationUpdateTime, status, statusUpdateTime);
+      int baseRelationUpdateTime = FlutterJusProfile().userRelationUpdateTime;
+      FlutterJusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
       if (relationUpdateTime > 0) {
         FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateFriendsUpdated(baseRelationUpdateTime));
       }
@@ -421,7 +421,7 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
     statusDiff.forEach((uid, statusMap) {
       status.add(FlutterJusStatus(uid, jsonEncode(statusMap)));
     });
-    FlutterJusProfile().updateRelationsAndStatus([], -1, status, lStatusTime);
+    FlutterJusProfile().updatePgmUserProfile([], -1, status, lStatusTime);
     return 0;
   }
   return 1;
@@ -435,7 +435,7 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   if (FlutterJusSDK.tools.isValidUserId(uid)) {
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
       // 本人的属性, 缓存到本地数据库
-      FlutterJusProfile().addProperties(props);
+      FlutterJusProfile().updatePgmUserProps(props);
     } else {
       // 其它用户的属性, 缓存到内存
       FlutterJusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));

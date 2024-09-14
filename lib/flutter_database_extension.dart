@@ -5,9 +5,9 @@ import 'package:flutter_jussdk/flutter_relation.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 
-extension FlutterJusRelationExt on FlutterJusRelation {
+extension FlutterJusUserRelationExt on FlutterJusUserRelation {
   /// 更新 pgm 下发的数据
-  void updatePgm(FlutterJusRelation other) {
+  void updatePgm(FlutterJusUserRelation other) {
     cfgs = other.cfgs;
     tag = other.tag;
     tagName = other.tagName;
@@ -33,11 +33,11 @@ extension FlutterJusRelationExt on FlutterJusRelation {
   }
 }
 
-class FlutterJusRelationUtils {
+class FlutterJusUserRelationUtils {
 
   /// 根据 pgm 下发的 json 转成 对象
-  static FlutterJusRelation factoryFromPgmJson(String uid, dynamic map, int updateTime) {
-    return FlutterJusRelation(
+  static FlutterJusUserRelation factoryFromPgmJson(String uid, dynamic map, int updateTime) {
+    return FlutterJusUserRelation(
         uid, jsonEncode(map['cfgs']), map['tag'], map['tagName'], map['type'], updateTime);
   }
 }

@@ -135,7 +135,7 @@ abstract class FlutterJusAccount {
   late Stream<FlutterJusApplyFriend> applyFriendUpdated;
 
   /// 收到他人通过我的好友关系变化申请的监听
-  late Stream<FlutterJusApplyResponseFriend> applyResponseFriendUpdated;
+  late Stream<FlutterJusResponseFriend> responseFriendUpdated;
 
   /// 好友列表变化监听
   late Stream<FlutterJusFriendsUpdated> friendsUpdated;
@@ -168,9 +168,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   @override
   Stream<FlutterJusApplyFriend> get applyFriendUpdated => _applyFriendEvents.stream;
 
-  final StreamController<FlutterJusApplyResponseFriend> _applyResponseFriendEvents = StreamController.broadcast();
+  final StreamController<FlutterJusResponseFriend> responseFriendEvents = StreamController.broadcast();
   @override
-  Stream<FlutterJusApplyResponseFriend> get applyResponseFriendUpdated => _applyResponseFriendEvents.stream;
+  Stream<FlutterJusResponseFriend> get responseFriendUpdated => responseFriendEvents.stream;
 
   final StreamController<FlutterJusFriendsUpdated> _friendUpdatedEvents = StreamController.broadcast();
   @override
@@ -229,9 +229,9 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
             callback.call();
           }
           _pgmLoginedEndCallbacks.clear();
-          Map<String, String> pendingProperties = FlutterJusProfile().pendingProperties;
+          Map<String, String> pendingProperties = FlutterJusProfile().userPendingProps;
           if (pendingProperties.isNotEmpty) {
-            FlutterJusProfile().clearPendingProperties();
+            FlutterJusProfile().clearUserPendingProps();
             FlutterJusSDK.logger.i(tag: _tag, message: 'setPendingProperties($pendingProperties)');
             int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
               FlutterJusPgmNotify.removeCookie(cookie);
@@ -587,8 +587,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   Future<Map<String, String>> getProperties() async {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getProperties()');
     await _pgmLoginedEndTransformer();
-    return (FlutterJusProfile().properties
-      ..addAll(FlutterJusProfile().pendingProperties)).filterKeys(FlutterJusSDK.accountPropNames);
+    return (FlutterJusProfile().userProps
+      ..addAll(FlutterJusProfile().userPendingProps)).filterKeys(FlutterJusSDK.accountPropNames);
   }
 
   @override
@@ -600,7 +600,7 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     }
     if (!_pgmLoginedEnd) {
       FlutterJusSDK.logger.i(tag: _tag, message: 'setProperties save to pending');
-      FlutterJusProfile().addPendingProperties(props);
+      FlutterJusProfile().addUserPendingProps(props);
       return;
     }
     int cookie = FlutterJusPgmNotify.addCookie((cookie, error) {
@@ -746,8 +746,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     FlutterJusSDK.logger.i(tag: _tag, message: 'getFriendsUpdated($baseTime)');
     return FlutterJusFriendsUpdated(
         baseTime,
-        FlutterJusProfile().relationUpdateTime,
-        FlutterJusProfile().getDiffRelations(baseTime).map((relation) => relation.toFriend()).toList());
+        FlutterJusProfile().userRelationUpdateTime,
+        FlutterJusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
   }
 
   @override
@@ -756,8 +756,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
     await _pgmLoginedEndTransformer();
     return FlutterJusFriendsUpdated(
         baseTime,
-        FlutterJusProfile().relationUpdateTime,
-        FlutterJusProfile().getDiffRelations(baseTime).map((relation) => relation.toFriend()).toList());
+        FlutterJusProfile().userRelationUpdateTime,
+        FlutterJusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
   }
 
   @override
@@ -903,8 +903,8 @@ class FlutterJusAccountImpl extends FlutterJusAccount {
   }
 
   /// 收到他人通过了我的好友关系变化申请的回调
-  void onReceiveApplyResponseFriend(FlutterJusApplyResponseFriend applyResponseFriend) {
-    _applyResponseFriendEvents.add(applyResponseFriend);
+  void onReceiveResponseFriend(FlutterJusResponseFriend responseFriend) {
+    responseFriendEvents.add(responseFriend);
   }
 
   /// 收到好友列表变化的回调
