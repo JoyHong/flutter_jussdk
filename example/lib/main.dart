@@ -48,10 +48,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final applyFriendUpdated = JusSDK.account.applyFriendUpdated.listen((v) {
+  final applyFriendUpdated = JusSDK.account.applyUserRelationUpdated.listen((v) {
   });
 
-  final applyResponseFriendUpdated = JusSDK.account.responseFriendUpdated.listen((v) {
+  final applyResponseFriendUpdated = JusSDK.account.respUserRelationUpdated.listen((v) {
   });
 
   @override
@@ -89,9 +89,9 @@ class _MyAppState extends State<MyApp> {
               JusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);
             }),
             button(text: '自定义测试', onPressed: () {
-              // JusSDK.account.setProperties({JusSDKConstants.userPropNickName: 'NickName04'});
+              // JusSDK.account.setProps({JusSDKConstants.userPropNickName: 'NickName04'});
               // JusSDK.account.searchFriend(username: '3845955877'); // 102369_40
-              JusSDK.account.applyFriend(
+              JusSDK.account.applyUserRelation(
                       uid: '102369_769', // 12345678901:102369_769
                       tagName: '备注名',
                       desc: jsonEncode({

@@ -5,9 +5,9 @@ import 'package:flutter_jussdk/flutter_relation.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 
-extension JusUserRelationExt on JusUserRelation {
+extension JusPgmUserRelationExt on JusPgmUserRelation {
   /// 更新 pgm 下发的数据
-  void updatePgm(JusUserRelation other) {
+  void update(JusPgmUserRelation other) {
     cfgs = other.cfgs;
     tag = other.tag;
     tagName = other.tagName;
@@ -15,7 +15,7 @@ extension JusUserRelationExt on JusUserRelation {
   }
 
   /// 转成 pgm 需要的 map 对象
-  Map<String, dynamic> toPgmJson() {
+  Map<String, dynamic> toJson() {
     return {
       'cfgs': jsonDecode(cfgs),
       'tag': tag,
@@ -25,19 +25,19 @@ extension JusUserRelationExt on JusUserRelation {
   }
 
   /// 转成 JusFriend 对象
-  JusFriend toFriend() {
-    return JusFriend(uid,
+  JusUserRelation toFriend() {
+    return JusUserRelation(uid,
         (jsonDecode(status!.status) as Map<String, dynamic>).map((key, value) => MapEntry(key, value['_value'])).castString().filterKeys(JusSDK.accountPropNames),
         tagName: tagName,
         type: type);
   }
 }
 
-class JusUserRelationUtils {
+class JusPgmUserRelationUtils {
 
   /// 根据 pgm 下发的 json 转成 对象
-  static JusUserRelation factoryFromPgmJson(String uid, dynamic map, int updateTime) {
-    return JusUserRelation(
+  static JusPgmUserRelation factoryFromJson(String uid, dynamic map, int updateTime) {
+    return JusPgmUserRelation(
         uid, jsonEncode(map['cfgs']), map['tag'], map['tagName'], map['type'], updateTime);
   }
 }

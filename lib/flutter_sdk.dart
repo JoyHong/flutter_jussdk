@@ -167,12 +167,12 @@ class JusSDK {
             if (data.params['TargetId'] != _mtc.Mtc_UeDbGetUid().toDartString()) {
               if (data.params['GroupId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
                 // 此时表示收到他人发起的好友请求
-                (JusSDK.account as JusAccountImpl).onReceiveApplyFriend(JusApplyFriend.fromJson(data.params));
+                (JusSDK.account as JusAccountImpl).onReceiveApplyUserRelation(JusApplyUserRelation.fromJson(data.params));
               }
             }
           } else if (data.event == 6) { // 好友申请通过的回调
             if (data.params['TargetId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
-              (JusSDK.account as JusAccountImpl).onReceiveResponseFriend(JusResponseFriend.fromJson(data.params));
+              (JusSDK.account as JusAccountImpl).onReceiveRespUserRelation(JusRespUserRelation.fromJson(data.params));
             }
           }
           return;
@@ -182,8 +182,8 @@ class JusSDK {
           return;
         }
         if (data is _PgmIsolateFriendsUpdated) {
-          (JusSDK.account as JusAccountImpl).onReceiveFriendsUpdated(
-              JusFriendsUpdated(data.baseTime,
+          (JusSDK.account as JusAccountImpl).onReceiveUserRelationsUpdated(
+              JusUserRelationsUpdated(data.baseTime,
                   JusProfile().userRelationUpdateTime,
                   JusProfile().getDiffUserRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
           return;
@@ -367,7 +367,7 @@ int _pgmLoadGroup(
     Map<String, dynamic> relationMap = {};
     Map<String, dynamic> statusMap = {};
     for (var relation in profile.userRelations) {
-      relationMap[relation.uid] = relation.toPgmJson();
+      relationMap[relation.uid] = relation.toJson();
     }
     for (var status in profile.userStatus) {
       statusMap[status.uid] = jsonDecode(status.status);
@@ -393,13 +393,13 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
       'pgmUpdateGroup, pcGroupId=$uid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
       'lStatusTime=$statusUpdateTime, pcStatusVersMap=$statusDiff');
   if (JusSDK.tools.isValidUserId(uid)) {
-      List<JusUserRelation> relations = [];
+      List<JusPgmUserRelation> relations = [];
       relationDiff.forEach((uid, map) {
-        relations.add(JusUserRelationUtils.factoryFromPgmJson(uid, map, relationUpdateTime));
+        relations.add(JusPgmUserRelationUtils.factoryFromJson(uid, map, relationUpdateTime));
       });
-      List<JusStatus> status = [];
+      List<JusPgmStatus> status = [];
       statusDiff.forEach((uid, statusMap) {
-        status.add(JusStatus(uid, jsonEncode(statusMap)));
+        status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
       });
       int baseRelationUpdateTime = JusProfile().userRelationUpdateTime;
       JusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
@@ -417,9 +417,9 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
   final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
   JusSDK._log('pgmUpdateStatus, pcGroupId=$uid, lStatusTime=$lStatusTime, pcStatusVersMap=$statusDiff');
   if (JusSDK.tools.isValidUserId(uid)) {
-    List<JusStatus> status = [];
+    List<JusPgmStatus> status = [];
     statusDiff.forEach((uid, statusMap) {
-      status.add(JusStatus(uid, jsonEncode(statusMap)));
+      status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
     });
     JusProfile().updatePgmUserProfile([], -1, status, lStatusTime);
     return 0;

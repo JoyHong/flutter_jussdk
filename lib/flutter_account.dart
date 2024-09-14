@@ -95,32 +95,32 @@ abstract class JusAccount {
   Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
 
   /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 JusError
-  Future<Map<String, String>> getProperties();
+  Future<Map<String, String>> getUserProps();
 
   /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
-  void setProperties(Map<String, String> props);
+  void setUserProps(Map<String, String> map);
 
   /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError
-  Future<JusFriend> searchFriend({required String username});
+  Future<JusUserRelation> searchUser({required String username});
 
-  /// 发起添加好友请求, 成功返回 true, 失败则抛出异常 JusError
+  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError
   /// uid: 对方的 uid
   /// tagName: 给对方的备注
   /// desc: 附带信息
   /// extraParamMap: 额外的键值对参数
-  Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
+  Future<bool> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
-  /// 接受好友请求, 成功返回 true, 失败则抛出异常 JusError
+  /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功返回 true, 失败则抛出异常 JusError
   /// msgId: 收到 applyFriend 上报时附带的参数
   /// tagName: 给对方的备注
   /// extraParamMap: 额外的键值对参数
-  Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap});
+  Future<bool> respUserRelation({required int msgId, required String tagName, required Map<String, String> extraParamMap});
 
   /// 根据 baseTime 立马获取与插件内部的差异
-  JusFriendsUpdated getFriendsUpdated(int baseTime);
+  JusUserRelationsUpdated getUserRelationsUpdated(int baseTime);
 
   /// 根据 baseTime 获取最新的差异
-  Future<JusFriendsUpdated> getFriendsUpdatedAsync(int baseTime);
+  Future<JusUserRelationsUpdated> getUserRelationsUpdatedAsync(int baseTime);
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -132,13 +132,13 @@ abstract class JusAccount {
   late Stream<JusAccountState> stateUpdated;
 
   /// 收到好友关系变化申请的监听
-  late Stream<JusApplyFriend> applyFriendUpdated;
+  late Stream<JusApplyUserRelation> applyUserRelationUpdated;
 
   /// 收到他人通过我的好友关系变化申请的监听
-  late Stream<JusResponseFriend> responseFriendUpdated;
+  late Stream<JusRespUserRelation> respUserRelationUpdated;
 
   /// 好友列表变化监听
-  late Stream<JusFriendsUpdated> friendsUpdated;
+  late Stream<JusUserRelationsUpdated> userRelationsUpdated;
 }
 
 class JusAccountImpl extends JusAccount {
@@ -163,18 +163,17 @@ class JusAccountImpl extends JusAccount {
   @override
   Stream<JusAccountState> get stateUpdated => _stateEvents.stream;
 
-  final StreamController<JusApplyFriend> _applyFriendEvents = StreamController.broadcast();
-  /// 收到他人发起的添加好友请求
+  final StreamController<JusApplyUserRelation> _applyUserRelationEvents = StreamController.broadcast();
   @override
-  Stream<JusApplyFriend> get applyFriendUpdated => _applyFriendEvents.stream;
+  Stream<JusApplyUserRelation> get applyUserRelationUpdated => _applyUserRelationEvents.stream;
 
-  final StreamController<JusResponseFriend> responseFriendEvents = StreamController.broadcast();
+  final StreamController<JusRespUserRelation> _respUserRelationEvents = StreamController.broadcast();
   @override
-  Stream<JusResponseFriend> get responseFriendUpdated => responseFriendEvents.stream;
+  Stream<JusRespUserRelation> get respUserRelationUpdated => _respUserRelationEvents.stream;
 
-  final StreamController<JusFriendsUpdated> _friendUpdatedEvents = StreamController.broadcast();
+  final StreamController<JusUserRelationsUpdated> _userRelationsEvents = StreamController.broadcast();
   @override
-  Stream<JusFriendsUpdated> get friendsUpdated => _friendUpdatedEvents.stream;
+  Stream<JusUserRelationsUpdated> get userRelationsUpdated => _userRelationsEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -229,20 +228,20 @@ class JusAccountImpl extends JusAccount {
             callback.call();
           }
           _pgmLoginedEndCallbacks.clear();
-          Map<String, String> pendingProperties = JusProfile().userPendingProps;
-          if (pendingProperties.isNotEmpty) {
+          Map<String, String> pendingProps = JusProfile().userPendingProps;
+          if (pendingProps.isNotEmpty) {
             JusProfile().clearUserPendingProps();
-            JusSDK.logger.i(tag: _tag, message: 'setPendingProperties($pendingProperties)');
+            JusSDK.logger.i(tag: _tag, message: 'setPendingProps($pendingProps)');
             int cookie = JusPgmNotify.addCookie((cookie, error) {
               JusPgmNotify.removeCookie(cookie);
               if (error.isNotEmpty) {
-                JusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, $error');
+                JusSDK.logger.e(tag: _tag, message: 'setPendingProps fail, $error');
               }
             });
             Pointer<Char> pcErr = ''.toNativePointer();
-            if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProperties).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+            if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProps).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
               JusPgmNotify.removeCookie(cookie);
-              JusSDK.logger.e(tag: _tag, message: 'setPendingProperties fail, ${pcErr.toDartString()}');
+              JusSDK.logger.e(tag: _tag, message: 'setPendingProps fail, ${pcErr.toDartString()}');
             }
           }
         });
@@ -584,43 +583,43 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<Map<String, String>> getProperties() async {
-    JusSDK.logger.i(tag: _tag, message: 'getProperties()');
+  Future<Map<String, String>> getUserProps() async {
+    JusSDK.logger.i(tag: _tag, message: 'getUserProps()');
     await _pgmLoginedEndTransformer();
     return (JusProfile().userProps
       ..addAll(JusProfile().userPendingProps)).filterKeys(JusSDK.accountPropNames);
   }
 
   @override
-  void setProperties(Map<String, String> props) {
-    JusSDK.logger.i(tag: _tag, message: 'setProperties($props)');
+  void setUserProps(Map<String, String> map) {
+    JusSDK.logger.i(tag: _tag, message: 'setUserProps($map)');
     if (_mtc.Mtc_UeDbGetUid() == nullptr || _mtc.Mtc_UeDbGetUid().toDartString().isEmpty) {
-      JusSDK.logger.e(tag: _tag, message: 'setProperties fail, no logged user');
+      JusSDK.logger.e(tag: _tag, message: 'setUserProps fail, no logged user');
       return;
     }
     if (!_pgmLoginedEnd) {
-      JusSDK.logger.i(tag: _tag, message: 'setProperties save to pending');
-      JusProfile().addUserPendingProps(props);
+      JusSDK.logger.i(tag: _tag, message: 'setUserProps save to pending');
+      JusProfile().addUserPendingProps(map);
       return;
     }
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isNotEmpty) {
-        JusSDK.logger.e(tag: _tag, message: 'setProperties fail, $error');
+        JusSDK.logger.e(tag: _tag, message: 'setUserProps fail, $error');
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(props).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(map).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.e(tag: _tag, message: 'setProperties fail, ${pcErr.toDartString()}');
+      JusSDK.logger.e(tag: _tag, message: 'setUserProps fail, ${pcErr.toDartString()}');
     }
   }
 
   @override
-  Future<JusFriend> searchFriend({required String username}) async {
-    JusSDK.logger.i(tag: _tag, message: 'searchFriend($username)');
+  Future<JusUserRelation> searchUser({required String username}) async {
+    JusSDK.logger.i(tag: _tag, message: 'searchUser($username)');
     if (!(await _connectOkTransformer())) {
-      JusSDK.logger.i(tag: _tag, message: 'searchFriend fail, not connected');
+      JusSDK.logger.i(tag: _tag, message: 'searchUser fail, not connected');
       throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
     Future<String> Mtc_BuddyQueryUserId(String uri) {
@@ -650,18 +649,18 @@ class JusAccountImpl extends JusAccount {
     try {
       uid = await Mtc_BuddyQueryUserId(uri);
     } catch (e) {
-      JusSDK.logger.e(tag: _tag, message: 'searchFriend fail, $e');
+      JusSDK.logger.e(tag: _tag, message: 'searchUser fail, $e');
       rethrow;
     }
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      JusSDK.logger.e(tag: _tag, message: 'searchFriend fail, should not search self');
+      JusSDK.logger.e(tag: _tag, message: 'searchUser fail, should not search self');
       throw const JusError(JusAccountConstants.errorDevIntegration, message: 'should not search self');
     }
-    Completer<JusFriend> completer = Completer();
+    Completer<JusUserRelation> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(JusFriend(uid, JusProfile().getCachedProps(uid).filterKeys(JusSDK.accountPropNames)));
+        completer.complete(JusUserRelation(uid, JusProfile().getCachedProps(uid).filterKeys(JusSDK.accountPropNames)));
       } else {
         completer.completeError(error.toNotificationError());
       }
@@ -669,17 +668,17 @@ class JusAccountImpl extends JusAccount {
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.e(tag: _tag, message: 'searchFriend fail, call pgm_c_get_props did fail');
+      JusSDK.logger.e(tag: _tag, message: 'searchUser fail, call pgm_c_get_props did fail');
       completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
     }
     return completer.future;
   }
 
   @override
-  Future<bool> applyFriend({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
-    JusSDK.logger.i(tag: _tag, message: 'applyFriend($uid, $tagName, $desc, $extraParamMap)');
+  Future<bool> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
+    JusSDK.logger.i(tag: _tag, message: 'applyUserRelation($uid, $tagName, $desc, $extraParamMap)');
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      JusSDK.logger.e(tag: _tag, message: 'applyFriend fail, should not apply self');
+      JusSDK.logger.e(tag: _tag, message: 'applyUserRelation fail, should not apply self');
       throw const JusError(JusAccountConstants.errorDevIntegration, message: 'should not apply self');
     }
     await _pgmLoginedEndTransformer();
@@ -707,15 +706,15 @@ class JusAccountImpl extends JusAccount {
         jsonEncode(extraParamMap).toNativePointer(),
         pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.i(tag: _tag, message: 'applyFriend fail, call pgm_c_apply_relation did fail');
+      JusSDK.logger.i(tag: _tag, message: 'applyUserRelation fail, call pgm_c_apply_relation did fail');
       completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_apply_relation did fail'));
     }
     return completer.future;
   }
 
   @override
-  Future<bool> acceptFriend({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
-    JusSDK.logger.i(tag: _tag, message: 'acceptFriend($msgId, $tagName, $extraParamMap)');
+  Future<bool> respUserRelation({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
+    JusSDK.logger.i(tag: _tag, message: 'respUserRelation($msgId, $tagName, $extraParamMap)');
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
@@ -735,26 +734,26 @@ class JusAccountImpl extends JusAccount {
         jsonEncode(extraParamMap).toNativePointer(),
         pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.i(tag: _tag, message: 'acceptFriend fail, call pgm_c_accept_relation did fail');
+      JusSDK.logger.i(tag: _tag, message: 'respUserRelation fail, call pgm_c_accept_relation did fail');
       completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail'));
     }
     return completer.future;
   }
 
   @override
-  JusFriendsUpdated getFriendsUpdated(int baseTime) {
-    JusSDK.logger.i(tag: _tag, message: 'getFriendsUpdated($baseTime)');
-    return JusFriendsUpdated(
+  JusUserRelationsUpdated getUserRelationsUpdated(int baseTime) {
+    JusSDK.logger.i(tag: _tag, message: 'getUserRelationsUpdated($baseTime)');
+    return JusUserRelationsUpdated(
         baseTime,
         JusProfile().userRelationUpdateTime,
         JusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
   }
 
   @override
-  Future<JusFriendsUpdated> getFriendsUpdatedAsync(int baseTime) async {
-    JusSDK.logger.i(tag: _tag, message: 'getFriendsUpdatedAsync($baseTime)');
+  Future<JusUserRelationsUpdated> getUserRelationsUpdatedAsync(int baseTime) async {
+    JusSDK.logger.i(tag: _tag, message: 'getUserRelationsUpdatedAsync($baseTime)');
     await _pgmLoginedEndTransformer();
-    return JusFriendsUpdated(
+    return JusUserRelationsUpdated(
         baseTime,
         JusProfile().userRelationUpdateTime,
         JusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
@@ -898,18 +897,18 @@ class JusAccountImpl extends JusAccount {
   }
 
   /// 收到好友关系变化申请的回调
-  void onReceiveApplyFriend(JusApplyFriend applyFriend) {
-    _applyFriendEvents.add(applyFriend);
+  void onReceiveApplyUserRelation(JusApplyUserRelation applyUserRelation) {
+    _applyUserRelationEvents.add(applyUserRelation);
   }
 
   /// 收到他人通过了我的好友关系变化申请的回调
-  void onReceiveResponseFriend(JusResponseFriend responseFriend) {
-    responseFriendEvents.add(responseFriend);
+  void onReceiveRespUserRelation(JusRespUserRelation respUserRelation) {
+    _respUserRelationEvents.add(respUserRelation);
   }
 
-  /// 收到好友列表变化的回调
-  void onReceiveFriendsUpdated(JusFriendsUpdated friendsUpdated) {
-    _friendUpdatedEvents.add(friendsUpdated);
+  /// 收到个人节点列表变化的回调
+  void onReceiveUserRelationsUpdated(JusUserRelationsUpdated userRelationsUpdated) {
+    _userRelationsEvents.add(userRelationsUpdated);
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];

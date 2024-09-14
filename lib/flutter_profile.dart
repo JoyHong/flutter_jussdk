@@ -29,10 +29,10 @@ class JusProfile {
     String path = await JusTools.getUserPath(uid);
     List<int> keyBytes = 'JusProfile#$uid'.codeUnits;
     _instance!._realm = Realm(Configuration.local([
-      JusUserRelation.schema,
-      JusStatus.schema,
-      JusUserProp.schema,
-      JusUserPendingProp.schema,
+      JusPgmUserRelation.schema,
+      JusPgmStatus.schema,
+      JusPgmUserProp.schema,
+      JusPgmUserPendingProp.schema,
       JusPreference.schema
     ],
         path: File(p.join(path, 'default.realm')).path,
@@ -70,10 +70,10 @@ class JusProfile {
   JusProfile._();
 
   /// 用户个人节点上的关系列表
-  RealmResults<JusUserRelation> get userRelations => _realm.query<JusUserRelation>('TRUEPREDICATE');
+  RealmResults<JusPgmUserRelation> get userRelations => _realm.query<JusPgmUserRelation>('TRUEPREDICATE');
 
   /// 用户个人节点上的状态列表
-  RealmResults<JusStatus> get userStatus => _realm.query<JusStatus>('TRUEPREDICATE');
+  RealmResults<JusPgmStatus> get userStatus => _realm.query<JusPgmStatus>('TRUEPREDICATE');
 
   /// 用户个人节点上的关系列表同步的时间戳
   int get userRelationUpdateTime =>
@@ -85,30 +85,30 @@ class JusProfile {
 
   /// 用户个人节点上已同步的实时个人属性
   Map<String, String> get userProps =>
-      Map.fromEntries(_realm.query<JusUserProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+      Map.fromEntries(_realm.query<JusPgmUserProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
   /// 用户将要同步的个人属性
   Map<String, String> get userPendingProps =>
-      Map.fromEntries(_realm.query<JusUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+      Map.fromEntries(_realm.query<JusPgmUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
   /// 收到 pgm 个人节点回调时, 同步数据到本地
   void updatePgmUserProfile(
-      List<JusUserRelation> relations,
+      List<JusPgmUserRelation> relations,
       int relationUpdateTime,
-      List<JusStatus> status,
+      List<JusPgmStatus> status,
       int statusUpdateTime) {
     _realm.write(() {
       if (status.isNotEmpty) {
         _realm.addAll(status, update: true);
       }
       for (var relation in relations) {
-        JusUserRelation? dbRef = _realm.query<JusUserRelation>('uid == \'${relation.uid}\'').firstOrNull;
+        JusPgmUserRelation? dbRef = _realm.query<JusPgmUserRelation>('uid == \'${relation.uid}\'').firstOrNull;
         if (dbRef != null) {
-          dbRef.updatePgm(relation);
+          dbRef.update(relation);
           dbRef.updateTime = relation.updateTime;
         } else {
           dbRef = _realm.add(relation);
-          dbRef.status = _realm.query<JusStatus>('uid == \'${relation.uid}\'').firstOrNull;
+          dbRef.status = _realm.query<JusPgmStatus>('uid == \'${relation.uid}\'').firstOrNull;
         }
       }
       if (relationUpdateTime > 0) {
@@ -123,27 +123,27 @@ class JusProfile {
   /// 收到 pgm 个人属性回调时, 同步数据到本地
   void updatePgmUserProps(Map<String, String> map) {
     _realm.write(() {
-      List<JusUserProp> properties = [];
+      List<JusPgmUserProp> props = [];
       map.forEach((key, value) {
-        properties.add(JusUserProp(key, value));
+        props.add(JusPgmUserProp(key, value));
       });
-      _realm.addAll(properties, update: true);
+      _realm.addAll(props, update: true);
     });
   }
 
   /// 当 pgm 还未 logined ok, 此时暂缓存到本地
   void addUserPendingProps(Map<String, String> map) {
     _realm.write(() {
-      List<JusUserPendingProp> properties = [];
+      List<JusPgmUserPendingProp> props = [];
       map.forEach((key, value) {
-        properties.add(JusUserPendingProp(key, value));
+        props.add(JusPgmUserPendingProp(key, value));
       });
-      _realm.addAll(properties, update: true);
+      _realm.addAll(props, update: true);
     });
   }
   
   void clearUserPendingProps() {
-    RealmResults<JusUserPendingProp> results = _realm.query<JusUserPendingProp>('TRUEPREDICATE');
+    RealmResults<JusPgmUserPendingProp> results = _realm.query<JusPgmUserPendingProp>('TRUEPREDICATE');
     if (results.isNotEmpty) {
       _realm.write(() {
         _realm.deleteMany(results);
@@ -160,13 +160,13 @@ class JusProfile {
   }
 
   /// 根据 uid 获取个人节点列表上的某一关系对象
-  JusUserRelation? getUserRelation(String uid) {
-    return _realm.query<JusUserRelation>('uid == \'$uid\'').firstOrNull;
+  JusPgmUserRelation? getUserRelation(String uid) {
+    return _realm.query<JusPgmUserRelation>('uid == \'$uid\'').firstOrNull;
   }
 
   /// 根据 baseTime 获取个人节点列表上的变化集合
-  RealmResults<JusUserRelation> getDiffUserRelations(int baseTime) {
-    return _realm.query<JusUserRelation>('updateTime > $baseTime');
+  RealmResults<JusPgmUserRelation> getDiffUserRelations(int baseTime) {
+    return _realm.query<JusPgmUserRelation>('updateTime > $baseTime');
   }
 
 }
