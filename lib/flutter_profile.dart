@@ -11,10 +11,14 @@ import 'flutter_tools.dart';
 
 class FlutterJusProfile {
 
-  /// 同步 pgm 回调个人列表的时间戳
-  static const String propRelationUpdateTime = 'relationUpdateTime';
-  /// 同步 pgm 回调状态的时间戳
-  static const String propStatusUpdateTime = 'statusUpdateTime';
+  /// 同步 pgm 个人节点里列表的时间戳
+  static const String propUserRelationUpdateTime = 'userRelationUpdateTime';
+  /// 同步 pgm 个人节点里状态的时间戳
+  static const String propUserStatusUpdateTime = 'userStatusUpdateTime';
+  /// 同步 pgm 群的节点里列表的时间戳
+  static const String propGroupRelationUpdateTime = 'groupRelationUpdateTime';
+  /// 同步 pgm 群的节点里状态的时间戳
+  static const String propGroupStatusUpdateTime = 'groupStatusUpdateTime';
 
   // 数据库新删改后务必自增 realm 版本号
   static const _schemaVersion = 1;
@@ -76,10 +80,10 @@ class FlutterJusProfile {
       _realm.query<FlutterJusStatus>('TRUEPREDICATE');
 
   int get relationUpdateTime =>
-      int.parse(_realm.query<FlutterJusPreference>('key == \'$propRelationUpdateTime\'').firstOrNull?.value ?? '-1');
+      int.parse(_realm.query<FlutterJusPreference>('key == \'$propUserRelationUpdateTime\'').firstOrNull?.value ?? '-1');
 
   int get statusUpdateTime =>
-      int.parse(_realm.query<FlutterJusPreference>('key == \'$propStatusUpdateTime\'').firstOrNull?.value ?? '-1');
+      int.parse(_realm.query<FlutterJusPreference>('key == \'$propUserStatusUpdateTime\'').firstOrNull?.value ?? '-1');
 
   Map<String, String> get properties =>
       Map.fromEntries(_realm.query<FlutterJusProperty>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
@@ -104,10 +108,10 @@ class FlutterJusProfile {
         }
       }
       if (relationUpdateTime > 0) {
-        _realm.add(FlutterJusPreference(propRelationUpdateTime, relationUpdateTime.toString()), update: true);
+        _realm.add(FlutterJusPreference(propUserRelationUpdateTime, relationUpdateTime.toString()), update: true);
       }
       if (statusUpdateTime > 0) {
-        _realm.add(FlutterJusPreference(propStatusUpdateTime, statusUpdateTime.toString()), update: true);
+        _realm.add(FlutterJusPreference(propUserStatusUpdateTime, statusUpdateTime.toString()), update: true);
       }
     });
   }
