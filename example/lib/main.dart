@@ -48,15 +48,20 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final applyFriendUpdated = JusSDK.account.applyUserRelationUpdated.listen((v) {
+  final applyUserRelationUpdated = JusSDK.account.applyUserRelationUpdated.listen((v) {
   });
 
-  final applyResponseFriendUpdated = JusSDK.account.respUserRelationUpdated.listen((v) {
+  final respUserRelationUpdated = JusSDK.account.respUserRelationUpdated.listen((v) {
+  });
+
+  final userRelationsUpdated = JusSDK.account.userRelationsUpdated.listen((v) {
   });
 
   @override
   void dispose() {
-    applyFriendUpdated.cancel();
+    applyUserRelationUpdated.cancel();
+    respUserRelationUpdated.cancel();
+    userRelationsUpdated.cancel();
     super.dispose();
   }
 
