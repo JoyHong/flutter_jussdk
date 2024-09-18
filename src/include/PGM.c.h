@@ -167,12 +167,7 @@ MTCFUNC int pgm_c_record_err(const JStrStrMap* pcErrRecord);
 */
 MTCFUNC int pgm_c_reflush_data(char* pcErr);
 
-/* 以下接口当cookie重复/请求过频/未登录有误时返回false. rpc的异步结果通过CookieEnd事件回调 */
-
-/*
-  1. CookieEnd永远只会回调succ. 失败内部重试
-  2. 后台切前台/无网切有网时调用
-*/
+/* 以下接口当cookie重复/请求过频/未登录/入参本地检查有误时返回false. rpc的异步结果通过CookieEnd事件回调 */
 MTCFUNC int pgm_c_refresh_main(const char* pcCookie, char* pcErr);
 
 /*
@@ -268,6 +263,12 @@ MTCFUNC int pgm_c_disband_org(const char* pcCookie, const char* pcOrgId, char* p
     需要在多个同时登录设备之间维护版本才需要填. 否则一般填-1, 此时pgm库默认使用粗校后的本地时间作为状态版本. pgm_set_org_status同
 */
 MTCFUNC int pgm_c_set_status_to_peer(const char* pcCookie, const char* pcPeerUid, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
+
+/*
+  1. 设置组织中某节点(可能是自己也可能是他人)的状态. 比如 A设置自己在组织C中的状态为繁忙: A pgm_nowait_ack_set_status(cookie, orgIdC, uidA, 'Busy', '1', err)
+  2. 设置self列表中他人的状态, 供其他设备登录时读取. A pgm_nowait_ack_set_status(cookie, uidA, uidB, '...', '1', err), 暂无明确的应用场景
+*/
+MTCFUNC int pgm_c_nowait_ack_set_status(const char* pcCookie, const char* pcGroupId, const char* pcTargetId, const char* pcType, const char* pcValue, int64_t lTimeStamp, char* pcErr);
 
 /*
 1. 设置自己/组织属性(会有组织权限检查), @props传diff

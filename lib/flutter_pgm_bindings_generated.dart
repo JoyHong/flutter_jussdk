@@ -187,8 +187,7 @@ class FlutterPGMBindings {
   late final _pgm_c_reflush_data =
       _pgm_c_reflush_dataPtr.asFunction<int Function(ffi.Pointer<ffi.Char>)>();
 
-  /// 1. CookieEnd永远只会回调succ. 失败内部重试
-  /// 2. 后台切前台/无网切有网时调用
+  /// 以下接口当cookie重复/请求过频/未登录/入参本地检查有误时返回false. rpc的异步结果通过CookieEnd事件回调
   int pgm_c_refresh_main(
     ffi.Pointer<ffi.Char> pcCookie,
     ffi.Pointer<ffi.Char> pcErr,
@@ -559,6 +558,49 @@ class FlutterPGMBindings {
   late final _pgm_c_set_status_to_peer =
       _pgm_c_set_status_to_peerPtr.asFunction<
           int Function(
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              int,
+              ffi.Pointer<ffi.Char>)>();
+
+  /// 1. 设置组织中某节点(可能是自己也可能是他人)的状态. 比如 A设置自己在组织C中的状态为繁忙: A pgm_nowait_ack_set_status(cookie, orgIdC, uidA, 'Busy', '1', err)
+  /// 2. 设置self列表中他人的状态, 供其他设备登录时读取. A pgm_nowait_ack_set_status(cookie, uidA, uidB, '...', '1', err), 暂无明确的应用场景
+  int pgm_c_nowait_ack_set_status(
+    ffi.Pointer<ffi.Char> pcCookie,
+    ffi.Pointer<ffi.Char> pcGroupId,
+    ffi.Pointer<ffi.Char> pcTargetId,
+    ffi.Pointer<ffi.Char> pcType,
+    ffi.Pointer<ffi.Char> pcValue,
+    int lTimeStamp,
+    ffi.Pointer<ffi.Char> pcErr,
+  ) {
+    return _pgm_c_nowait_ack_set_status(
+      pcCookie,
+      pcGroupId,
+      pcTargetId,
+      pcType,
+      pcValue,
+      lTimeStamp,
+      pcErr,
+    );
+  }
+
+  late final _pgm_c_nowait_ack_set_statusPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int64,
+              ffi.Pointer<ffi.Char>)>>('pgm_c_nowait_ack_set_status');
+  late final _pgm_c_nowait_ack_set_status =
+      _pgm_c_nowait_ack_set_statusPtr.asFunction<
+          int Function(
+              ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
