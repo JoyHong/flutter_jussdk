@@ -97,8 +97,8 @@ abstract class JusAccount {
   /// infoTypes: 需要注册的 info 消息列表
   Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
 
-  /// 获取用户的个人属性, 成功返回 Map, 失败则抛出异常 JusError
-  Future<Map<String, String>> getUserProps();
+  /// 获取(本人或者他人)的个人属性, 如果 uid 不为空且是其他人, 则实时获取他人的用户属性 成功返回 Map, 失败则抛出异常 JusError
+  Future<Map<String, String>> getUserProps({String? uid});
 
   /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
   void setUserProps(Map<String, String> map);
@@ -586,11 +586,29 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<Map<String, String>> getUserProps() async {
-    JusSDK.logger.i(tag: _tag, message: 'getUserProps()');
+  Future<Map<String, String>> getUserProps({String? uid}) async {
+    JusSDK.logger.i(tag: _tag, message: 'getUserProps($uid)');
     await _pgmLoginedEndTransformer();
-    return (JusProfile().userProps
-      ..addAll(JusProfile().userPendingProps)).filterKeys(JusSDK.accountPropNames);
+    if (uid == null || uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
+      return (JusProfile().userProps
+        ..addAll(JusProfile().userPendingProps)).filterKeys(JusSDK.accountPropNames);
+    }
+    Completer<Map<String, String>> completer = Completer();
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
+      if (error.isEmpty) {
+        completer.complete(JusProfile().getCachedProps(uid).filterKeys(JusSDK.accountPropNames));
+      } else {
+        completer.completeError(error.toNotificationError());
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.e(tag: _tag, message: 'getUserProps fail, call pgm_c_get_props did fail');
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
+    }
+    return completer.future;
   }
 
   @override
