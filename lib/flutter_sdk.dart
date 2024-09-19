@@ -158,6 +158,10 @@ class JusSDK {
           _pgmIsolateResponses.remove(data.id)?.complete();
           return;
         }
+        if (data is _PgmIsolateRefreshDB) {
+          JusProfile().refreshDB();
+          return;
+        }
         if (data is _PgmIsolateEventProcessor) {
           if (data.event == 1) { // CookieEnd
             data.params.forEach((cookie, error) {
@@ -322,6 +326,8 @@ class _PgmIsolateFriendsUpdated {
   const _PgmIsolateFriendsUpdated(this.baseTime);
 }
 
+class _PgmIsolateRefreshDB {}
+
 class _PgmIsolateRequest {
   final int id;
 
@@ -403,6 +409,7 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
       });
       int baseRelationUpdateTime = JusProfile().userRelationUpdateTime;
       JusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
+      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
       if (relationUpdateTime > 0) {
         JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateFriendsUpdated(baseRelationUpdateTime));
       }
@@ -422,6 +429,7 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
       status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
     });
     JusProfile().updatePgmUserProfile([], -1, status, lStatusTime);
+    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
     return 0;
   }
   return 1;
@@ -436,6 +444,7 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
       // 本人的属性, 缓存到本地数据库
       JusProfile().updatePgmUserProps(props);
+      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
     } else {
       // 其它用户的属性, 缓存到内存
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));

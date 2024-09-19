@@ -91,6 +91,11 @@ class JusProfile {
   Map<String, String> get userPendingProps =>
       Map.fromEntries(_realm.query<JusPgmUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
+  /// 一般在其它 isolate 操作数据库后, 需要实时同步一下, 以防数据不同步
+  void refreshDB() {
+    _realm.refresh();
+  }
+
   /// 收到 pgm 个人节点回调时, 同步数据到本地
   void updatePgmUserProfile(
       List<JusPgmUserRelation> relations,
