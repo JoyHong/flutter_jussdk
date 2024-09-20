@@ -8,6 +8,8 @@ class JusUserRelation {
   static const int typeUnknown = -1;
   /// 好友
   static const int typeContact = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT;
+  /// 陌生人
+  static const int typeStranger = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_STRANGER;
   /// 已拉黑用户
   static const int typeBlacklist = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_BLACKLIST;
 

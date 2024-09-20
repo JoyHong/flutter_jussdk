@@ -12,6 +12,7 @@ import 'package:flutter_jussdk/flutter_profile.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 
+import 'flutter_database.dart';
 import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
 import 'flutter_relation.dart';
@@ -27,7 +28,7 @@ class JusAccountConstants {
   /// 搜索用户失败, 未找到匹配的用户
   static const int errorSearchNotFound = JusSDKConstants.errorBaseCode - 3;
 
-  /// 申请关系变化失败, 当前已是期望的关系
+  /// 申请关系变化失败, 当前已是期望的关系, 上层可以通过调用 changeUserRelation 直接修改关系
   static const int errorApplyUserRelationAlreadyGranted = JusSDKConstants.errorBaseCode - 4;
 
   /// 注册失败, 账号已存在
@@ -118,6 +119,11 @@ abstract class JusAccount {
   /// tagName: 给对方的备注
   /// extraParamMap: 额外的键值对参数
   Future<bool> respUserRelation({required int msgId, required String tagName, required Map<String, String> extraParamMap});
+
+  /// 修改他人在本人关系列表中的关系, 成功返回 true, 失败则抛出异常 JusError
+  /// uid: 需要修改关系的用户 uid
+  /// type: 要更改的关系
+  Future<bool> changeUserRelation({required String uid, required int type});
 
   /// 根据 baseTime 立马获取与插件内部的差异
   JusUserRelationsUpdated getUserRelationsUpdated(int baseTime);
@@ -759,6 +765,50 @@ class JusAccountImpl extends JusAccount {
       JusPgmNotify.removeCookie(cookie);
       JusSDK.logger.i(tag: _tag, message: 'respUserRelation fail, call pgm_c_accept_relation did fail');
       completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail'));
+    }
+    return completer.future;
+  }
+
+  @override
+  Future<bool> changeUserRelation({required String uid, required int type}) async {
+    JusSDK.logger.i(tag: _tag, message: 'changeUserRelation($uid, $type)');
+    await _pgmLoginedEndTransformer();
+    Completer<bool> completer = Completer();
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
+      if (error.isEmpty) {
+        completer.complete(true);
+      } else {
+        completer.completeError(error.toNotificationError());
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    JusPgmUserRelation? userRelation = JusProfile().getUserRelation(uid);
+    if (userRelation != null) {
+      final changed = userRelation.toJson();
+      changed['type'] = type;
+      if (_pgm.pgm_c_change_relations(
+          cookie.toString().toNativePointer(),
+          _mtc.Mtc_UeDbGetUid(),
+          jsonEncode({uid: changed}).toNativePointer(),
+          pcErr) != JusSDKConstants.ZOK) {
+        JusPgmNotify.removeCookie(cookie);
+        JusSDK.logger.i(tag: _tag, message: 'changeUserRelation fail, call pgm_c_change_relations did fail');
+        completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_change_relations did fail'));
+      }
+    } else {
+      final added = {
+        'type': type
+      };
+      if (_pgm.pgm_c_add_relations(
+          cookie.toString().toNativePointer(),
+          _mtc.Mtc_UeDbGetUid(),
+          jsonEncode({uid: added}).toNativePointer(),
+          pcErr) != JusSDKConstants.ZOK) {
+        JusPgmNotify.removeCookie(cookie);
+        JusSDK.logger.i(tag: _tag, message: 'changeUserRelation fail, call pgm_c_add_relations did fail');
+        completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_add_relations did fail'));
+      }
     }
     return completer.future;
   }
