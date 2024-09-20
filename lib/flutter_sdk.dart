@@ -185,7 +185,7 @@ class JusSDK {
           JusProfile().cacheProps(data.uid, data.map);
           return;
         }
-        if (data is _PgmIsolateFriendsUpdated) {
+        if (data is _PgmIsolateRelationsUpdated) {
           (JusSDK.account as JusAccountImpl).onReceiveUserRelationsUpdated(
               JusUserRelationsUpdated(data.baseTime,
                   JusProfile().userRelationUpdateTime,
@@ -320,10 +320,10 @@ class _PgmIsolateCacheProps {
   const _PgmIsolateCacheProps(this.uid, this.map);
 }
 
-class _PgmIsolateFriendsUpdated {
+class _PgmIsolateRelationsUpdated {
   final int baseTime;
 
-  const _PgmIsolateFriendsUpdated(this.baseTime);
+  const _PgmIsolateRelationsUpdated(this.baseTime);
 }
 
 class _PgmIsolateRefreshDB {}
@@ -410,8 +410,8 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
       int baseRelationUpdateTime = JusProfile().userRelationUpdateTime;
       JusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-      if (relationUpdateTime > 0) {
-        JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateFriendsUpdated(baseRelationUpdateTime));
+      if (relationUpdateTime > 0 && relationUpdateTime != baseRelationUpdateTime) {
+        JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRelationsUpdated(baseRelationUpdateTime));
       }
     return 0;
   }
