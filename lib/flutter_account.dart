@@ -29,13 +29,15 @@ class JusAccountConstants {
   /// 搜索用户失败, 未找到匹配的用户
   static const int errorSearchNotFound = JusSDKConstants.errorBaseCode - 3;
 
-  /// 申请关系变化失败, 你在对方的关系列表里已是期望的关系, 通过调用 changeUserRelation 直接修改关系
+  /// 申请关系变化失败, 你已在对方的关系列表里(可能是好友、陌生人、或者被拉黑的关系), 通过调用 changeUserRelation 直接修改关系
   static const int errorApplyUserRelationAlreadyGranted = JusSDKConstants.errorBaseCode - 4;
+  /// 申请关系变化失败, 你未在对方的关系列表里, 且已被拉黑
+  static const int errorApplyUserRelationBlockByBlacklist = JusSDKConstants.errorBaseCode - 5;
 
   /// 检查用户关系失败, 未找到对应的 uid 用户
-  static const int errorCheckUserRelationNotFound = JusSDKConstants.errorBaseCode - 5;
+  static const int errorCheckUserRelationNotFound = JusSDKConstants.errorBaseCode - 6;
   /// 检查用户关系失败, 对应的 uid 用户账号已删除
-  static const int errorCheckUserRelationAccountDeleted = JusSDKConstants.errorBaseCode - 6;
+  static const int errorCheckUserRelationAccountDeleted = JusSDKConstants.errorBaseCode - 7;
 
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
@@ -116,7 +118,7 @@ abstract class JusAccount {
   /// 查询本人在该用户关系列表里的关系, 失败则抛出异常 JusError(errorCheckUserRelationNotFound/errorCheckUserRelationAccountDeleted)
   Future<int> checkUserRelation({required String uid});
 
-  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError(errorApplyUserRelationAlreadyGranted)
+  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError(errorApplyUserRelationAlreadyGranted/errorApplyUserRelationBlockByBlacklist)
   /// uid: 对方的 uid
   /// tagName: 给对方的备注
   /// desc: 附带信息
@@ -760,6 +762,8 @@ class JusAccountImpl extends JusAccount {
         completer.complete(true);
       } else if (error.contains('target_type_granted')) {
         completer.completeError(JusError(JusAccountConstants.errorApplyUserRelationAlreadyGranted, message: error));
+      } else if (error.contains('block_by_blacklist')) {
+        completer.completeError(JusError(JusAccountConstants.errorApplyUserRelationBlockByBlacklist, message: error));
       } else {
         completer.completeError(error.toNotificationError());
       }
