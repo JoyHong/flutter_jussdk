@@ -32,7 +32,7 @@ class JusProfile {
       JusPgmUserRelation.schema,
       JusPgmStatus.schema,
       JusPgmUserProp.schema,
-      JusPgmUserPendingProp.schema,
+      JusUserPendingProp.schema,
       JusPreference.schema
     ],
         path: File(p.join(path, 'default.realm')).path,
@@ -89,7 +89,7 @@ class JusProfile {
 
   /// 用户将要同步的个人属性
   Map<String, String> get userPendingProps =>
-      Map.fromEntries(_realm.query<JusPgmUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+      Map.fromEntries(_realm.query<JusUserPendingProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
 
   /// 一般在其它 isolate 操作数据库后, 需要实时同步一下, 以防数据不同步
   void refreshDB() {
@@ -139,16 +139,16 @@ class JusProfile {
   /// 当 pgm 还未 logined ok, 此时暂缓存到本地
   void addUserPendingProps(Map<String, String> map) {
     _realm.write(() {
-      List<JusPgmUserPendingProp> props = [];
+      List<JusUserPendingProp> props = [];
       map.forEach((key, value) {
-        props.add(JusPgmUserPendingProp(key, value));
+        props.add(JusUserPendingProp(key, value));
       });
       _realm.addAll(props, update: true);
     });
   }
   
   void clearUserPendingProps() {
-    RealmResults<JusPgmUserPendingProp> results = _realm.query<JusPgmUserPendingProp>('TRUEPREDICATE');
+    RealmResults<JusUserPendingProp> results = _realm.query<JusUserPendingProp>('TRUEPREDICATE');
     if (results.isNotEmpty) {
       _realm.write(() {
         _realm.deleteMany(results);

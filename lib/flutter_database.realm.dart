@@ -278,9 +278,9 @@ class JusPgmUserProp extends _JusPgmUserProp
   SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
 }
 
-class JusPgmUserPendingProp extends _JusPgmUserPendingProp
+class JusUserPendingProp extends _JusUserPendingProp
     with RealmEntity, RealmObjectBase, RealmObject {
-  JusPgmUserPendingProp(
+  JusUserPendingProp(
     String key,
     String value,
   ) {
@@ -288,7 +288,7 @@ class JusPgmUserPendingProp extends _JusPgmUserPendingProp
     RealmObjectBase.set(this, 'value', value);
   }
 
-  JusPgmUserPendingProp._();
+  JusUserPendingProp._();
 
   @override
   String get key => RealmObjectBase.get<String>(this, 'key') as String;
@@ -301,17 +301,17 @@ class JusPgmUserPendingProp extends _JusPgmUserPendingProp
   set value(String value) => RealmObjectBase.set(this, 'value', value);
 
   @override
-  Stream<RealmObjectChanges<JusPgmUserPendingProp>> get changes =>
-      RealmObjectBase.getChanges<JusPgmUserPendingProp>(this);
+  Stream<RealmObjectChanges<JusUserPendingProp>> get changes =>
+      RealmObjectBase.getChanges<JusUserPendingProp>(this);
 
   @override
-  Stream<RealmObjectChanges<JusPgmUserPendingProp>> changesFor(
+  Stream<RealmObjectChanges<JusUserPendingProp>> changesFor(
           [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<JusPgmUserPendingProp>(this, keyPaths);
+      RealmObjectBase.getChangesFor<JusUserPendingProp>(this, keyPaths);
 
   @override
-  JusPgmUserPendingProp freeze() =>
-      RealmObjectBase.freezeObject<JusPgmUserPendingProp>(this);
+  JusUserPendingProp freeze() =>
+      RealmObjectBase.freezeObject<JusUserPendingProp>(this);
 
   EJsonValue toEJson() {
     return <String, dynamic>{
@@ -320,15 +320,15 @@ class JusPgmUserPendingProp extends _JusPgmUserPendingProp
     };
   }
 
-  static EJsonValue _toEJson(JusPgmUserPendingProp value) => value.toEJson();
-  static JusPgmUserPendingProp _fromEJson(EJsonValue ejson) {
+  static EJsonValue _toEJson(JusUserPendingProp value) => value.toEJson();
+  static JusUserPendingProp _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
       {
         'key': EJsonValue key,
         'value': EJsonValue value,
       } =>
-        JusPgmUserPendingProp(
+        JusUserPendingProp(
           fromEJson(key),
           fromEJson(value),
         ),
@@ -337,10 +337,10 @@ class JusPgmUserPendingProp extends _JusPgmUserPendingProp
   }
 
   static final schema = () {
-    RealmObjectBase.registerFactory(JusPgmUserPendingProp._);
+    RealmObjectBase.registerFactory(JusUserPendingProp._);
     register(_toEJson, _fromEJson);
-    return const SchemaObject(ObjectType.realmObject, JusPgmUserPendingProp,
-        'JusPgmUserPendingProp', [
+    return const SchemaObject(
+        ObjectType.realmObject, JusUserPendingProp, 'JusUserPendingProp', [
       SchemaProperty('key', RealmPropertyType.string, primaryKey: true),
       SchemaProperty('value', RealmPropertyType.string),
     ]);

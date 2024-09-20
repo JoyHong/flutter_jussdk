@@ -29,7 +29,7 @@ class _JusPgmUserProp {
 }
 
 @RealmModel()
-class _JusPgmUserPendingProp {
+class _JusUserPendingProp {
   @PrimaryKey()
   late String key;
   late String value;
