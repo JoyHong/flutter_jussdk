@@ -25,6 +25,7 @@ class JusAccountConstants {
 
   /// 账号删除失败, 密码错误
   static const int errorDeleteWrongPWD = JusSDKConstants.errorBaseCode - 2;
+
   /// 搜索用户失败, 未找到匹配的用户
   static const int errorSearchNotFound = JusSDKConstants.errorBaseCode - 3;
 
@@ -71,12 +72,12 @@ class JusAccountConstants {
 
 abstract class JusAccount {
 
-  /// 注册账号, 成功返回 true, 失败则抛出异常 JusError
+  /// 注册账号, 成功返回 true, 失败则抛出异常 JusError(errorSignUpExist)
   /// username: 用户名
   /// password: 密码
   Future<bool> signUp({required String username, required String password, Map<String, String>? props});
 
-  /// 账号密码登陆, 成功返回 true, 失败则抛出异常 JusError
+  /// 账号密码登陆, 成功返回 true, 失败则抛出异常 JusError(errorLoginAuthFailed/errorLoginDeleted/errorLoginInvalid/errorLoginBanned)
   /// username: 用户名
   /// password: 密码
   Future<bool> login({required String username, required String password});
@@ -84,12 +85,12 @@ abstract class JusAccount {
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
   Future<void> autoLogin({required String username});
 
-  /// 修改密码, 成功返回 true, 失败则抛出异常 JusError
+  /// 修改密码, 成功返回 true, 失败则抛出异常 JusError(errorChangePasswordWrongPWD)
   /// oldPassword: 原密码
   /// newPassword: 新密码
   Future<bool> changePassword({required String oldPassword, required String newPassword});
 
-  /// 删除账号, 成功返回 true, 失败则抛出异常 JusError
+  /// 删除账号, 成功返回 true, 失败则抛出异常 JusError(errorDeleteWrongPWD)
   /// 注: 需要在登陆成功的状态下才能进行删除操作
   Future<bool> delete({required String password});
 
@@ -109,13 +110,13 @@ abstract class JusAccount {
   /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
   void setUserProps(Map<String, String> map);
 
-  /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError
+  /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError(errorSearchNotFound)
   Future<JusUserRelation> searchUser({required String username});
 
-  /// 查询本人在该用户关系列表里的关系, 失败则抛出异常 JusError
+  /// 查询本人在该用户关系列表里的关系, 失败则抛出异常 JusError(errorCheckUserRelationNotFound/errorCheckUserRelationAccountDeleted)
   Future<int> checkUserRelation({required String uid});
 
-  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError; 注意错误码 errorApplyUserRelationAlreadyGranted 的处理
+  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError(errorApplyUserRelationAlreadyGranted)
   /// uid: 对方的 uid
   /// tagName: 给对方的备注
   /// desc: 附带信息
