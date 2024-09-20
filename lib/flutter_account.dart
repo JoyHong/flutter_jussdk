@@ -31,6 +31,11 @@ class JusAccountConstants {
   /// 申请关系变化失败, 你在对方的关系列表里已是期望的关系, 通过调用 changeUserRelation 直接修改关系
   static const int errorApplyUserRelationAlreadyGranted = JusSDKConstants.errorBaseCode - 4;
 
+  /// 检查用户关系失败, 未找到对应的 uid 用户
+  static const int errorCheckUserRelationNotFound = JusSDKConstants.errorBaseCode - 5;
+  /// 检查用户关系失败, 对应的 uid 用户账号已删除
+  static const int errorCheckUserRelationAccountDeleted = JusSDKConstants.errorBaseCode - 6;
+
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
 
@@ -106,6 +111,9 @@ abstract class JusAccount {
 
   /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError
   Future<JusUserRelation> searchUser({required String username});
+
+  /// 查询本人在该用户关系列表里的关系, 失败则抛出异常 JusError
+  Future<int> checkUserRelation({required String uid});
 
   /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError; 注意错误码 errorApplyUserRelationAlreadyGranted 的处理
   /// uid: 对方的 uid
@@ -697,6 +705,41 @@ class JusAccountImpl extends JusAccount {
       JusPgmNotify.removeCookie(cookie);
       JusSDK.logger.e(tag: _tag, message: 'searchUser fail, call pgm_c_get_props did fail');
       completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
+    }
+    return completer.future;
+  }
+
+  @override
+  Future<int> checkUserRelation({required String uid}) async {
+    JusSDK.logger.i(tag: _tag, message: 'checkUserRelation($uid)');
+    if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
+      JusSDK.logger.e(tag: _tag, message: 'checkUserRelation fail, should not check self');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'should not check self');
+    }
+    await _pgmLoginedEndTransformer();
+    Completer<int> completer = Completer();
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
+      int? type = int.tryParse(error);
+      if (type != null) {
+        completer.complete(type);
+      } else if (error.contains('stranger_forbid')) {
+        completer.complete(EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_STRANGER);
+      } else if (error.contains('block_by_blacklist')) {
+        completer.complete(EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_BLACKLIST);
+      } else if (error.contains('account-deleted-error')) {
+        completer.completeError(JusError(JusAccountConstants.errorCheckUserRelationAccountDeleted, message: error));
+      } else if (error.contains('user_id_not_found')) {
+        completer.completeError(JusError(JusAccountConstants.errorCheckUserRelationNotFound, message: error));
+      } else {
+        completer.completeError(error.toNotificationError());
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    if (_pgm.pgm_c_check_relation(cookie.toString().toNativePointer(), uid.toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.i(tag: _tag, message: 'checkUserRelation fail, call pgm_c_check_relation did fail');
+      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_check_relation did fail'));
     }
     return completer.future;
   }
