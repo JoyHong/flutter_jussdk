@@ -28,7 +28,7 @@ class JusAccountConstants {
   /// 搜索用户失败, 未找到匹配的用户
   static const int errorSearchNotFound = JusSDKConstants.errorBaseCode - 3;
 
-  /// 申请关系变化失败, 当前已是期望的关系, 上层可以通过调用 changeUserRelation 直接修改关系
+  /// 申请关系变化失败, 你在对方的关系列表里已是期望的关系, 通过调用 changeUserRelation 直接修改关系
   static const int errorApplyUserRelationAlreadyGranted = JusSDKConstants.errorBaseCode - 4;
 
   /// 注册失败, 账号已存在
