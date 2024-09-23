@@ -99,12 +99,12 @@ abstract class JusAccount {
   /// 退出登陆
   Future<bool> logout();
 
-  /// 注册 push, 默认注册了 Text 消息以及好友的请求与响应, 成功返回 true, 失败则抛出异常 JusError
+  /// 注册 push, 成功返回 true, 失败则抛出异常 JusError
   /// pushType: push 类型 - pushTypeGCM
   /// pushAppId: push 对应的 key, 如 GCM 是 Project ID (Project settings -> General -> Your project -> Project ID)
   /// pushToken: push token
   /// infoTypes: 需要注册的 info 消息列表
-  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes});
+  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? types});
 
   /// 获取(本人或者他人)的个人属性, 如果 uid 不为空且是其他人, 则实时获取他人的用户属性 成功返回 Map, 失败则抛出异常 JusError
   Future<Map<String, String>> getUserProps({String? uid});
@@ -521,8 +521,8 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? infoTypes}) async {
-    JusSDK.logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $infoTypes)');
+  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? types}) async {
+    JusSDK.logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $types)');
     if (pushType != JusAccountConstants.pushTypeGCM) {
       JusSDK.logger.e(tag: _tag, message: 'registerPush fail, pushType must be JusAccountConstants.pushTypeGCM');
       throw const JusError(JusAccountConstants.errorDevIntegration, message: 'pushType must be JusAccountConstants.pushTypeGCM');
@@ -539,8 +539,8 @@ class JusAccountImpl extends JusAccount {
     };
 
     /// 注册好友请求与响应的 push, infoType 固定必须是 P2PApply 或 P2PApplyResponse
-    void putPayloadFriendRequest(String infoType) {
-      params['Notify.$pushType.Message.System.$infoType.Payload'] = jsonEncode({
+    void putPayloadFriendRequest(String type) {
+      params['Notify.$pushType.Message.System.$type.Payload'] = jsonEncode({
         'MtcImDisplayNameKey': '\${TargetName}',
         'MtcImSenderUidKey': '\${TargetId}',
         'MtcImMsgIdKey': '\${ApplyMsgIdx}',
@@ -548,25 +548,7 @@ class JusAccountImpl extends JusAccount {
         'MtcImTextKey': '\${Desc}',
         'MtcImTimeKey': '\${Time}',
         'TargetType': '\${TargetType}',
-        'MtcImInfoTypeKey': infoType,
-      });
-      params['Notify.$pushType.Message.Text.Expiration'] = expiration;
-      params['Notify.$pushType.Message.Text.ResendCount'] = '0';
-      params['Notify.$pushType.Message.Text.ResendTimeout'] = '20';
-      params['Notify.$pushType.Message.Text.PassThrough'] = '1';
-    }
-    /// 注册文本消息 push
-    void putPayloadMessageText() {
-      params['Notify.$pushType.Message.Text.Payload'] = jsonEncode({
-        'MtcImDisplayNameKey': '\${Sender}',
-        'MtcImSenderUidKey': '\${SenderUid}',
-        'MtcImMsgIdKey': '\${MsgIdx}',
-        'MtcImImdnIdKey': '\${imdnId}',
-        'MtcImTextKey': '\${Text}',
-        'MtcImLabelKey': '\${Box}',
-        'MtcImTimeKey': '\${Time}',
-        'MtcImUserDataKey': '\${userData}',
-        'MtcImInfoTypeKey': 'Text'
+        'MtcImInfoTypeKey': type,
       });
       params['Notify.$pushType.Message.Text.Expiration'] = expiration;
       params['Notify.$pushType.Message.Text.ResendCount'] = '0';
@@ -574,8 +556,8 @@ class JusAccountImpl extends JusAccount {
       params['Notify.$pushType.Message.Text.PassThrough'] = '1';
     }
     /// 注册 Info 消息 push
-    void putPayloadMessageInfo(String infoType) {
-      params['Notify.$pushType.Message.$infoType.Payload'] = jsonEncode({
+    void putPayloadMessage(String type) {
+      params['Notify.$pushType.Message.$type.Payload'] = jsonEncode({
         'MtcImDisplayNameKey': '\${Sender}',
         'MtcImSenderUidKey': '\${SenderUid}',
         'MtcImMsgIdKey': '\${MsgIdx}',
@@ -584,19 +566,20 @@ class JusAccountImpl extends JusAccount {
         'MtcImLabelKey': '\${Box}',
         'MtcImTimeKey': '\${Time}',
         'MtcImUserDataKey': '\${userData}',
-        'MtcImInfoTypeKey': infoType
+        'MtcImInfoTypeKey': type
       });
-      params['Notify.$pushType.Message.$infoType.Expiration'] = expiration;
-      params['Notify.$pushType.Message.$infoType.ResendCount'] = '0';
-      params['Notify.$pushType.Message.$infoType.ResendTimeout'] = '20';
-      params['Notify.$pushType.Message.$infoType.PassThrough'] = '1';
+      params['Notify.$pushType.Message.$type.Expiration'] = expiration;
+      params['Notify.$pushType.Message.$type.ResendCount'] = '0';
+      params['Notify.$pushType.Message.$type.ResendTimeout'] = '20';
+      params['Notify.$pushType.Message.$type.PassThrough'] = '1';
     }
 
-    putPayloadFriendRequest('P2PApply');
-    putPayloadFriendRequest('P2PApplyResponse');
-    putPayloadMessageText();
-    infoTypes?.forEach((infoType) {
-      putPayloadMessageInfo(infoType);
+    types?.forEach((type) {
+      if (type == 'P2PApply' || type == 'P2PApplyResponse') {
+        putPayloadFriendRequest(type);
+      } else {
+        putPayloadMessage(type);
+      }
     });
 
     if (_mtc.Mtc_CliSetPushParm(jsonEncode(params).toNativePointer()) != JusSDKConstants.ZOK) {
