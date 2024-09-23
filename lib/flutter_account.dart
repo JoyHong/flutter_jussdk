@@ -259,9 +259,13 @@ class JusAccountImpl extends JusAccount {
               }
             });
             Pointer<Char> pcErr = ''.toNativePointer();
-            if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(pendingProps).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+            if (_pgm.pgm_c_nowait_ack_set_props(
+                    cookie.toString().toNativePointer(),
+                    _mtc.Mtc_UeDbGetUid(),
+                    jsonEncode(pendingProps).toNativePointer(),
+                    pcErr) != JusSDKConstants.ZOK) {
               JusPgmNotify.removeCookie(cookie);
-              JusSDK.logger.e(tag: _tag, message: 'setPendingProps fail, ${pcErr.toDartString()}');
+              JusSDK.logger.e(tag: _tag, message: 'setPendingProps fail, call pgm_c_nowait_ack_set_props did fail ${pcErr.toDartString()}');
             }
           }
         });
@@ -622,8 +626,8 @@ class JusAccountImpl extends JusAccount {
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.e(tag: _tag, message: 'getUserProps fail, call pgm_c_get_props did fail');
-      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
+      JusSDK.logger.e(tag: _tag, message: 'getUserProps fail, call pgm_c_get_props did fail ${pcErr.toDartString()}');
+      completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail ${pcErr.toDartString()}'));
     }
     return completer.future;
   }
@@ -647,9 +651,10 @@ class JusAccountImpl extends JusAccount {
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(), _mtc.Mtc_UeDbGetUid(), jsonEncode(map).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+    if (_pgm.pgm_c_nowait_ack_set_props(cookie.toString().toNativePointer(),
+            _mtc.Mtc_UeDbGetUid(), jsonEncode(map).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.e(tag: _tag, message: 'setUserProps fail, ${pcErr.toDartString()}');
+      JusSDK.logger.e(tag: _tag, message: 'setUserProps fail, call pgm_c_nowait_ack_set_props did fail ${pcErr.toDartString()}');
     }
   }
 
@@ -704,10 +709,12 @@ class JusAccountImpl extends JusAccount {
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(), uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
+    if (_pgm.pgm_c_get_props(cookie.toString().toNativePointer(),
+            uid.toNativePointer(), jsonEncode(['']).toNativePointer(), pcErr) !=
+        JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.e(tag: _tag, message: 'searchUser fail, call pgm_c_get_props did fail');
-      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail'));
+      JusSDK.logger.e(tag: _tag, message: 'searchUser fail, call pgm_c_get_props did fail ${pcErr.toDartString()}');
+      completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_get_props did fail ${pcErr.toDartString()}'));
     }
     return completer.future;
   }
@@ -741,8 +748,8 @@ class JusAccountImpl extends JusAccount {
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_check_relation(cookie.toString().toNativePointer(), uid.toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.i(tag: _tag, message: 'checkUserRelation fail, call pgm_c_check_relation did fail');
-      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_check_relation did fail'));
+      JusSDK.logger.i(tag: _tag, message: 'checkUserRelation fail, call pgm_c_check_relation did fail ${pcErr.toDartString()}');
+      completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_check_relation did fail ${pcErr.toDartString()}'));
     }
     return completer.future;
   }
@@ -783,8 +790,8 @@ class JusAccountImpl extends JusAccount {
         jsonEncode(extraParamMap).toNativePointer(),
         pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.i(tag: _tag, message: 'applyUserRelation fail, call pgm_c_apply_relation did fail');
-      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_apply_relation did fail'));
+      JusSDK.logger.i(tag: _tag, message: 'applyUserRelation fail, call pgm_c_apply_relation did fail ${pcErr.toDartString()}');
+      completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_apply_relation did fail ${pcErr.toDartString()}'));
     }
     return completer.future;
   }
@@ -811,8 +818,8 @@ class JusAccountImpl extends JusAccount {
         jsonEncode(extraParamMap).toNativePointer(),
         pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.i(tag: _tag, message: 'respUserRelation fail, call pgm_c_accept_relation did fail');
-      completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail'));
+      JusSDK.logger.i(tag: _tag, message: 'respUserRelation fail, call pgm_c_accept_relation did fail ${pcErr.toDartString()}');
+      completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_accept_relation did fail ${pcErr.toDartString()}'));
     }
     return completer.future;
   }
@@ -841,8 +848,8 @@ class JusAccountImpl extends JusAccount {
           jsonEncode({uid: changed}).toNativePointer(),
           pcErr) != JusSDKConstants.ZOK) {
         JusPgmNotify.removeCookie(cookie);
-        JusSDK.logger.i(tag: _tag, message: 'changeUserRelation fail, call pgm_c_change_relations did fail');
-        completer.completeError(const JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_change_relations did fail'));
+        JusSDK.logger.i(tag: _tag, message: 'changeUserRelation fail, call pgm_c_change_relations did fail ${pcErr.toDartString()}');
+        completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_change_relations did fail ${pcErr.toDartString()}'));
       }
     } else {
       final added = {
@@ -1013,7 +1020,7 @@ class JusAccountImpl extends JusAccount {
     if (_pgm.pgm_c_refresh_main(cookie.toString().toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
       _pgmRefreshing = false;
-      JusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain fail, ${pcErr.toDartString()}');
+      JusSDK.logger.i(tag: _tag, message: 'pgmRefreshMain fail, call pgm_c_refresh_main did fail ${pcErr.toDartString()}');
     }
   }
 

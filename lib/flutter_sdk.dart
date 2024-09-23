@@ -10,7 +10,6 @@ import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_database.dart';
 import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
-import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
@@ -65,8 +64,6 @@ class JusSDK {
   static late JusConnectivity connectivity;
   /// 账号模块对象
   static late JusAccount account;
-  /// 消息模块对象
-  static late JusMessage message;
   /// 工具模块对象
   static late JusTools tools;
 
@@ -100,7 +97,6 @@ class JusSDK {
     logger = JusLogger(_mtc, appName, buildNumber, deviceId, logDir);
     connectivity = JusConnectivity(_mtc);
     account = JusAccountImpl(_mtc, _pgm, appKey, router, buildNumber, deviceId, deviceProps, _mtcNotifyEvents);
-    message = JusMessage();
     tools = JusTools(_mtc);
     _mtc.Mtc_CliCfgSetLogDir(logDir.path.toNativePointer());
     if (!Platform.isWindows) {
