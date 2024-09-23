@@ -6,6 +6,7 @@ import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_error.dart';
+import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
 import 'package:flutter_jussdk/flutter_profile.dart';
@@ -142,6 +143,12 @@ abstract class JusAccount {
   /// 根据 baseTime 获取最新的差异
   Future<JusUserRelationsUpdated> getUserRelationsUpdatedAsync(int baseTime);
 
+  /// 发送消息
+  /// uid: 目标的 uid (一般是用户或者群组)
+  /// type: 消息类型
+  /// content: 消息内容
+  Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, dynamic>? attachFiles});
+
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
@@ -159,6 +166,9 @@ abstract class JusAccount {
 
   /// 好友列表变化监听
   late Stream<JusUserRelationsUpdated> userRelationsUpdated;
+
+  /// 收到消息回调
+  late Stream<JusMessageReceived> messageReceived;
 }
 
 class JusAccountImpl extends JusAccount {
@@ -194,6 +204,10 @@ class JusAccountImpl extends JusAccount {
   final StreamController<JusUserRelationsUpdated> _userRelationsEvents = StreamController.broadcast();
   @override
   Stream<JusUserRelationsUpdated> get userRelationsUpdated => _userRelationsEvents.stream;
+
+  final StreamController<JusMessageReceived> _messageReceivedEvents = StreamController.broadcast();
+  @override
+  Stream<JusMessageReceived> get messageReceived => _messageReceivedEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -871,6 +885,56 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
+  Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, dynamic>? attachFiles}) async {
+    JusSDK.logger.i(tag: _tag, message: 'sendMessage($uid, $type, $imdnId, $content, $userData)');
+    if (!JusSDK.tools.isValidUserId(uid)) {
+      JusSDK.logger.e(tag: _tag, message: 'sendMessage fail, must be valid user id');
+      throw const JusError(JusAccountConstants.errorDevIntegration, message: 'must be valid user id');
+    }
+    await _pgmLoginedEndTransformer();
+    Completer<int> completer = Completer();
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
+      if (error.isEmpty) {
+        completer.complete(JusProfile().getCachedMsgId(imdnId));
+      } else {
+        completer.completeError(error.toNotificationError());
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    Map<String, dynamic> bodyJson = Map.from(userData ?? {});
+    bodyJson['content'] = content ?? '';
+    Map<String, dynamic> contentJson = {
+      '_type': type,
+      '_body': bodyJson,
+      '_params': {'imdnId': imdnId}
+    };
+    if (attachFiles != null) {
+      contentJson['_ress'] = attachFiles;
+    }
+    Map<String, String> paramJson = {
+      'Notify.imdnId': imdnId,
+      'Notify.userData': '',
+      'Notify.Text': content ?? ''
+    };
+    if (userData != null) {
+      paramJson['Notify.userData'] = jsonEncode(userData);
+    }
+    if (_pgm.pgm_c_send_p2p_msg(
+            cookie.toString().toNativePointer(),
+            uid.toNativePointer(),
+            jsonEncode(contentJson).toNativePointer(),
+            jsonEncode(paramJson).toNativePointer(),
+            pcErr) !=
+        JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.i(tag: _tag, message: 'sendMessage fail, call pgm_c_send_p2p_msg did fail ${pcErr.toDartString()}');
+      completer.completeError(JusError(JusAccountConstants.errorDevIntegration, message: 'call pgm_c_send_p2p_msg did fail ${pcErr.toDartString()}'));
+    }
+    return completer.future;
+  }
+
+  @override
   String getLoginUid() {
     JusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
     return _mtc.Mtc_UeDbGetUid().toDartString();
@@ -1020,6 +1084,11 @@ class JusAccountImpl extends JusAccount {
   /// 收到个人节点列表变化的回调
   void onReceiveUserRelationsUpdated(JusUserRelationsUpdated userRelationsUpdated) {
     _userRelationsEvents.add(userRelationsUpdated);
+  }
+
+  /// 收到他人发送的消息
+  void onReceiveMessage(JusMessageReceived message) {
+    _messageReceivedEvents.add(message);
   }
 
   static final List<Function(bool)> _provisionCallbacks = [];

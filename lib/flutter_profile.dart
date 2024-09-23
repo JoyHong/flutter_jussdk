@@ -66,6 +66,8 @@ class JusProfile {
   late Realm _realm;
   /// 查询出来临时保存的本人以外的属性集合
   final Map<String, Map<String, String>> _cacheProps = {};
+  /// 消息的 imdnId 映射的 MsgId
+  final Map<String, int> _cacheMsgIds = {};
 
   JusProfile._();
 
@@ -100,11 +102,11 @@ class JusProfile {
   void updatePgmUserProfile(
       List<JusPgmUserRelation> relations,
       int relationUpdateTime,
-      List<JusPgmStatus> status,
+      List<JusPgmStatus> statuses,
       int statusUpdateTime) {
     _realm.write(() {
-      if (status.isNotEmpty) {
-        _realm.addAll(status, update: true);
+      for (var status in statuses) {
+        _realm.add(status, update: true);
       }
       for (var relation in relations) {
         JusPgmUserRelation? dbRef = _realm.query<JusPgmUserRelation>('uid == \'${relation.uid}\'').firstOrNull;
@@ -162,6 +164,14 @@ class JusProfile {
 
   Map<String, String> getCachedProps(String uid) {
     return _cacheProps[uid]!;
+  }
+
+  void cacheMsgId(String imdnId, int msgId) {
+    _cacheMsgIds[imdnId] = msgId;
+  }
+
+  int getCachedMsgId(String imdnId) {
+    return _cacheMsgIds.remove(imdnId)!;
   }
 
   /// 根据 uid 获取个人节点列表上的某一关系对象

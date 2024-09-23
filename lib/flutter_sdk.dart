@@ -15,6 +15,7 @@ import 'package:flutter_jussdk/flutter_pgm_notify.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 import 'package:system_clock/system_clock.dart';
 
+import 'flutter_message.dart';
 import 'flutter_mtc_notify.dart';
 import 'flutter_pgm_bindings_generated.dart';
 import 'flutter_profile.dart';
@@ -188,6 +189,20 @@ class JusSDK {
                   JusProfile().getDiffUserRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
           return;
         }
+        if (data is _PgmIsolateInsertMsg) {
+          String imdnId = data.content['_params']['imdnId'];
+          if (data.senderId == _mtc.Mtc_UeDbGetUid().toDartString()) {
+            // 本人发送消息成功
+            JusProfile().cacheMsgId(imdnId, data.msgId);
+          } else {
+            // 收到他人发送的消息
+            String type = data.content['_type'];
+            Map<String, dynamic> body = jsonDecode(data.content['_body']);
+            (JusSDK.account as JusAccountImpl).onReceiveMessage(
+                JusMessageReceived(data.senderId, type, imdnId, body['content'], body..remove('content'), data.content['_ress']));
+          }
+          return;
+        }
         throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
       });
 
@@ -320,6 +335,15 @@ class _PgmIsolateRelationsUpdated {
   final int baseTime;
 
   const _PgmIsolateRelationsUpdated(this.baseTime);
+}
+
+class _PgmIsolateInsertMsg {
+  final String senderId;
+  final Map<String, dynamic> content;
+  final int msgId;
+  final int timestamp;
+
+  const _PgmIsolateInsertMsg(this.senderId, this.content, this.msgId, this.timestamp);
 }
 
 class _PgmIsolateRefreshDB {}
@@ -457,9 +481,19 @@ int _pgmGetTicks(Pointer<Uint64> ticks) {
 
 int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
     Pointer<JStatusTimes> pcMsgStatuses) {
-  JusSDK._log(
-      'pgmInsertMsgs, pcGroupId=${pcGroupId.toDartString()}, pcMsgs=${pcMsgs.toDartString()}, pcMsgStatuses=${pcMsgStatuses.toDartString()}');
-  return 0;
+  String uid = pcGroupId.toDartString();
+  String msgs = pcMsgs.toDartString();
+  String status = pcMsgStatuses.toDartString();
+  JusSDK._log('pgmInsertMsgs, pcGroupId=$uid, pcMsgs=$msgs, pcMsgStatuses=$status');
+  if (JusSDK.tools.isValidUserId(uid)) {
+    JusProfile().updatePgmUserProfile([], -1, [JusPgmStatus(uid, status)], -1);
+    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
+    for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
+      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));
+    }
+    return 0;
+  }
+  return 1;
 }
 
 DynamicLibrary _openLibrary(String libName) {
