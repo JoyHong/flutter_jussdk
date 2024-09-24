@@ -33,6 +33,15 @@ extension JusPgmUserRelationExt on JusPgmUserRelation {
   }
 }
 
+extension JusPgmStatusExt on JusPgmStatus {
+  /// 更新 pgm 下发的数据
+  void update(JusPgmStatus other) {
+    Map map = jsonDecode(status) as Map;
+    map.addAll(jsonDecode(other.status) as Map);
+    status = jsonEncode(map);
+  }
+}
+
 class JusPgmUserRelationUtils {
 
   /// 根据 pgm 下发的 json 转成 对象

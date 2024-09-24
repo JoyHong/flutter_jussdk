@@ -106,7 +106,12 @@ class JusProfile {
       int statusUpdateTime) {
     _realm.write(() {
       for (var status in statuses) {
-        _realm.add(status, update: true);
+        JusPgmStatus? dbRef = _realm.query<JusPgmStatus>('uid == \'${status.uid}\'').firstOrNull;
+        if (dbRef != null) {
+          dbRef.update(status);
+        } else {
+          dbRef = _realm.add(status);
+        }
       }
       for (var relation in relations) {
         JusPgmUserRelation? dbRef = _realm.query<JusPgmUserRelation>('uid == \'${relation.uid}\'').firstOrNull;
