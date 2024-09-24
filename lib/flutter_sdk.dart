@@ -199,7 +199,7 @@ class JusSDK {
             String type = data.content['_type'];
             Map<String, dynamic> body = jsonDecode(data.content['_body']);
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
-                JusMessageReceived(data.senderId, type, imdnId, body['content'], body..remove('content'), data.content['_ress']));
+                JusMessageReceived(data.senderId, type, data.msgId, imdnId, body['content'], body..remove('content'), data.content['_ress'], data.timestamp));
           }
           return;
         }
