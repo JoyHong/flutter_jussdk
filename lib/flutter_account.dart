@@ -36,9 +36,18 @@ class JusAccountConstants {
   static const int errorApplyUserRelationBlockByBlacklist = JusSDKConstants.errorBaseCode - 5;
 
   /// 检查用户关系失败, 未找到对应的 uid 用户
-  static const int errorCheckUserRelationNotFound = JusSDKConstants.errorBaseCode - 6;
+  static const int errorCheckUserRelationUserIdNotFound = JusSDKConstants.errorBaseCode - 6;
   /// 检查用户关系失败, 对应的 uid 用户账号已删除
   static const int errorCheckUserRelationAccountDeleted = JusSDKConstants.errorBaseCode - 7;
+
+  /// 消息发送失败, 对方开启了好友验证且没有添加为好友
+  static const int errorSendMessageStrangerForbid = JusSDKConstants.errorBaseCode - 8;
+  /// 消息发送失败, 对方已把你拉黑
+  static const int errorSendMessageBlockByBlacklist = JusSDKConstants.errorBaseCode - 9;
+  /// 消息发送失败, 对方账号已删除
+  static const int errorSendMessageAccountDeleted = JusSDKConstants.errorBaseCode - 10;
+  /// 消息发送失败, 用户未找到
+  static const int errorSendMessageUserIdNotFound = JusSDKConstants.errorBaseCode - 11;
 
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
@@ -143,10 +152,13 @@ abstract class JusAccount {
   /// 根据 baseTime 获取最新的差异
   Future<JusUserRelationsUpdated> getUserRelationsUpdatedAsync(int baseTime);
 
-  /// 发送消息
+  /// 发送消息, 成功返回 msgId, 失败则抛出异常 JusError(errorSendMessageStrangerForbid/errorSendMessageBlockByBlacklist/errorSendMessageAccountDeleted/errorSendMessageUserIdNotFound)
   /// uid: 目标的 uid (一般是用户或者群组)
   /// type: 消息类型
+  /// imdnId: 消息的唯一 ID
   /// content: 消息内容
+  /// userData: 自定义字段
+  /// attachFiles: 附件(key 表示附件的自定义名字, value 为该附件的流)
   Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, dynamic>? attachFiles});
 
   /// 获取当前用户登陆的 uid
@@ -737,7 +749,7 @@ class JusAccountImpl extends JusAccount {
       } else if (error.contains('account-deleted-error')) {
         completer.completeError(JusError(JusAccountConstants.errorCheckUserRelationAccountDeleted, message: error));
       } else if (error.contains('user_id_not_found')) {
-        completer.completeError(JusError(JusAccountConstants.errorCheckUserRelationNotFound, message: error));
+        completer.completeError(JusError(JusAccountConstants.errorCheckUserRelationUserIdNotFound, message: error));
       } else {
         completer.completeError(error.toNotificationError());
       }
@@ -897,6 +909,14 @@ class JusAccountImpl extends JusAccount {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
         completer.complete(JusProfile().getCachedMsgId(imdnId));
+      } else if (error.contains('stranger_forbid')) {
+        completer.completeError(JusError(JusAccountConstants.errorSendMessageStrangerForbid, message: error));
+      } else if (error.contains('block_by_blacklist')) {
+        completer.completeError(JusError(JusAccountConstants.errorSendMessageBlockByBlacklist, message: error));
+      } else if (error.contains('account-deleted-error')) {
+        completer.completeError(JusError(JusAccountConstants.errorSendMessageAccountDeleted, message: error));
+      } else if (error.contains('user_id_not_found')) {
+        completer.completeError(JusError(JusAccountConstants.errorSendMessageUserIdNotFound, message: error));
       } else {
         completer.completeError(error.toNotificationError());
       }
