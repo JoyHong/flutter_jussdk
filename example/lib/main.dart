@@ -57,6 +57,9 @@ class _MyAppState extends State<MyApp> {
   final userRelationsUpdated = JusSDK.account.userRelationsUpdated.listen((v) {
   });
 
+  final messageReceived = JusSDK.account.messageReceived.listen((v) {
+  });
+
   @override
   void dispose() {
     applyUserRelationUpdated.cancel();
