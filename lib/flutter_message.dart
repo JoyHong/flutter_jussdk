@@ -1,7 +1,7 @@
 class JusMessageReceived {
   /// 发送者的 uid
   late String senderUid;
-  /// 发送者的昵称
+  /// 发送者的备注名(因为目前仅能收到好友发送的消息)
   late String senderName;
   /// 消息类型
   late String type;
