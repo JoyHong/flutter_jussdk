@@ -47,6 +47,11 @@ class JusSDKConstants {
   /// 固定值, 服务器端已定义
   static const String userPropNickName = 'Basic.NickName';
 
+  /// 用户关系变化申请
+  static const String msgTypeApplyUserRelation = 'System.P2PApply';
+  /// 对方接受了你的用户关系变化申请
+  static const String msgTypeRespUserRelation = 'System.P2PApplyResponse';
+
 }
 
 class JusSDK {

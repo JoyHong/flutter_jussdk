@@ -564,9 +564,9 @@ class JusAccountImpl extends JusAccount {
       'Notify.GCM.RegId': pushToken
     };
 
-    /// 注册好友请求与响应的 push, infoType 固定必须是 P2PApply 或 P2PApplyResponse
-    void putPayloadFriendRequest(String type) {
-      params['Notify.$pushType.Message.System.$type.Payload'] = jsonEncode({
+    /// 注册好友请求与响应的 push, infoType 固定必须是 System.P2PApply 或 System.P2PApplyResponse
+    void putPayloadUserRelation(String type) {
+      params['Notify.$pushType.Message.$type.Payload'] = jsonEncode({
         'MtcImDisplayNameKey': '\${TargetName}',
         'MtcImSenderUidKey': '\${TargetId}',
         'MtcImMsgIdKey': '\${ApplyMsgIdx}',
@@ -576,10 +576,10 @@ class JusAccountImpl extends JusAccount {
         'TargetType': '\${TargetType}',
         'MtcImInfoTypeKey': type,
       });
-      params['Notify.$pushType.Message.Text.Expiration'] = expiration;
-      params['Notify.$pushType.Message.Text.ResendCount'] = '0';
-      params['Notify.$pushType.Message.Text.ResendTimeout'] = '20';
-      params['Notify.$pushType.Message.Text.PassThrough'] = '1';
+      params['Notify.$pushType.Message.$type.Expiration'] = expiration;
+      params['Notify.$pushType.Message.$type.ResendCount'] = '0';
+      params['Notify.$pushType.Message.$type.ResendTimeout'] = '20';
+      params['Notify.$pushType.Message.$type.PassThrough'] = '1';
     }
     /// 注册 Info 消息 push
     void putPayloadMessage(String type) {
@@ -601,8 +601,8 @@ class JusAccountImpl extends JusAccount {
     }
 
     types?.forEach((type) {
-      if (type == 'P2PApply' || type == 'P2PApplyResponse') {
-        putPayloadFriendRequest(type);
+      if (type == JusSDKConstants.msgTypeApplyUserRelation || type == JusSDKConstants.msgTypeRespUserRelation) {
+        putPayloadUserRelation(type);
       } else {
         putPayloadMessage(type);
       }
