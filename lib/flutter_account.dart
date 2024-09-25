@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:cancellation_token/cancellation_token.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
@@ -159,7 +160,7 @@ abstract class JusAccount {
   /// content: 消息内容
   /// userData: 自定义字段
   /// attachFiles: 附件(key 表示附件的自定义名字, value 为该附件的流)
-  Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, dynamic>? attachFiles});
+  Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, Uint8List>? attachFiles});
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
@@ -897,7 +898,7 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, dynamic>? attachFiles}) async {
+  Future<int> sendMessage({required String uid, required String type, required String imdnId, String? content, Map<String, dynamic>? userData, Map<String, Uint8List>? attachFiles}) async {
     JusSDK.logger.i(tag: _tag, message: 'sendMessage($uid, $type, $imdnId, $content, $userData)');
     if (!JusSDK.tools.isValidUserId(uid)) {
       JusSDK.logger.e(tag: _tag, message: 'sendMessage fail, must be valid user id');
