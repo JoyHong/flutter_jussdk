@@ -195,13 +195,17 @@ class JusSDK {
           return;
         }
         if (data is _PgmIsolateInsertMsg) {
+          String type = data.content['_type'];
+          if (type == JusSDKConstants.msgTypeApplyUserRelation ||
+              type == JusSDKConstants.msgTypeRespUserRelation) {
+            return;
+          }
           String imdnId = data.content['_params']['imdnId'];
           if (data.senderId == _mtc.Mtc_UeDbGetUid().toDartString()) {
             // 本人发送消息成功
             JusProfile().cacheMsgId(imdnId, data.msgId);
           } else {
             // 收到他人发送的消息
-            String type = data.content['_type'];
             Map<String, dynamic> body = jsonDecode(data.content['_body']);
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
                 JusMessageReceived(data.senderId, type, data.msgId, imdnId, body['content'], body..remove('content'), data.content['_ress'], data.timestamp));
