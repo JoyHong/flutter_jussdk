@@ -1,6 +1,8 @@
 class JusMessageReceived {
   /// 发送者的 uid
   late String senderUid;
+  /// 发送者的昵称
+  late String senderName;
   /// 消息类型
   late String type;
   /// 服务器保存 id
@@ -16,10 +18,10 @@ class JusMessageReceived {
   /// 时间戳
   late int timestamp;
 
-  JusMessageReceived(this.senderUid, this.type, this.msgId, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
+  JusMessageReceived(this.senderUid, this.senderName, this.type, this.msgId, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
 
   @override
   String toString() {
-    return 'JusMessageReceived{senderUid: $senderUid, type: $type, msgId: $msgId, imdnId: $imdnId, content: $content, userData: $userData, timestamp: $timestamp}';
+    return 'JusMessageReceived{senderUid: $senderUid, senderName: $senderName, type: $type, msgId: $msgId, imdnId: $imdnId, content: $content, userData: $userData, timestamp: $timestamp}';
   }
 }

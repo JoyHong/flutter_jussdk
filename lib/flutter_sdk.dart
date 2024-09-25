@@ -208,7 +208,7 @@ class JusSDK {
             // 收到他人发送的消息
             Map<String, dynamic> body = jsonDecode(data.content['_body']);
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
-                JusMessageReceived(data.senderId, type, data.msgId, imdnId, body['content'], body..remove('content'), data.content['_ress'], data.timestamp));
+                JusMessageReceived(data.senderId, '', type, data.msgId, imdnId, body['content'], body..remove('content'), data.content['_ress'], data.timestamp));
           }
           return;
         }

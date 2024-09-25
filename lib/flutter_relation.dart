@@ -1,5 +1,6 @@
 import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_profile.dart';
+import 'package:flutter_jussdk/flutter_sdk.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
@@ -79,6 +80,8 @@ class JusApplyUserRelation {
 class JusRespUserRelation {
   /// 通过者的 uid
   late String uid;
+  /// 通过者的昵称
+  late String nickName;
   /// 通过后当前是什么关系
   late int type;
   /// 通过时的时间戳
@@ -86,18 +89,14 @@ class JusRespUserRelation {
 
   JusRespUserRelation.fromJson(Map<String, dynamic> map) {
     uid = map['GroupId'];
+    nickName = JusProfile().getUserRelation(uid)?.toFriend().props[JusSDKConstants.userPropNickName] ?? '';
     type = int.parse(map['TargetType']);
     timestamp = int.parse(map['Time']);
   }
 
-  /// 通过者的用户 Relation 对象, 如果是通过 SDK 收到的, 则一定不为空
-  JusUserRelation? getUserRelation() {
-    return JusProfile().getUserRelation(uid)?.toFriend();
-  }
-
   @override
   String toString() {
-    return 'JusRespUserRelation{uid: $uid, type: $type, timestamp: $timestamp}';
+    return 'JusRespUserRelation{uid: $uid, nickName:$nickName, type: $type, timestamp: $timestamp}';
   }
 }
 
