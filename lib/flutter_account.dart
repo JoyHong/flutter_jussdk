@@ -50,6 +50,9 @@ class JusAccountConstants {
   /// 消息发送失败, 用户未找到
   static const int errorSendMessageUserIdNotFound = JusSDKConstants.errorBaseCode - 11;
 
+  /// 接受他人的关系变化申请失败, 该申请已过期
+  static const int errorRespUserRelationExpired = JusSDKConstants.errorBaseCode - 12;
+
   /// 注册失败, 账号已存在
   static const int errorSignUpExist = EN_MTC_UE_REASON_TYPE.EN_MTC_UE_REASON_ACCOUNT_EXIST;
 
@@ -136,7 +139,7 @@ abstract class JusAccount {
   /// extraParamMap: 额外的键值对参数
   Future<bool> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
-  /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功返回 true, 失败则抛出异常 JusError
+  /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功返回 true, 失败则抛出异常 JusError(errorRespUserRelationExpired)
   /// msgId: 收到 applyFriend 上报时附带的参数
   /// tagName: 给对方的备注
   /// extraParamMap: 额外的键值对参数
@@ -815,6 +818,8 @@ class JusAccountImpl extends JusAccount {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
         completer.complete(true);
+      } else if (error.contains('apply_msg_expire')) {
+        completer.completeError(JusError(JusAccountConstants.errorRespUserRelationExpired, message: error));
       } else {
         completer.completeError(error.toNotificationError());
       }
