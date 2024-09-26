@@ -592,7 +592,7 @@ class JusAccountImpl extends JusAccount {
         'MtcImSenderUidKey': '\${SenderUid}',
         'MtcImMsgIdKey': '\${MsgIdx}',
         'MtcImImdnIdKey': '\${imdnId}',
-        'MtcImInfoContentKey': '\${Text}',
+        'MtcImTextKey': '\${Text}',
         'MtcImLabelKey': '\${Box}',
         'MtcImTimeKey': '\${Time}',
         'MtcImUserDataKey': '\${userData}',

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class JusMessageReceived {
   /// 发送者的 uid
   late String senderUid;
@@ -5,7 +7,7 @@ class JusMessageReceived {
   late String senderName;
   /// 消息类型
   late String type;
-  /// 服务器保存 id
+  /// 服务器保存 id(push 过来时没有该字段, 默认值为 -1)
   late int msgId;
   /// 消息的 imdnId(唯一的)
   late String imdnId;
@@ -13,12 +15,34 @@ class JusMessageReceived {
   late String content;
   /// userData
   late Map<String, dynamic> userData;
-  /// 附件
+  /// 附件(push 过来时没有该字段)
   late Map<String, dynamic> attachFiles;
   /// 时间戳
   late int timestamp;
 
   JusMessageReceived(this.senderUid, this.senderName, this.type, this.msgId, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
+
+  /// push json 转消息
+  factory JusMessageReceived.fromPushJson(dynamic map) {
+    String senderUid = map['MtcImLabelKey'];
+    if (senderUid.startsWith('P2P')) {
+      senderUid = senderUid.substring(3);
+    }
+    String userData = map['MtcImUserDataKey'];
+    if (userData.isEmpty) {
+      userData = '{}';
+    }
+    return JusMessageReceived(
+        senderUid,
+        map['MtcImDisplayNameKey'],
+        map['MtcImInfoTypeKey'],
+        -1,
+        map['MtcImImdnIdKey'],
+        map['MtcImTextKey'],
+        jsonDecode(userData),
+        {},
+        int.parse(map['MtcImTimeKey']));
+  }
 
   @override
   String toString() {
