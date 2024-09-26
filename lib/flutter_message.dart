@@ -24,16 +24,16 @@ class JusMessageReceived {
 
   /// push json 转消息
   factory JusMessageReceived.fromPushJson(dynamic map) {
-    String senderUid = map['MtcImLabelKey'];
-    if (senderUid.startsWith('P2P')) {
-      senderUid = senderUid.substring(3);
-    }
+    // String uid = map['MtcImLabelKey'];
+    // if (uid.startsWith('P2P/')) {
+    //   uid = uid.substring(4);
+    // }
     String userData = map['MtcImUserDataKey'];
     if (userData.isEmpty) {
       userData = '{}';
     }
     return JusMessageReceived(
-        senderUid,
+        map['MtcImSenderUidKey'],
         map['MtcImDisplayNameKey'],
         map['MtcImInfoTypeKey'],
         -1,
