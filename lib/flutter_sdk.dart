@@ -207,8 +207,12 @@ class JusSDK {
           } else {
             // 收到他人发送的消息
             Map<String, dynamic> body = jsonDecode(data.content['_body']);
+            Map<String, Uint8List> ress = {};
+            (data.content['_ress'] as Map).forEach((key, value) {
+              ress[key] = base64Decode(value);
+            });
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
-                JusMessageReceived(data.senderId, JusProfile().getUserRelation(data.senderId)!.tagName, type, data.msgId, imdnId, body['content'], body..remove('content'), data.content['_ress'], data.timestamp));
+                JusMessageReceived(data.senderId, JusProfile().getUserRelation(data.senderId)!.tagName, type, data.msgId, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
           }
           return;
         }

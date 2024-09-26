@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 class JusMessageReceived {
   /// 发送者的 uid
@@ -16,7 +17,7 @@ class JusMessageReceived {
   /// userData
   late Map<String, dynamic> userData;
   /// 附件(push 过来时没有该字段)
-  late Map<String, dynamic> attachFiles;
+  late Map<String, Uint8List> attachFiles;
   /// 时间戳
   late int timestamp;
 

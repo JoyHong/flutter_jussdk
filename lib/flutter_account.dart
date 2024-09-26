@@ -936,7 +936,11 @@ class JusAccountImpl extends JusAccount {
       '_params': {'imdnId': imdnId}
     };
     if (attachFiles != null) {
-      contentJson['_ress'] = attachFiles;
+      Map<String, String> ress = {};
+      attachFiles.forEach((key, value) {
+        ress[key] = base64Encode(value);
+      });
+      contentJson['_ress'] = ress;
     }
     Map<String, String> paramJson = {
       'Notify.imdnId': imdnId,
