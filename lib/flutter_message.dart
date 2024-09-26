@@ -46,6 +46,6 @@ class JusMessageReceived {
 
   @override
   String toString() {
-    return 'JusMessageReceived{senderUid: $senderUid, senderName: $senderName, type: $type, msgId: $msgId, imdnId: $imdnId, content: $content, userData: $userData, timestamp: $timestamp}';
+    return 'JusMessageReceived{senderUid: $senderUid, senderName: $senderName, type: $type, msgId: $msgId, imdnId: $imdnId, content: $content, userData: $userData, attachFiles: $attachFiles, timestamp: $timestamp}';
   }
 }
