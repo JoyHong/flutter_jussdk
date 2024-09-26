@@ -68,4 +68,9 @@ class JusTools {
     return '${dir.path}/jussdk/$uid';
   }
 
+  /// 从 push 的 json 里获取类型
+  static String getTypeFromPushJson(dynamic map) {
+    return map['MtcImInfoTypeKey'];
+  }
+
 }
