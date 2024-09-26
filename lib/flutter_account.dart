@@ -140,10 +140,10 @@ abstract class JusAccount {
   Future<bool> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
   /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功返回 true, 失败则抛出异常 JusError(errorRespUserRelationExpired)
-  /// msgId: 收到 applyFriend 上报时附带的参数
+  /// msgIdx: 收到 applyFriend 上报时附带的参数
   /// tagName: 给对方的备注
   /// extraParamMap: 额外的键值对参数
-  Future<bool> respUserRelation({required int msgId, required String tagName, required Map<String, String> extraParamMap});
+  Future<bool> respUserRelation({required int msgIdx, required String tagName, required Map<String, String> extraParamMap});
 
   /// 修改他人在本人关系列表中的关系, 成功返回 true, 失败则抛出异常 JusError
   /// uid: 需要修改关系的用户 uid
@@ -156,7 +156,7 @@ abstract class JusAccount {
   /// 根据 baseTime 获取最新的差异
   Future<JusUserRelationsUpdated> getUserRelationsUpdatedAsync(int baseTime);
 
-  /// 发送消息, 成功返回 msgId, 失败则抛出异常 JusError(errorSendMessageStrangerForbid/errorSendMessageBlockByBlacklist/errorSendMessageAccountDeleted/errorSendMessageUserIdNotFound)
+  /// 发送消息, 成功返回 msgIdx, 失败则抛出异常 JusError(errorSendMessageStrangerForbid/errorSendMessageBlockByBlacklist/errorSendMessageAccountDeleted/errorSendMessageUserIdNotFound)
   /// uid: 目标的 uid (一般是用户或者群组)
   /// type: 消息类型
   /// imdnId: 消息的唯一 ID
@@ -810,8 +810,8 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> respUserRelation({required int msgId, required String tagName, required Map<String, String> extraParamMap}) async {
-    JusSDK.logger.i(tag: _tag, message: 'respUserRelation($msgId, $tagName, $extraParamMap)');
+  Future<bool> respUserRelation({required int msgIdx, required String tagName, required Map<String, String> extraParamMap}) async {
+    JusSDK.logger.i(tag: _tag, message: 'respUserRelation($msgIdx, $tagName, $extraParamMap)');
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
@@ -826,7 +826,7 @@ class JusAccountImpl extends JusAccount {
     });
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_accept_relation(cookie.toString().toNativePointer(),
-        msgId,
+        msgIdx,
         tagName.toNativePointer(),
         ''.toNativePointer(),
         '{}'.toNativePointer(),
@@ -914,7 +914,7 @@ class JusAccountImpl extends JusAccount {
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(JusProfile().getCachedMsgId(imdnId));
+        completer.complete(JusProfile().getCachedMsgIdx(imdnId));
       } else if (error.contains('stranger_forbid')) {
         completer.completeError(JusError(JusAccountConstants.errorSendMessageStrangerForbid, message: error));
       } else if (error.contains('block_by_blacklist')) {

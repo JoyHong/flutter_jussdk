@@ -66,8 +66,8 @@ class JusProfile {
   late Realm _realm;
   /// 查询出来临时保存的本人以外的属性集合
   final Map<String, Map<String, String>> _cacheProps = {};
-  /// 消息的 imdnId 映射的 MsgId
-  final Map<String, int> _cacheMsgIds = {};
+  /// 消息的 imdnId 映射的 msgIdx
+  final Map<String, int> _cacheMsgIdxs = {};
 
   JusProfile._();
 
@@ -171,12 +171,12 @@ class JusProfile {
     return _cacheProps[uid]!;
   }
 
-  void cacheMsgId(String imdnId, int msgId) {
-    _cacheMsgIds[imdnId] = msgId;
+  void cacheMsgIdx(String imdnId, int msgIdx) {
+    _cacheMsgIdxs[imdnId] = msgIdx;
   }
 
-  int getCachedMsgId(String imdnId) {
-    return _cacheMsgIds.remove(imdnId)!;
+  int getCachedMsgIdx(String imdnId) {
+    return _cacheMsgIdxs.remove(imdnId)!;
   }
 
   /// 根据 uid 获取个人节点列表上的某一关系对象

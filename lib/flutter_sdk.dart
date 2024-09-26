@@ -203,7 +203,7 @@ class JusSDK {
           String imdnId = data.content['_params']['imdnId'];
           if (data.senderId == _mtc.Mtc_UeDbGetUid().toDartString()) {
             // 本人发送消息成功
-            JusProfile().cacheMsgId(imdnId, data.msgId);
+            JusProfile().cacheMsgIdx(imdnId, data.msgIdx);
           } else {
             // 收到他人发送的消息
             Map<String, dynamic> body = jsonDecode(data.content['_body']);
@@ -212,7 +212,7 @@ class JusSDK {
               ress[key] = base64Decode(value);
             });
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
-                JusMessageReceived(data.senderId, JusProfile().getUserRelation(data.senderId)!.tagName, type, data.msgId, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
+                JusMessageReceived(data.senderId, JusProfile().getUserRelation(data.senderId)!.tagName, type, data.msgIdx, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
           }
           return;
         }
@@ -353,10 +353,10 @@ class _PgmIsolateRelationsUpdated {
 class _PgmIsolateInsertMsg {
   final String senderId;
   final Map<String, dynamic> content;
-  final int msgId;
+  final int msgIdx;
   final int timestamp;
 
-  const _PgmIsolateInsertMsg(this.senderId, this.content, this.msgId, this.timestamp);
+  const _PgmIsolateInsertMsg(this.senderId, this.content, this.msgIdx, this.timestamp);
 }
 
 class _PgmIsolateRefreshDB {}

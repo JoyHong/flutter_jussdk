@@ -9,7 +9,7 @@ class JusMessageReceived {
   /// 消息类型
   late String type;
   /// 服务器保存 id(push 过来时没有该字段, 默认值为 -1)
-  late int msgId;
+  late int msgIdx;
   /// 消息的 imdnId(唯一的)
   late String imdnId;
   /// 内容
@@ -21,7 +21,7 @@ class JusMessageReceived {
   /// 时间戳
   late int timestamp;
 
-  JusMessageReceived(this.senderUid, this.senderName, this.type, this.msgId, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
+  JusMessageReceived(this.senderUid, this.senderName, this.type, this.msgIdx, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
 
   /// push json 转消息
   factory JusMessageReceived.fromPushJson(dynamic map) {
@@ -47,6 +47,6 @@ class JusMessageReceived {
 
   @override
   String toString() {
-    return 'JusMessageReceived{senderUid: $senderUid, senderName: $senderName, type: $type, msgId: $msgId, imdnId: $imdnId, content: $content, userData: $userData, attachFiles: $attachFiles, timestamp: $timestamp}';
+    return 'JusMessageReceived{senderUid: $senderUid, senderName: $senderName, type: $type, msgIdx: $msgIdx, imdnId: $imdnId, content: $content, userData: $userData, attachFiles: $attachFiles, timestamp: $timestamp}';
   }
 }
