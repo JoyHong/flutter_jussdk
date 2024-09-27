@@ -141,9 +141,9 @@ abstract class JusAccount {
 
   /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功返回 true, 失败则抛出异常 JusError(errorRespUserRelationExpired)
   /// msgIdx: 收到 applyFriend 上报时附带的参数
-  /// tagName: 给对方的备注
+  /// tagName: 给对方的备注, 默认不传的话自动把 nickName 设置给 tagName
   /// extraParamMap: 额外的键值对参数
-  Future<bool> respUserRelation({required int msgIdx, required String tagName, required Map<String, String> extraParamMap});
+  Future<bool> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap});
 
   /// 修改他人在本人关系列表中的关系, 成功返回 true, 失败则抛出异常 JusError
   /// uid: 需要修改关系的用户 uid
@@ -810,7 +810,7 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> respUserRelation({required int msgIdx, required String tagName, required Map<String, String> extraParamMap}) async {
+  Future<bool> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap}) async {
     JusSDK.logger.i(tag: _tag, message: 'respUserRelation($msgIdx, $tagName, $extraParamMap)');
     await _pgmLoginedEndTransformer();
     Completer<bool> completer = Completer();
@@ -827,7 +827,7 @@ class JusAccountImpl extends JusAccount {
     Pointer<Char> pcErr = ''.toNativePointer();
     if (_pgm.pgm_c_accept_relation(cookie.toString().toNativePointer(),
         msgIdx,
-        tagName.toNativePointer(),
+        (tagName ?? '').toNativePointer(),
         ''.toNativePointer(),
         '{}'.toNativePointer(),
         jsonEncode(extraParamMap).toNativePointer(),
