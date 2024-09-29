@@ -176,8 +176,8 @@ abstract class JusAccount {
   /// 获取当前用户登陆的 uid
   String getLoginUid();
 
-  /// 获取服务器时间, 依赖 pgm 的 login ok 的 cookie end; 成功返回具体的时间戳(ms), 失败则返回 -1
-  int getServerTimeMs();
+  /// 获取服务器时间, 依赖 pgm 的 login ok 的 cookie end; 成功返回具体的时间戳(ms), 失败则返回 null
+  int? getServerTimeMs();
 
   /// 获取当前的状态
   int getState();
@@ -1041,10 +1041,11 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  int getServerTimeMs() {
+  int? getServerTimeMs() {
     Pointer<Int64> pcTimeMs = malloc<Int64>();
     if (_pgm.pgm_c_get_cur_time(SystemClock.elapsedRealtime().inMilliseconds, pcTimeMs) != JusSDKConstants.ZOK) {
-      return -1;
+      JusSDK.logger.e(tag: _tag, message: 'getServerTimeMs fail');
+      return null;
     }
     int timeMs = pcTimeMs.value;
     malloc.free(pcTimeMs);
