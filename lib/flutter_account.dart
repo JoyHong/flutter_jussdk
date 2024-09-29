@@ -126,6 +126,10 @@ abstract class JusAccount {
   /// 设置用户的个人属性, 仅在已成功登陆过一次的情况下调用
   void setUserProps(Map<String, String> map);
 
+  /// 设置好友或者拉黑用户的备注名, 失败则抛出异常 JusError(errorNotConnected)
+  /// 注: 只能在登陆成功(连上服务器)后调用, 且根据 userRelationsUpdated 监听更新数据库
+  void setTagName({required String uid, required String tagName});
+
   /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError(errorSearchNotFound)
   Future<JusUserRelation> searchUser({required String username});
 
@@ -180,7 +184,7 @@ abstract class JusAccount {
   /// 收到他人通过我的好友关系变化申请的监听
   late Stream<JusRespUserRelation> respUserRelationUpdated;
 
-  /// 好友列表变化监听
+  /// 好友列表变化、好友的备注名变化的监听
   late Stream<JusUserRelationsUpdated> userRelationsUpdated;
 
   /// 收到消息回调
@@ -668,6 +672,46 @@ class JusAccountImpl extends JusAccount {
             _mtc.Mtc_UeDbGetUid(), jsonEncode(map).toNativePointer(), pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
       JusSDK.logger.e(tag: _tag, message: 'setUserProps fail, call pgm_c_nowait_ack_set_props did fail ${pcErr.toDartString()}');
+    }
+  }
+
+  @override
+  void setTagName({required String uid, required String tagName}) {
+    JusSDK.logger.i(tag: _tag, message: 'setTagName($uid, $tagName)');
+    if (_mtc.Mtc_UeDbGetUid() == nullptr || _mtc.Mtc_UeDbGetUid().toDartString().isEmpty) {
+      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, no logged user');
+      return;
+    }
+    JusPgmUserRelation? userRelation = JusProfile().getUserRelation(uid);
+    if (userRelation == null) {
+      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, app\'s relations is not sync with jussdk');
+      throw const JusError(JusSDKConstants.errorDevIntegration, message: 'app\'s relations is not sync with jussdk');
+    }
+    if (userRelation.type != EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT &&
+        userRelation.type != EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_BLACKLIST) {
+      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, the user is neither contact nor blacklist');
+      throw const JusError(JusSDKConstants.errorDevIntegration, message: 'the user is neither contact nor blacklist');
+    }
+    if (!_pgmLoginedEnd) {
+      JusSDK.logger.i(tag: _tag, message: 'setTagName fail, pgm not logined');
+      throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
+    }
+    int cookie = JusPgmNotify.addCookie((cookie, error) {
+      JusPgmNotify.removeCookie(cookie);
+      if (error.isNotEmpty) {
+        JusSDK.logger.e(tag: _tag, message: 'setTagName fail, $error');
+      }
+    });
+    Pointer<Char> pcErr = ''.toNativePointer();
+    final changed = userRelation.toJson();
+    changed['tagName'] = tagName;
+    if (_pgm.pgm_c_nowait_ack_change_relation(cookie.toString().toNativePointer(),
+        _mtc.Mtc_UeDbGetUid(),
+        uid.toNativePointer(),
+        jsonEncode(changed).toNativePointer(),
+        pcErr) != JusSDKConstants.ZOK) {
+      JusPgmNotify.removeCookie(cookie);
+      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, call pgm_c_nowait_ack_set_props did fail ${pcErr.toDartString()}');
     }
   }
 
