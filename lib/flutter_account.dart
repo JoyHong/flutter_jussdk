@@ -14,11 +14,14 @@ import 'package:flutter_jussdk/flutter_preferences.dart';
 import 'package:flutter_jussdk/flutter_profile.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
+import 'package:system_clock/system_clock.dart';
 
 import 'flutter_database.dart';
 import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
 import 'flutter_relation.dart';
+
+import 'package:ffi/ffi.dart';
 
 class JusAccountConstants {
 
@@ -172,6 +175,9 @@ abstract class JusAccount {
 
   /// 获取当前用户登陆的 uid
   String getLoginUid();
+
+  /// 获取服务器时间, 依赖 pgm 的 login ok 的 cookie end; 成功返回具体的时间戳(ms), 失败则返回 -1
+  int getServerTimeMs();
 
   /// 获取当前的状态
   int getState();
@@ -1032,6 +1038,17 @@ class JusAccountImpl extends JusAccount {
   String getLoginUid() {
     JusSDK.logger.i(tag: _tag, message: 'getLoginUid()');
     return _mtc.Mtc_UeDbGetUid().toDartString();
+  }
+
+  @override
+  int getServerTimeMs() {
+    Pointer<Int64> pcTimeMs = malloc<Int64>();
+    if (_pgm.pgm_c_get_cur_time(SystemClock.elapsedRealtime().inMilliseconds, pcTimeMs) != JusSDKConstants.ZOK) {
+      return -1;
+    }
+    int timeMs = pcTimeMs.value;
+    malloc.free(pcTimeMs);
+    return timeMs;
   }
 
   @override
