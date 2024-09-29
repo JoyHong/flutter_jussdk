@@ -10,6 +10,7 @@ import 'package:flutter_jussdk/flutter_error.dart';
 import 'package:flutter_jussdk/flutter_message.dart';
 import 'package:flutter_jussdk/flutter_pgm_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
+import 'package:flutter_jussdk/flutter_preferences.dart';
 import 'package:flutter_jussdk/flutter_profile.dart';
 import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
@@ -99,7 +100,7 @@ abstract class JusAccount {
   Future<void> login({required String username, required String password});
 
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
-  Future<void> autoLogin({required String username});
+  Future<void> autoLogin();
 
   /// 修改密码, 成功无返回值, 失败则抛出异常 JusError(errorChangePasswordWrongPWD)
   /// oldPassword: 原密码
@@ -197,6 +198,9 @@ class JusAccountImpl extends JusAccount {
 
   static const String _defUserType = 'duoNumber';
 
+  /// 本地保存的已登陆的账号信息
+  static const String _keyLoginedUser = 'loginedUser';
+
   String _clientUser = '';
   bool _clientUserProvisionOk = false;
   int _state = JusAccountConstants.stateInit;
@@ -272,6 +276,7 @@ class JusAccountImpl extends JusAccount {
         }
         JusSDK.logger.i(tag: _tag, message: 'logined uid is ${_mtc.Mtc_UeDbGetUid().toDartString()}');
         if (!_autoLogging) {
+          await JusPreferences.setString(key: _keyLoginedUser, value: _clientUser);
           await JusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
         }
         await JusSDK.pgmIsolateInitPgm();
@@ -372,6 +377,11 @@ class JusAccountImpl extends JusAccount {
   @override
   Future<void> signUp({required String username, required String password, Map<String, String>? props}) async {
     JusSDK.logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
+    String loginedUser = JusPreferences.getString(key: _keyLoginedUser);
+    if (loginedUser.isNotEmpty) {
+      JusSDK.logger.e(tag: _tag, message: 'signUp fail, exists logined user, please logout first');
+      return;
+    }
     dynamic result = (await _cliOpen(_defUserType, username)) == JusSDKConstants.ZOK;
     if (!result) {
       JusSDK.logger.e(tag: _tag, message: 'signUp fail, call cliOpen did fail');
@@ -446,6 +456,11 @@ class JusAccountImpl extends JusAccount {
   @override
   Future<void> login({required String username, required String password}) async {
     JusSDK.logger.i(tag: _tag, message: 'login($username, $password)');
+    String loginedUser = JusPreferences.getString(key: _keyLoginedUser);
+    if (loginedUser.isNotEmpty) {
+      JusSDK.logger.e(tag: _tag, message: 'login fail, exists logined user, please logout first');
+      return;
+    }
     bool result = (await _cliOpen(_defUserType, username, password: password)) == JusSDKConstants.ZOK;
     if (!result) {
       JusSDK.logger.e(tag: _tag, message: 'login fail, call cliOpen did fail');
@@ -471,9 +486,15 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<void> autoLogin({required String username}) async {
-    JusSDK.logger.i(tag: _tag, message: 'autoLogin($username)');
-    bool result = (await _cliOpen(_defUserType, username)) == JusSDKConstants.ZOK;
+  Future<void> autoLogin() async {
+    JusSDK.logger.i(tag: _tag, message: 'autoLogin()');
+    String loginedUser = JusPreferences.getString(key: _keyLoginedUser);
+    if (loginedUser.isEmpty) {
+      JusSDK.logger.e(tag: _tag, message: 'autoLogin fail, no logined user, please login first');
+      return;
+    }
+    List<String> userInfo = loginedUser.split(')');
+    bool result = (await _cliOpen(userInfo[0], userInfo[1])) == JusSDKConstants.ZOK;
     if (!result) {
       JusSDK.logger.e(tag: _tag, message: 'autoLogin fail, cliOpen did fail');
       return;
@@ -1111,6 +1132,7 @@ class JusAccountImpl extends JusAccount {
     _pgmLoginedEnd = false;
     _pgmRefreshing = false;
     JusSDK.finalizeProfile();
+    JusPreferences.remove(key: _keyLoginedUser);
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();
     }

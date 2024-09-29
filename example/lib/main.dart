@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
               JusSDK.account.login(username: '12345678906', password: '123456');
             }),
             button(text: '自动登陆', onPressed: () {
-              JusSDK.account.autoLogin(username: '12345678906');
+              JusSDK.account.autoLogin();
             }),
             button(text: '日志上报', onPressed: () {
               JusSDK.logger.upload(memo: '测试memo3', tag: '测试tag3', isManual: true);

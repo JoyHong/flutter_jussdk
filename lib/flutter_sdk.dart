@@ -12,6 +12,7 @@ import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_logger.dart';
 import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
+import 'package:flutter_jussdk/flutter_preferences.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
 import 'package:system_clock/system_clock.dart';
 
@@ -96,6 +97,7 @@ class JusSDK {
     required Directory profileDir,
     required List<String> accountPropNames,
     Map<String, String>? deviceProps}) async {
+    await JusPreferences.initialize();
     _accountPropNames = List.from(accountPropNames);
     if (!_accountPropNames.contains(JusSDKConstants.userPropNickName)) {
       _accountPropNames.add(JusSDKConstants.userPropNickName);
