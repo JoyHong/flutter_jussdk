@@ -88,37 +88,37 @@ class JusAccountConstants {
 
 abstract class JusAccount {
 
-  /// 注册账号, 成功返回 true, 失败则抛出异常 JusError(errorSignUpExist)
+  /// 注册账号, 成功无返回值, 失败则抛出异常 JusError(errorSignUpExist)
   /// username: 用户名
   /// password: 密码
-  Future<bool> signUp({required String username, required String password, Map<String, String>? props});
+  Future<void> signUp({required String username, required String password, Map<String, String>? props});
 
-  /// 账号密码登陆, 成功返回 true, 失败则抛出异常 JusError(errorLoginAuthFailed/errorLoginDeleted/errorLoginInvalid/errorLoginBanned)
+  /// 账号密码登陆, 成功无返回值, 失败则抛出异常 JusError(errorLoginAuthFailed/errorLoginDeleted/errorLoginInvalid/errorLoginBanned)
   /// username: 用户名
   /// password: 密码
-  Future<bool> login({required String username, required String password});
+  Future<void> login({required String username, required String password});
 
   /// 自动登陆, 针对已登陆情况下使用, 内部会自动重试
   Future<void> autoLogin({required String username});
 
-  /// 修改密码, 成功返回 true, 失败则抛出异常 JusError(errorChangePasswordWrongPWD)
+  /// 修改密码, 成功无返回值, 失败则抛出异常 JusError(errorChangePasswordWrongPWD)
   /// oldPassword: 原密码
   /// newPassword: 新密码
-  Future<bool> changePassword({required String oldPassword, required String newPassword});
+  Future<void> changePassword({required String oldPassword, required String newPassword});
 
-  /// 删除账号, 成功返回 true, 失败则抛出异常 JusError(errorDeleteWrongPWD)
+  /// 删除账号, 成功无返回值, 失败则抛出异常 JusError(errorDeleteWrongPWD)
   /// 注: 需要在登陆成功的状态下才能进行删除操作
-  Future<bool> delete({required String password});
+  Future<void> delete({required String password});
 
-  /// 退出登陆
-  Future<bool> logout();
+  /// 退出登陆, 无返回值
+  Future<void> logout();
 
-  /// 注册 push, 成功返回 true, 失败则抛出异常 JusError
+  /// 注册 push, 成功无返回值, 失败则抛出异常 JusError
   /// pushType: push 类型 - pushTypeGCM
   /// pushAppId: push 对应的 key, 如 GCM 是 Project ID (Project settings -> General -> Your project -> Project ID)
   /// pushToken: push token
   /// infoTypes: 需要注册的 info 消息列表
-  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? types});
+  Future<void> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? types});
 
   /// 获取(本人或者他人)的个人属性, 如果 uid 不为空且是其他人, 则实时获取他人的用户属性 成功返回 Map, 失败则抛出异常 JusError
   Future<Map<String, String>> getUserProps({String? uid});
@@ -136,23 +136,23 @@ abstract class JusAccount {
   /// 查询本人在该用户关系列表里的关系, 失败则抛出异常 JusError(errorCheckUserRelationNotFound/errorCheckUserRelationAccountDeleted)
   Future<int> checkUserRelation({required String uid});
 
-  /// 发起关系变化申请(当前指添加好友请求), 成功返回 true, 失败则抛出异常 JusError(errorApplyUserRelationAlreadyGranted/errorApplyUserRelationBlockByBlacklist)
+  /// 发起关系变化申请(当前指添加好友请求), 成功无返回值, 失败则抛出异常 JusError(errorApplyUserRelationAlreadyGranted/errorApplyUserRelationBlockByBlacklist)
   /// uid: 对方的 uid
   /// tagName: 给对方的备注
   /// desc: 附带信息
   /// extraParamMap: 额外的键值对参数
-  Future<bool> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
+  Future<void> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
-  /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功返回 true, 失败则抛出异常 JusError(errorRespUserRelationExpired)
+  /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功无返回值, 失败则抛出异常 JusError(errorRespUserRelationExpired)
   /// msgIdx: 收到 applyFriend 上报时附带的参数
   /// tagName: 给对方的备注, 默认不传的话自动把 nickName 设置给 tagName
   /// extraParamMap: 额外的键值对参数
-  Future<bool> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap});
+  Future<void> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap});
 
-  /// 修改他人在本人关系列表中的关系, 成功返回 true, 失败则抛出异常 JusError
+  /// 修改他人在本人关系列表中的关系, 成功无返回值, 失败则抛出异常 JusError
   /// uid: 需要修改关系的用户 uid
   /// type: 要更改的关系
-  Future<bool> changeUserRelation({required String uid, required int type});
+  Future<void> changeUserRelation({required String uid, required int type});
 
   /// 根据 baseTime 立马获取与插件内部的差异
   JusUserRelationsUpdated getUserRelationsUpdated(int baseTime);
@@ -370,7 +370,7 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> signUp({required String username, required String password, Map<String, String>? props}) async {
+  Future<void> signUp({required String username, required String password, Map<String, String>? props}) async {
     JusSDK.logger.i(tag: _tag, message: 'signUp($username, $password, $props)');
     dynamic result = (await _cliOpen(_defUserType, username)) == JusSDKConstants.ZOK;
     if (!result) {
@@ -414,11 +414,11 @@ class JusAccountImpl extends JusAccount {
       JusSDK.logger.e(tag: _tag, message: 'signUp fail, $e');
       rethrow;
     }
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     int cookie = JusMtcNotify.addCookie((cookie, name, info) {
       JusMtcNotify.removeCookie(cookie);
       if (name == MtcUeCreateOkNotification) {
-        completer.complete(true);
+        completer.complete();
       } else {
         completer.completeError(info.toUeError());
       }
@@ -444,17 +444,17 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> login({required String username, required String password}) async {
+  Future<void> login({required String username, required String password}) async {
     JusSDK.logger.i(tag: _tag, message: 'login($username, $password)');
     bool result = (await _cliOpen(_defUserType, username, password: password)) == JusSDKConstants.ZOK;
     if (!result) {
       JusSDK.logger.e(tag: _tag, message: 'login fail, call cliOpen did fail');
       throw const JusError(JusAccountConstants.errorDevIntegration, message: 'call cliOpen did fail');
     }
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     callback(result) {
       if (result == true) {
-        completer.complete(true);
+        completer.complete();
       } else {
         completer.completeError(result);
       }
@@ -486,18 +486,18 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> changePassword({required String oldPassword, required String newPassword}) async {
+  Future<void> changePassword({required String oldPassword, required String newPassword}) async {
     JusSDK.logger.i(tag: _tag, message: 'changePassword($oldPassword, $newPassword)');
     if (!(await _connectOkTransformer())) {
       JusSDK.logger.i(tag: _tag, message: 'changePassword fail, not connected');
       throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     int cookie = JusMtcNotify.addCookie((cookie, name, info) {
       JusMtcNotify.removeCookie(cookie);
       if (name == MtcUeChangePasswordOkNotification) {
         _mtc.Mtc_ProfSaveProvision();
-        completer.complete(true);
+        completer.complete();
       } else {
         completer.completeError(info.toUeError());
       }
@@ -511,7 +511,7 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> delete({required String password}) async {
+  Future<void> delete({required String password}) async {
     JusSDK.logger.i(tag: _tag, message: 'delete($password)');
     if (password != _mtc.Mtc_UeDbGetPassword().toDartString()) {
       JusSDK.logger.i(tag: _tag, message: 'delete fail, wrong password');
@@ -521,11 +521,11 @@ class JusAccountImpl extends JusAccount {
       JusSDK.logger.i(tag: _tag, message: 'delete fail, not connected');
       throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     int cookie = JusMtcNotify.addCookie((cookie, name, info) {
       JusMtcNotify.removeCookie(cookie);
       if (name == MtcUeDeleteUserOkNotifcation) {
-        completer.complete(true);
+        completer.complete();
       } else {
         completer.completeError(info.toUeError());
       }
@@ -539,23 +539,23 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> logout() async {
+  Future<void> logout() async {
     JusSDK.logger.i(tag: _tag, message: 'logout()');
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     callback() {
-      completer.complete(true);
+      completer.complete();
     }
     _didLogoutCallbacks.add(callback);
     if (_mtc.Mtc_CliLogout() != JusSDKConstants.ZOK) {
       _didLogoutCallbacks.remove(callback);
       _logoutOk(0, true);
-      completer.complete(true);
+      completer.complete();
     }
     return completer.future;
   }
 
   @override
-  Future<bool> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? types}) async {
+  Future<void> registerPush({required String pushType, required String pushAppId, required String pushToken, List<String>? types}) async {
     JusSDK.logger.i(tag: _tag, message: 'registerPush($pushType, $pushAppId, $pushToken, $types)');
     if (pushType != JusAccountConstants.pushTypeGCM) {
       JusSDK.logger.e(tag: _tag, message: 'registerPush fail, pushType must be JusAccountConstants.pushTypeGCM');
@@ -620,7 +620,6 @@ class JusAccountImpl extends JusAccount {
       JusSDK.logger.e(tag: _tag, message: 'registerPush fail, Mtc_CliSetPushParm did fail');
       throw const JusError(JusAccountConstants.errorDevIntegration, message: 'Mtc_CliSetPushParm did fail');
     }
-    return true;
   }
 
   @override
@@ -812,18 +811,18 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
+  Future<void> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap}) async {
     JusSDK.logger.i(tag: _tag, message: 'applyUserRelation($uid, $tagName, $desc, $extraParamMap)');
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
       JusSDK.logger.e(tag: _tag, message: 'applyUserRelation fail, should not apply self');
       throw const JusError(JusAccountConstants.errorDevIntegration, message: 'should not apply self');
     }
     await _pgmLoginedEndTransformer();
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(true);
+        completer.complete();
       } else if (error.contains('target_type_granted')) {
         completer.completeError(JusError(JusAccountConstants.errorApplyUserRelationAlreadyGranted, message: error));
       } else if (error.contains('block_by_blacklist')) {
@@ -854,14 +853,14 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap}) async {
+  Future<void> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap}) async {
     JusSDK.logger.i(tag: _tag, message: 'respUserRelation($msgIdx, $tagName, $extraParamMap)');
     await _pgmLoginedEndTransformer();
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(true);
+        completer.complete();
       } else if (error.contains('apply_msg_expire')) {
         completer.completeError(JusError(JusAccountConstants.errorRespUserRelationExpired, message: error));
       } else {
@@ -884,14 +883,14 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  Future<bool> changeUserRelation({required String uid, required int type}) async {
+  Future<void> changeUserRelation({required String uid, required int type}) async {
     JusSDK.logger.i(tag: _tag, message: 'changeUserRelation($uid, $type)');
     await _pgmLoginedEndTransformer();
-    Completer<bool> completer = Completer();
+    Completer<void> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isEmpty) {
-        completer.complete(true);
+        completer.complete();
       } else {
         completer.completeError(error.toNotificationError());
       }
