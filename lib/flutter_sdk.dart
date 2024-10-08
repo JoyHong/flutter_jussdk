@@ -193,7 +193,7 @@ class JusSDK {
           (JusSDK.account as JusAccountImpl).onReceiveUserRelationsUpdated(
               JusUserRelationsUpdated(data.baseTime,
                   JusProfile().userRelationUpdateTime,
-                  JusProfile().getDiffUserRelations(data.baseTime).map((relation) => relation.toFriend()).toList()));
+                  JusProfile().getDiffRelations(data.baseTime).map((relation) => relation.toUser()).toList()));
           return;
         }
         if (data is _PgmIsolateInsertMsg) {
@@ -214,7 +214,7 @@ class JusSDK {
               ress[key] = base64Decode(value);
             });
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
-                JusMessageReceived(data.senderId, JusProfile().getUserRelation(data.senderId)!.tagName, type, data.msgIdx, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
+                JusMessageReceived(data.senderId, JusProfile().getRelation(data.senderId)!.tagName, type, data.msgIdx, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
           }
           return;
         }
@@ -417,7 +417,7 @@ int _pgmLoadGroup(
     plRelationUpdateTime.value = profile.userRelationUpdateTime;
     ppcStatusVersMap.value = jsonEncode(statusMap).toNativePointer();
     plStatusTime.value = profile.userStatusUpdateTime;
-    ppcProps.value = jsonEncode(profile.userProps).toNativePointer();
+    ppcProps.value = jsonEncode(profile.profileProps).toNativePointer();
     return 0;
   }
   return 1;
@@ -434,16 +434,16 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
       'pgmUpdateGroup, pcGroupId=$uid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
       'lStatusTime=$statusUpdateTime, pcStatusVersMap=$statusDiff');
   if (JusSDK.tools.isValidUserId(uid)) {
-      List<JusPgmUserRelation> relations = [];
+      List<JusPgmRelation> relations = [];
       relationDiff.forEach((uid, map) {
-        relations.add(JusPgmUserRelationUtils.factoryFromJson(uid, map, relationUpdateTime));
+        relations.add(JusPgmRelationUtils.factoryFromJson(uid, map, relationUpdateTime));
       });
       List<JusPgmStatus> status = [];
       statusDiff.forEach((uid, statusMap) {
         status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
       });
       int baseRelationUpdateTime = JusProfile().userRelationUpdateTime;
-      JusProfile().updatePgmUserProfile(relations, relationUpdateTime, status, statusUpdateTime);
+      JusProfile().updatePgmRelationsStatuses(relations, relationUpdateTime, status, statusUpdateTime);
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
       if (relationUpdateTime > 0 && relationUpdateTime != baseRelationUpdateTime) {
         JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRelationsUpdated(baseRelationUpdateTime));
@@ -463,7 +463,7 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
     statusDiff.forEach((uid, statusMap) {
       status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
     });
-    JusProfile().updatePgmUserProfile([], -1, status, lStatusTime);
+    JusProfile().updatePgmRelationsStatuses([], -1, status, lStatusTime);
     JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
     return 0;
   }
@@ -478,7 +478,7 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   if (JusSDK.tools.isValidUserId(uid)) {
     if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
       // 本人的属性, 缓存到本地数据库
-      JusProfile().updatePgmUserProps(props);
+      JusProfile().updatePgmProfileProps(props);
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
     } else {
       // 其它用户的属性, 缓存到内存
@@ -501,7 +501,7 @@ int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
   String status = pcMsgStatuses.toDartString();
   JusSDK._log('pgmInsertMsgs, pcGroupId=$uid, pcMsgs=$msgs, pcMsgStatuses=$status');
   if (JusSDK.tools.isValidUserId(uid)) {
-    JusProfile().updatePgmUserProfile([], -1, [JusPgmStatus(uid, status)], -1);
+    JusProfile().updatePgmRelationsStatuses([], -1, [JusPgmStatus(uid, status)], -1);
     JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
     for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));

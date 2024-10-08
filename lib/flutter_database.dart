@@ -3,7 +3,7 @@ import 'package:realm/realm.dart';
 part 'flutter_database.realm.dart';
 
 @RealmModel()
-class _JusPgmUserRelation {
+class _JusPgmRelation {
   @PrimaryKey()
   late String uid;
   late String cfgs;
@@ -22,14 +22,14 @@ class _JusPgmStatus {
 }
 
 @RealmModel()
-class _JusPgmUserProp {
+class _JusPgmProfileProp {
   @PrimaryKey()
   late String key;
   late String value;
 }
 
 @RealmModel()
-class _JusUserPendingProp {
+class _JusPendingProfileProp {
   @PrimaryKey()
   late String key;
   late String value;

@@ -148,7 +148,7 @@ abstract class JusAccount {
   Future<void> applyUserRelation({required String uid, required String tagName, required String desc, required Map<String, String> extraParamMap});
 
   /// 接受他人发起的关系变化申请(当前指接受他人的好友请求), 成功无返回值, 失败则抛出异常 JusError(errorRespUserRelationExpired)
-  /// msgIdx: 收到 applyFriend 上报时附带的参数
+  /// msgIdx: 收到 JusApplyUserRelation 上报时附带的参数
   /// tagName: 给对方的备注, 默认不传的话自动把 nickName 设置给 tagName
   /// extraParamMap: 额外的键值对参数
   Future<void> respUserRelation({required int msgIdx, String? tagName, required Map<String, String> extraParamMap});
@@ -293,9 +293,9 @@ class JusAccountImpl extends JusAccount {
             callback.call();
           }
           _pgmLoginedEndCallbacks.clear();
-          Map<String, String> pendingProps = JusProfile().userPendingProps;
+          Map<String, String> pendingProps = JusProfile().pendingProfileProps;
           if (pendingProps.isNotEmpty) {
-            JusProfile().clearUserPendingProps();
+            JusProfile().clearPendingProfileProps();
             JusSDK.logger.i(tag: _tag, message: 'setPendingProps($pendingProps)');
             int cookie = JusPgmNotify.addCookie((cookie, error) {
               JusPgmNotify.removeCookie(cookie);
@@ -654,8 +654,8 @@ class JusAccountImpl extends JusAccount {
     JusSDK.logger.i(tag: _tag, message: 'getUserProps($uid)');
     await _pgmLoginedEndTransformer();
     if (uid == null || uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      return (JusProfile().userProps
-        ..addAll(JusProfile().userPendingProps)).filterKeys(JusSDK.accountPropNames);
+      return (JusProfile().profileProps
+        ..addAll(JusProfile().pendingProfileProps)).filterKeys(JusSDK.accountPropNames);
     }
     Completer<Map<String, String>> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
@@ -684,7 +684,7 @@ class JusAccountImpl extends JusAccount {
     }
     if (!_pgmLoginedEnd) {
       JusSDK.logger.i(tag: _tag, message: 'setUserProps save to pending');
-      JusProfile().addUserPendingProps(map);
+      JusProfile().addPendingProfileProps(map);
       return;
     }
     int cookie = JusPgmNotify.addCookie((cookie, error) {
@@ -708,7 +708,7 @@ class JusAccountImpl extends JusAccount {
       JusSDK.logger.e(tag: _tag, message: 'setTagName fail, no logged user');
       return;
     }
-    JusPgmUserRelation? userRelation = JusProfile().getUserRelation(uid);
+    JusPgmRelation? userRelation = JusProfile().getRelation(uid);
     if (userRelation == null) {
       JusSDK.logger.e(tag: _tag, message: 'setTagName fail, app\'s relations is not sync with jussdk');
       throw const JusError(JusSDKConstants.errorDevIntegration, message: 'app\'s relations is not sync with jussdk');
@@ -923,7 +923,7 @@ class JusAccountImpl extends JusAccount {
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    JusPgmUserRelation? userRelation = JusProfile().getUserRelation(uid);
+    JusPgmRelation? userRelation = JusProfile().getRelation(uid);
     if (userRelation != null) {
       final changed = userRelation.toJson();
       changed['type'] = type;
@@ -959,7 +959,7 @@ class JusAccountImpl extends JusAccount {
     return JusUserRelationsUpdated(
         baseTime,
         JusProfile().userRelationUpdateTime,
-        JusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
+        JusProfile().getDiffRelations(baseTime).map((relation) => relation.toUser()).toList());
   }
 
   @override
@@ -969,7 +969,7 @@ class JusAccountImpl extends JusAccount {
     return JusUserRelationsUpdated(
         baseTime,
         JusProfile().userRelationUpdateTime,
-        JusProfile().getDiffUserRelations(baseTime).map((relation) => relation.toFriend()).toList());
+        JusProfile().getDiffRelations(baseTime).map((relation) => relation.toUser()).toList());
   }
 
   @override

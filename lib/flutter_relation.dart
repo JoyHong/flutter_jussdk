@@ -89,7 +89,7 @@ class JusRespUserRelation {
 
   JusRespUserRelation.fromJson(Map<String, dynamic> map) {
     uid = map['GroupId'];
-    nickName = JusProfile().getUserRelation(uid)?.toFriend().props[JusSDKConstants.userPropNickName] ?? '';
+    nickName = JusProfile().getRelation(uid)?.toUser().props[JusSDKConstants.userPropNickName] ?? '';
     type = int.parse(map['TargetType']);
     timestamp = int.parse(map['Time']);
   }
