@@ -5,12 +5,10 @@ import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'flutter_mtc_bindings_generated.dart';
 
 class JusUserRelation {
-  /// 未知
-  static const int typeUnknown = -1;
-  /// 好友
-  static const int typeContact = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT;
   /// 陌生人
   static const int typeStranger = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_STRANGER;
+  /// 好友
+  static const int typeContact = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT;
   /// 已拉黑用户
   static const int typeBlacklist = EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_BLACKLIST;
 
@@ -23,7 +21,7 @@ class JusUserRelation {
   /// 所属关系
   final int type;
 
-  const JusUserRelation(this.uid, this.props, {this.tagName = '', this.type = typeUnknown});
+  const JusUserRelation(this.uid, this.props, {this.tagName = '', this.type = typeStranger});
 
   @override
   String toString() {
