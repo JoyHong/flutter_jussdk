@@ -195,7 +195,7 @@ abstract class JusAccount {
   late Stream<JusUserRelationsUpdated> userRelationsUpdated;
 
   /// 收到消息回调
-  late Stream<JusIncomingMessage> messageReceived;
+  late Stream<JusReceivedMessage> messageReceived;
 }
 
 class JusAccountImpl extends JusAccount {
@@ -235,9 +235,9 @@ class JusAccountImpl extends JusAccount {
   @override
   Stream<JusUserRelationsUpdated> get userRelationsUpdated => _userRelationsEvents.stream;
 
-  final StreamController<JusIncomingMessage> _messageReceivedEvents = StreamController.broadcast();
+  final StreamController<JusReceivedMessage> _messageReceivedEvents = StreamController.broadcast();
   @override
-  Stream<JusIncomingMessage> get messageReceived => _messageReceivedEvents.stream;
+  Stream<JusReceivedMessage> get messageReceived => _messageReceivedEvents.stream;
 
   final FlutterMtcBindings _mtc;
   final FlutterPGMBindings _pgm;
@@ -1200,7 +1200,7 @@ class JusAccountImpl extends JusAccount {
   }
 
   /// 收到他人发送的消息
-  void onReceiveMessage(JusIncomingMessage message) {
+  void onReceiveMessage(JusReceivedMessage message) {
     _messageReceivedEvents.add(message);
   }
 

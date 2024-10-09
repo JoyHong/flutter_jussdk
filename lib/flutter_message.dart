@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-class JusIncomingMessage {
+class JusReceivedMessage {
   /// 发送者的 uid
   late String senderUid;
   /// 发送者的备注名(因为目前仅能收到好友发送的消息)
@@ -21,10 +21,10 @@ class JusIncomingMessage {
   /// 时间戳
   late int timestamp;
 
-  JusIncomingMessage(this.senderUid, this.senderName, this.type, this.msgIdx, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
+  JusReceivedMessage(this.senderUid, this.senderName, this.type, this.msgIdx, this.imdnId, this.content, this.userData, this.attachFiles, this.timestamp);
 
   /// push json 转消息
-  factory JusIncomingMessage.fromPushJson(dynamic map) {
+  factory JusReceivedMessage.fromPushJson(dynamic map) {
     // String uid = map['MtcImLabelKey'];
     // if (uid.startsWith('P2P/')) {
     //   uid = uid.substring(4);
@@ -33,7 +33,7 @@ class JusIncomingMessage {
     if (userData.isEmpty) {
       userData = '{}';
     }
-    return JusIncomingMessage(
+    return JusReceivedMessage(
         map['MtcImSenderUidKey'],
         map['MtcImDisplayNameKey'],
         map['MtcImInfoTypeKey'],
@@ -47,6 +47,6 @@ class JusIncomingMessage {
 
   @override
   String toString() {
-    return 'JusIncomingMessage{senderUid: $senderUid, senderName: $senderName, type: $type, msgIdx: $msgIdx, imdnId: $imdnId, content: $content, userData: $userData, attachFiles: $attachFiles, timestamp: $timestamp}';
+    return 'JusReceivedMessage{senderUid: $senderUid, senderName: $senderName, type: $type, msgIdx: $msgIdx, imdnId: $imdnId, content: $content, userData: $userData, attachFiles: $attachFiles, timestamp: $timestamp}';
   }
 }
