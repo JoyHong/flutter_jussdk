@@ -214,7 +214,7 @@ class JusSDK {
               ress[key] = base64Decode(value);
             });
             (JusSDK.account as JusAccountImpl).onReceiveMessage(
-                JusMessageReceived(data.senderId, JusProfile().getRelation(data.senderId)!.tagName, type, data.msgIdx, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
+                JusIncomingMessage(data.senderId, JusProfile().getRelation(data.senderId)!.tagName, type, data.msgIdx, imdnId, body['content'], body..remove('content'), ress, data.timestamp));
           }
           return;
         }
