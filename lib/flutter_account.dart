@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cancellation_token/cancellation_token.dart';
+import 'package:ffi/ffi.dart';
 import 'package:flutter_jussdk/flutter_connectivity.dart';
 import 'package:flutter_jussdk/flutter_database_extension.dart';
 import 'package:flutter_jussdk/flutter_error.dart';
@@ -20,8 +21,6 @@ import 'flutter_database.dart';
 import 'flutter_mtc_bindings_generated.dart';
 import 'flutter_mtc_notify.dart';
 import 'flutter_relation.dart';
-
-import 'package:ffi/ffi.dart';
 
 class JusAccountConstants {
 
@@ -1044,7 +1043,6 @@ class JusAccountImpl extends JusAccount {
   int? getServerTimeMs() {
     Pointer<Int64> pcTimeMs = malloc<Int64>();
     if (_pgm.pgm_c_get_cur_time(SystemClock.elapsedRealtime().inMilliseconds, pcTimeMs) != JusSDKConstants.ZOK) {
-      JusSDK.logger.e(tag: _tag, message: 'getServerTimeMs fail');
       return null;
     }
     int timeMs = pcTimeMs.value;
