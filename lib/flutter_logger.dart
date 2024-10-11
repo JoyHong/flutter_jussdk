@@ -29,7 +29,7 @@ class JusLogger {
       {required String memo, String? tag, bool isManual = false}) {
     final now = DateTime.now();
     final info = {
-      MtcParmAcvCommitArchiveName: '${_appName}_${_buildNumber}_${now.year}${now.month}${now.day}_${now.hour}${now.minute}${isManual ? '_manual' : ''}${tag?.isNotEmpty == true ? '__${tag}__' : ''}_a.tgz',
+      MtcParmAcvCommitArchiveName: '${_appName.replaceAll(' ', '')}_${_buildNumber}_${now.year}${now.month}${now.day}_${now.hour}${now.minute}${isManual ? '_manual' : ''}${tag?.isNotEmpty == true ? '__${tag}__' : ''}_a.tgz',
       MtcParmAcvCommitDeviceId: _deviceId,
       MtcParmAcvCommitMemo: memo,
       MtcParmAcvCommitPaths: [_logDir.path]
