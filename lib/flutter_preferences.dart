@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:realm/realm.dart';
+import 'package:flutter_jussdk/flutter_sdk.dart';
 import 'package:path/path.dart' as p;
+import 'package:realm/realm.dart';
 
 import 'flutter_database.dart';
 
@@ -13,9 +13,8 @@ class JusPreferences {
   static const _schemaVersion = 1;
   static late Realm _realm;
 
-  static Future initialize() async {
-    Directory dir = await getApplicationSupportDirectory();
-    String path = '${dir.path}/jussdk/preferences';
+  static void initialize() {
+    String path = '${JusSDK.baseDir.path}/jussdk/preferences';
     List<int> keyBytes = 'JusPreferences'.codeUnits;
     _realm = Realm(Configuration.local([
       JusPreference.schema

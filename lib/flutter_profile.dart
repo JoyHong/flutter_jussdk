@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -21,12 +20,16 @@ class JusProfile {
 
   static JusProfile? _instance;
 
-  static Future initialize(String uid) async {
-    if (_instance != null) {
+  static void initialize(String uid) {
+    if (_instance?._uid == uid) {
       return;
     }
+    if (_instance != null) {
+      finalize();
+    }
     _instance = JusProfile._();
-    String path = await JusTools.getUserPath(uid);
+    _instance!._uid = uid;
+    String path = JusTools.getUserPath(uid);
     List<int> keyBytes = 'JusProfile#$uid'.codeUnits;
     _instance!._realm = Realm(Configuration.local([
       JusPgmRelation.schema,
@@ -63,6 +66,7 @@ class JusProfile {
     return _instance!;
   }
 
+  late String _uid;
   late Realm _realm;
   /// 查询出来临时保存的本人以外的属性集合
   final Map<String, Map<String, String>> _cacheProps = {};

@@ -14,6 +14,7 @@ import 'package:flutter_jussdk/flutter_mtc_bindings_generated.dart';
 import 'package:flutter_jussdk/flutter_pgm_notify.dart';
 import 'package:flutter_jussdk/flutter_preferences.dart';
 import 'package:flutter_jussdk/flutter_tools.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:system_clock/system_clock.dart';
 
 import 'flutter_message.dart';
@@ -74,9 +75,12 @@ class JusSDK {
   /// 工具模块对象
   static late JusTools tools;
 
+  /// 所有文件的根目录
+  static late Directory _baseDir;
+  static Directory get baseDir => _baseDir;
+
   /// 全局的用户属性的配置信息
   static late List<String> _accountPropNames;
-
   static List<String> get accountPropNames => _accountPropNames;
 
   /// 初始化 Sdk
@@ -97,7 +101,8 @@ class JusSDK {
     required Directory profileDir,
     required List<String> accountPropNames,
     Map<String, String>? deviceProps}) async {
-    await JusPreferences.initialize();
+    _baseDir = await getApplicationSupportDirectory();
+    JusPreferences.initialize();
     _accountPropNames = List.from(accountPropNames);
     if (!_accountPropNames.contains(JusSDKConstants.userPropNickName)) {
       _accountPropNames.add(JusSDKConstants.userPropNickName);
@@ -156,10 +161,6 @@ class JusSDK {
         if (data is SendPort) {
           // The helper isolate sent us the port on which we can sent it requests.
           completer.complete(data);
-          return;
-        }
-        if (data is _PgmIsolateResponse) {
-          _pgmIsolateResponses.remove(data.id)?.complete();
           return;
         }
         if (data is _PgmIsolateRefreshDB) {
@@ -229,19 +230,13 @@ class JusSDK {
         ..listen((dynamic data) async {
           // On the helper isolate listen to requests and respond to them.
           if (data is _PgmIsolateInit) {
+            BackgroundIsolateBinaryMessenger.ensureInitialized(data.rootIsolateToken!);
+            // 初始化 pgm isolate 的 baseDir 对象
+            _baseDir = await getApplicationSupportDirectory();
             // 初始化 pgm isolate 的 logger 对象
             logger = JusLogger(_mtc, data.appName, data.buildNumber, data.deviceId, data.logDir);
             // 初始化 pgm isolate 的 tools 对象
             tools = JusTools(_mtc);
-            return;
-          }
-          if (data is _PgmIsolateInitProfile) {
-            BackgroundIsolateBinaryMessenger.ensureInitialized(data.rootIsolateToken!);
-            await JusProfile.initialize(data.uid);
-            sendPort.send(_PgmIsolateResponse(data.id));
-            return;
-          }
-          if (data is _PgmIsolateInitPgm) {
             _pgm.pgm_c_init(1,
               Pointer.fromFunction(_pgmEventProcessor, 1),
               Pointer.fromFunction(_pgmLoadGroup, 1),
@@ -251,13 +246,7 @@ class JusSDK {
               Pointer.fromFunction(_pgmInsertMsgs, 1),
               Pointer.fromFunction(_pgmGetTicks, 1),
             );
-            sendPort.send(_PgmIsolateResponse(data.id));
             _pgm.pgm_c_cb_thread_func();
-            return;
-          }
-          if (data is _PgmIsolateFinalizeProfile) {
-            JusProfile.finalize();
-            sendPort.send(_PgmIsolateResponse(data.id));
             return;
           }
           throw UnsupportedError('Unsupported message type: ${data.runtimeType}');
@@ -272,39 +261,6 @@ class JusSDK {
     return completer.future;
   }();
 
-  static Future initProfile(String uid) async {
-    Future pgmIsolateInitProfile(String uid) async {
-      Completer completer = Completer();
-      int id = _PgmIsolateRequest.getNewId();
-      _pgmIsolateResponses[id] = completer;
-      _toPgmIsolateSendPort.send(_PgmIsolateInitProfile(id, uid));
-      return completer.future;
-    }
-    await JusProfile.initialize(uid);
-    return pgmIsolateInitProfile(uid);
-  }
-
-  static Future pgmIsolateInitPgm() async {
-    Completer completer = Completer();
-    int id = _PgmIsolateRequest.getNewId();
-    _pgmIsolateResponses[id] = completer;
-    _toPgmIsolateSendPort.send(_PgmIsolateInitPgm(id));
-    return completer.future
-        .then((v) => Future.delayed(const Duration(seconds: 1)));
-  }
-
-  static Future finalizeProfile() async {
-    Future pgmIsolateFinalizeProfile() async {
-      Completer completer = Completer();
-      int id = _PgmIsolateRequest.getNewId();
-      _pgmIsolateResponses[id] = completer;
-      _toPgmIsolateSendPort.send(_PgmIsolateFinalizeProfile(id));
-      return completer.future;
-    }
-    await pgmIsolateFinalizeProfile();
-    JusProfile.finalize();
-  }
-
 }
 
 class _PgmIsolateInit {
@@ -312,24 +268,10 @@ class _PgmIsolateInit {
   final String buildNumber;
   final String deviceId;
   final Directory logDir;
-
-  const _PgmIsolateInit(
-      this.appName, this.buildNumber, this.deviceId, this.logDir);
-}
-
-class _PgmIsolateInitProfile extends _PgmIsolateRequest {
-  final String uid;
   final rootIsolateToken = ServicesBinding.rootIsolateToken;
 
-  _PgmIsolateInitProfile(super.id, this.uid);
-}
-
-class _PgmIsolateInitPgm extends _PgmIsolateRequest {
-  const _PgmIsolateInitPgm(super.id);
-}
-
-class _PgmIsolateFinalizeProfile extends _PgmIsolateRequest {
-  const _PgmIsolateFinalizeProfile(super.id);
+  _PgmIsolateInit(
+      this.appName, this.buildNumber, this.deviceId, this.logDir);
 }
 
 class _PgmIsolateEventProcessor {
@@ -363,24 +305,6 @@ class _PgmIsolateInsertMsg {
 
 class _PgmIsolateRefreshDB {}
 
-class _PgmIsolateRequest {
-  final int id;
-
-  const _PgmIsolateRequest(this.id);
-
-  static int _id = 0;
-
-  static int getNewId() {
-    return ++_id;
-  }
-}
-
-class _PgmIsolateResponse {
-  final int id;
-
-  const _PgmIsolateResponse(this.id);
-}
-
 final Map<int, Completer> _pgmIsolateResponses = {};
 
 final DynamicLibrary _library = _openLibrary('mtc');
@@ -403,8 +327,9 @@ int _pgmLoadGroup(
     Pointer<Pointer<JStrStrMap>> ppcProps) {
   final String uid = pcGroupId.toDartString();
   JusSDK._log('pgmLoadGroup, pcGroupId=$uid');
-  JusProfile profile = JusProfile();
   if (JusSDK.tools.isValidUserId(uid)) {
+    JusProfile.initialize(uid);
+    JusProfile profile = JusProfile();
     Map<String, dynamic> relationMap = {};
     Map<String, dynamic> statusMap = {};
     for (var relation in profile.userRelations) {

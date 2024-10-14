@@ -282,9 +282,8 @@ class JusAccountImpl extends JusAccount {
         JusSDK.logger.i(tag: _tag, message: 'logined uid is ${_mtc.Mtc_UeDbGetUid().toDartString()}');
         if (!_autoLogging) {
           await JusPreferences.setString(key: _keyLoginedUser, value: _clientUser);
-          await JusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
+          JusProfile.initialize(_mtc.Mtc_UeDbGetUid().toDartString());
         }
-        await JusSDK.pgmIsolateInitPgm();
         int cookie = JusPgmNotify.addCookie((cookie, error) {
           JusPgmNotify.removeCookie(cookie);
           _pgmLoginedEnd = true;
@@ -1073,7 +1072,7 @@ class JusAccountImpl extends JusAccount {
       }
       _mtc.Mtc_ProfSaveProvision();
       if (_mtc.Mtc_UeDbGetUid() != nullptr && _mtc.Mtc_UeDbGetUid().toDartString().isNotEmpty) {
-        await JusSDK.initProfile(_mtc.Mtc_UeDbGetUid().toDartString());
+        JusProfile.initialize(_mtc.Mtc_UeDbGetUid().toDartString());
       }
     }
     return result;
@@ -1147,7 +1146,7 @@ class JusAccountImpl extends JusAccount {
     _reLoggingTimeoutToken = null;
     _pgmLoginedEnd = false;
     _pgmRefreshing = false;
-    JusSDK.finalizeProfile();
+    JusProfile.finalize();
     JusPreferences.remove(key: _keyLoginedUser);
     for (var cancellationToken in _connectCancellationTokens) {
       cancellationToken.cancel();

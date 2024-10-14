@@ -1,9 +1,7 @@
 import 'dart:ffi';
-import 'dart:io';
-
 
 import 'package:ffi/ffi.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter_jussdk/flutter_sdk.dart';
 
 import 'flutter_mtc_bindings_generated.dart';
 
@@ -63,9 +61,8 @@ class JusTools {
     return _mtc.Mtc_GroupIsValidGroupId(uid.toNativePointer());
   }
 
-  static Future<String> getUserPath(String uid) async {
-    Directory dir = await getApplicationSupportDirectory();
-    return '${dir.path}/jussdk/$uid';
+  static String getUserPath(String uid) {
+    return '${JusSDK.baseDir.path}/jussdk/$uid';
   }
 
   /// 从 push 的 json 里获取类型
