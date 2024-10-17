@@ -7,17 +7,21 @@ part of 'flutter_database.dart';
 // **************************************************************************
 
 // ignore_for_file: type=lint
-class JusPgmRelation extends _JusPgmRelation
+class ROPgmRelation extends _ROPgmRelation
     with RealmEntity, RealmObjectBase, RealmObject {
-  JusPgmRelation(
+  ROPgmRelation(
+    String identifier,
+    String belongToUid,
     String uid,
     String cfgs,
     String tag,
     String tagName,
     int type,
     int updateTime, {
-    JusPgmStatus? status,
+    ROPgmStatus? status,
   }) {
+    RealmObjectBase.set(this, 'identifier', identifier);
+    RealmObjectBase.set(this, 'belongToUid', belongToUid);
     RealmObjectBase.set(this, 'uid', uid);
     RealmObjectBase.set(this, 'cfgs', cfgs);
     RealmObjectBase.set(this, 'tag', tag);
@@ -27,7 +31,21 @@ class JusPgmRelation extends _JusPgmRelation
     RealmObjectBase.set(this, 'updateTime', updateTime);
   }
 
-  JusPgmRelation._();
+  ROPgmRelation._();
+
+  @override
+  String get identifier =>
+      RealmObjectBase.get<String>(this, 'identifier') as String;
+  @override
+  set identifier(String value) =>
+      RealmObjectBase.set(this, 'identifier', value);
+
+  @override
+  String get belongToUid =>
+      RealmObjectBase.get<String>(this, 'belongToUid') as String;
+  @override
+  set belongToUid(String value) =>
+      RealmObjectBase.set(this, 'belongToUid', value);
 
   @override
   String get uid => RealmObjectBase.get<String>(this, 'uid') as String;
@@ -55,10 +73,10 @@ class JusPgmRelation extends _JusPgmRelation
   set type(int value) => RealmObjectBase.set(this, 'type', value);
 
   @override
-  JusPgmStatus? get status =>
-      RealmObjectBase.get<JusPgmStatus>(this, 'status') as JusPgmStatus?;
+  ROPgmStatus? get status =>
+      RealmObjectBase.get<ROPgmStatus>(this, 'status') as ROPgmStatus?;
   @override
-  set status(covariant JusPgmStatus? value) =>
+  set status(covariant ROPgmStatus? value) =>
       RealmObjectBase.set(this, 'status', value);
 
   @override
@@ -67,19 +85,21 @@ class JusPgmRelation extends _JusPgmRelation
   set updateTime(int value) => RealmObjectBase.set(this, 'updateTime', value);
 
   @override
-  Stream<RealmObjectChanges<JusPgmRelation>> get changes =>
-      RealmObjectBase.getChanges<JusPgmRelation>(this);
+  Stream<RealmObjectChanges<ROPgmRelation>> get changes =>
+      RealmObjectBase.getChanges<ROPgmRelation>(this);
 
   @override
-  Stream<RealmObjectChanges<JusPgmRelation>> changesFor(
+  Stream<RealmObjectChanges<ROPgmRelation>> changesFor(
           [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<JusPgmRelation>(this, keyPaths);
+      RealmObjectBase.getChangesFor<ROPgmRelation>(this, keyPaths);
 
   @override
-  JusPgmRelation freeze() => RealmObjectBase.freezeObject<JusPgmRelation>(this);
+  ROPgmRelation freeze() => RealmObjectBase.freezeObject<ROPgmRelation>(this);
 
   EJsonValue toEJson() {
     return <String, dynamic>{
+      'identifier': identifier.toEJson(),
+      'belongToUid': belongToUid.toEJson(),
       'uid': uid.toEJson(),
       'cfgs': cfgs.toEJson(),
       'tag': tag.toEJson(),
@@ -90,11 +110,13 @@ class JusPgmRelation extends _JusPgmRelation
     };
   }
 
-  static EJsonValue _toEJson(JusPgmRelation value) => value.toEJson();
-  static JusPgmRelation _fromEJson(EJsonValue ejson) {
+  static EJsonValue _toEJson(ROPgmRelation value) => value.toEJson();
+  static ROPgmRelation _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
       {
+        'identifier': EJsonValue identifier,
+        'belongToUid': EJsonValue belongToUid,
         'uid': EJsonValue uid,
         'cfgs': EJsonValue cfgs,
         'tag': EJsonValue tag,
@@ -102,7 +124,9 @@ class JusPgmRelation extends _JusPgmRelation
         'type': EJsonValue type,
         'updateTime': EJsonValue updateTime,
       } =>
-        JusPgmRelation(
+        ROPgmRelation(
+          fromEJson(identifier),
+          fromEJson(belongToUid),
           fromEJson(uid),
           fromEJson(cfgs),
           fromEJson(tag),
@@ -116,17 +140,19 @@ class JusPgmRelation extends _JusPgmRelation
   }
 
   static final schema = () {
-    RealmObjectBase.registerFactory(JusPgmRelation._);
+    RealmObjectBase.registerFactory(ROPgmRelation._);
     register(_toEJson, _fromEJson);
     return const SchemaObject(
-        ObjectType.realmObject, JusPgmRelation, 'JusPgmRelation', [
-      SchemaProperty('uid', RealmPropertyType.string, primaryKey: true),
+        ObjectType.realmObject, ROPgmRelation, 'ROPgmRelation', [
+      SchemaProperty('identifier', RealmPropertyType.string, primaryKey: true),
+      SchemaProperty('belongToUid', RealmPropertyType.string),
+      SchemaProperty('uid', RealmPropertyType.string),
       SchemaProperty('cfgs', RealmPropertyType.string),
       SchemaProperty('tag', RealmPropertyType.string),
       SchemaProperty('tagName', RealmPropertyType.string),
       SchemaProperty('type', RealmPropertyType.int),
       SchemaProperty('status', RealmPropertyType.object,
-          optional: true, linkTarget: 'JusPgmStatus'),
+          optional: true, linkTarget: 'ROPgmStatus'),
       SchemaProperty('updateTime', RealmPropertyType.int),
     ]);
   }();
@@ -135,17 +161,35 @@ class JusPgmRelation extends _JusPgmRelation
   SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
 }
 
-class JusPgmStatus extends _JusPgmStatus
+class ROPgmStatus extends _ROPgmStatus
     with RealmEntity, RealmObjectBase, RealmObject {
-  JusPgmStatus(
+  ROPgmStatus(
+    String identifier,
+    String belongToUid,
     String uid,
     String status,
   ) {
+    RealmObjectBase.set(this, 'identifier', identifier);
+    RealmObjectBase.set(this, 'belongToUid', belongToUid);
     RealmObjectBase.set(this, 'uid', uid);
     RealmObjectBase.set(this, 'status', status);
   }
 
-  JusPgmStatus._();
+  ROPgmStatus._();
+
+  @override
+  String get identifier =>
+      RealmObjectBase.get<String>(this, 'identifier') as String;
+  @override
+  set identifier(String value) =>
+      RealmObjectBase.set(this, 'identifier', value);
+
+  @override
+  String get belongToUid =>
+      RealmObjectBase.get<String>(this, 'belongToUid') as String;
+  @override
+  set belongToUid(String value) =>
+      RealmObjectBase.set(this, 'belongToUid', value);
 
   @override
   String get uid => RealmObjectBase.get<String>(this, 'uid') as String;
@@ -158,33 +202,39 @@ class JusPgmStatus extends _JusPgmStatus
   set status(String value) => RealmObjectBase.set(this, 'status', value);
 
   @override
-  Stream<RealmObjectChanges<JusPgmStatus>> get changes =>
-      RealmObjectBase.getChanges<JusPgmStatus>(this);
+  Stream<RealmObjectChanges<ROPgmStatus>> get changes =>
+      RealmObjectBase.getChanges<ROPgmStatus>(this);
 
   @override
-  Stream<RealmObjectChanges<JusPgmStatus>> changesFor(
+  Stream<RealmObjectChanges<ROPgmStatus>> changesFor(
           [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<JusPgmStatus>(this, keyPaths);
+      RealmObjectBase.getChangesFor<ROPgmStatus>(this, keyPaths);
 
   @override
-  JusPgmStatus freeze() => RealmObjectBase.freezeObject<JusPgmStatus>(this);
+  ROPgmStatus freeze() => RealmObjectBase.freezeObject<ROPgmStatus>(this);
 
   EJsonValue toEJson() {
     return <String, dynamic>{
+      'identifier': identifier.toEJson(),
+      'belongToUid': belongToUid.toEJson(),
       'uid': uid.toEJson(),
       'status': status.toEJson(),
     };
   }
 
-  static EJsonValue _toEJson(JusPgmStatus value) => value.toEJson();
-  static JusPgmStatus _fromEJson(EJsonValue ejson) {
+  static EJsonValue _toEJson(ROPgmStatus value) => value.toEJson();
+  static ROPgmStatus _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
       {
+        'identifier': EJsonValue identifier,
+        'belongToUid': EJsonValue belongToUid,
         'uid': EJsonValue uid,
         'status': EJsonValue status,
       } =>
-        JusPgmStatus(
+        ROPgmStatus(
+          fromEJson(identifier),
+          fromEJson(belongToUid),
           fromEJson(uid),
           fromEJson(status),
         ),
@@ -193,11 +243,13 @@ class JusPgmStatus extends _JusPgmStatus
   }
 
   static final schema = () {
-    RealmObjectBase.registerFactory(JusPgmStatus._);
+    RealmObjectBase.registerFactory(ROPgmStatus._);
     register(_toEJson, _fromEJson);
     return const SchemaObject(
-        ObjectType.realmObject, JusPgmStatus, 'JusPgmStatus', [
-      SchemaProperty('uid', RealmPropertyType.string, primaryKey: true),
+        ObjectType.realmObject, ROPgmStatus, 'ROPgmStatus', [
+      SchemaProperty('identifier', RealmPropertyType.string, primaryKey: true),
+      SchemaProperty('belongToUid', RealmPropertyType.string),
+      SchemaProperty('uid', RealmPropertyType.string),
       SchemaProperty('status', RealmPropertyType.string),
     ]);
   }();
@@ -206,17 +258,35 @@ class JusPgmStatus extends _JusPgmStatus
   SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
 }
 
-class JusPgmProfileProp extends _JusPgmProfileProp
+class ROPgmProp extends _ROPgmProp
     with RealmEntity, RealmObjectBase, RealmObject {
-  JusPgmProfileProp(
+  ROPgmProp(
+    String identifier,
+    String belongToUid,
     String key,
     String value,
   ) {
+    RealmObjectBase.set(this, 'identifier', identifier);
+    RealmObjectBase.set(this, 'belongToUid', belongToUid);
     RealmObjectBase.set(this, 'key', key);
     RealmObjectBase.set(this, 'value', value);
   }
 
-  JusPgmProfileProp._();
+  ROPgmProp._();
+
+  @override
+  String get identifier =>
+      RealmObjectBase.get<String>(this, 'identifier') as String;
+  @override
+  set identifier(String value) =>
+      RealmObjectBase.set(this, 'identifier', value);
+
+  @override
+  String get belongToUid =>
+      RealmObjectBase.get<String>(this, 'belongToUid') as String;
+  @override
+  set belongToUid(String value) =>
+      RealmObjectBase.set(this, 'belongToUid', value);
 
   @override
   String get key => RealmObjectBase.get<String>(this, 'key') as String;
@@ -229,34 +299,38 @@ class JusPgmProfileProp extends _JusPgmProfileProp
   set value(String value) => RealmObjectBase.set(this, 'value', value);
 
   @override
-  Stream<RealmObjectChanges<JusPgmProfileProp>> get changes =>
-      RealmObjectBase.getChanges<JusPgmProfileProp>(this);
+  Stream<RealmObjectChanges<ROPgmProp>> get changes =>
+      RealmObjectBase.getChanges<ROPgmProp>(this);
 
   @override
-  Stream<RealmObjectChanges<JusPgmProfileProp>> changesFor(
-          [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<JusPgmProfileProp>(this, keyPaths);
+  Stream<RealmObjectChanges<ROPgmProp>> changesFor([List<String>? keyPaths]) =>
+      RealmObjectBase.getChangesFor<ROPgmProp>(this, keyPaths);
 
   @override
-  JusPgmProfileProp freeze() =>
-      RealmObjectBase.freezeObject<JusPgmProfileProp>(this);
+  ROPgmProp freeze() => RealmObjectBase.freezeObject<ROPgmProp>(this);
 
   EJsonValue toEJson() {
     return <String, dynamic>{
+      'identifier': identifier.toEJson(),
+      'belongToUid': belongToUid.toEJson(),
       'key': key.toEJson(),
       'value': value.toEJson(),
     };
   }
 
-  static EJsonValue _toEJson(JusPgmProfileProp value) => value.toEJson();
-  static JusPgmProfileProp _fromEJson(EJsonValue ejson) {
+  static EJsonValue _toEJson(ROPgmProp value) => value.toEJson();
+  static ROPgmProp _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
       {
+        'identifier': EJsonValue identifier,
+        'belongToUid': EJsonValue belongToUid,
         'key': EJsonValue key,
         'value': EJsonValue value,
       } =>
-        JusPgmProfileProp(
+        ROPgmProp(
+          fromEJson(identifier),
+          fromEJson(belongToUid),
           fromEJson(key),
           fromEJson(value),
         ),
@@ -265,11 +339,12 @@ class JusPgmProfileProp extends _JusPgmProfileProp
   }
 
   static final schema = () {
-    RealmObjectBase.registerFactory(JusPgmProfileProp._);
+    RealmObjectBase.registerFactory(ROPgmProp._);
     register(_toEJson, _fromEJson);
-    return const SchemaObject(
-        ObjectType.realmObject, JusPgmProfileProp, 'JusPgmProfileProp', [
-      SchemaProperty('key', RealmPropertyType.string, primaryKey: true),
+    return const SchemaObject(ObjectType.realmObject, ROPgmProp, 'ROPgmProp', [
+      SchemaProperty('identifier', RealmPropertyType.string, primaryKey: true),
+      SchemaProperty('belongToUid', RealmPropertyType.string),
+      SchemaProperty('key', RealmPropertyType.string),
       SchemaProperty('value', RealmPropertyType.string),
     ]);
   }();
@@ -278,17 +353,35 @@ class JusPgmProfileProp extends _JusPgmProfileProp
   SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
 }
 
-class JusPendingProfileProp extends _JusPendingProfileProp
+class ROPgmPreference extends _ROPgmPreference
     with RealmEntity, RealmObjectBase, RealmObject {
-  JusPendingProfileProp(
+  ROPgmPreference(
+    String identifier,
+    String belongToUid,
     String key,
     String value,
   ) {
+    RealmObjectBase.set(this, 'identifier', identifier);
+    RealmObjectBase.set(this, 'belongToUid', belongToUid);
     RealmObjectBase.set(this, 'key', key);
     RealmObjectBase.set(this, 'value', value);
   }
 
-  JusPendingProfileProp._();
+  ROPgmPreference._();
+
+  @override
+  String get identifier =>
+      RealmObjectBase.get<String>(this, 'identifier') as String;
+  @override
+  set identifier(String value) =>
+      RealmObjectBase.set(this, 'identifier', value);
+
+  @override
+  String get belongToUid =>
+      RealmObjectBase.get<String>(this, 'belongToUid') as String;
+  @override
+  set belongToUid(String value) =>
+      RealmObjectBase.set(this, 'belongToUid', value);
 
   @override
   String get key => RealmObjectBase.get<String>(this, 'key') as String;
@@ -301,34 +394,40 @@ class JusPendingProfileProp extends _JusPendingProfileProp
   set value(String value) => RealmObjectBase.set(this, 'value', value);
 
   @override
-  Stream<RealmObjectChanges<JusPendingProfileProp>> get changes =>
-      RealmObjectBase.getChanges<JusPendingProfileProp>(this);
+  Stream<RealmObjectChanges<ROPgmPreference>> get changes =>
+      RealmObjectBase.getChanges<ROPgmPreference>(this);
 
   @override
-  Stream<RealmObjectChanges<JusPendingProfileProp>> changesFor(
+  Stream<RealmObjectChanges<ROPgmPreference>> changesFor(
           [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<JusPendingProfileProp>(this, keyPaths);
+      RealmObjectBase.getChangesFor<ROPgmPreference>(this, keyPaths);
 
   @override
-  JusPendingProfileProp freeze() =>
-      RealmObjectBase.freezeObject<JusPendingProfileProp>(this);
+  ROPgmPreference freeze() =>
+      RealmObjectBase.freezeObject<ROPgmPreference>(this);
 
   EJsonValue toEJson() {
     return <String, dynamic>{
+      'identifier': identifier.toEJson(),
+      'belongToUid': belongToUid.toEJson(),
       'key': key.toEJson(),
       'value': value.toEJson(),
     };
   }
 
-  static EJsonValue _toEJson(JusPendingProfileProp value) => value.toEJson();
-  static JusPendingProfileProp _fromEJson(EJsonValue ejson) {
+  static EJsonValue _toEJson(ROPgmPreference value) => value.toEJson();
+  static ROPgmPreference _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
       {
+        'identifier': EJsonValue identifier,
+        'belongToUid': EJsonValue belongToUid,
         'key': EJsonValue key,
         'value': EJsonValue value,
       } =>
-        JusPendingProfileProp(
+        ROPgmPreference(
+          fromEJson(identifier),
+          fromEJson(belongToUid),
           fromEJson(key),
           fromEJson(value),
         ),
@@ -337,11 +436,13 @@ class JusPendingProfileProp extends _JusPendingProfileProp
   }
 
   static final schema = () {
-    RealmObjectBase.registerFactory(JusPendingProfileProp._);
+    RealmObjectBase.registerFactory(ROPgmPreference._);
     register(_toEJson, _fromEJson);
-    return const SchemaObject(ObjectType.realmObject, JusPendingProfileProp,
-        'JusPendingProfileProp', [
-      SchemaProperty('key', RealmPropertyType.string, primaryKey: true),
+    return const SchemaObject(
+        ObjectType.realmObject, ROPgmPreference, 'ROPgmPreference', [
+      SchemaProperty('identifier', RealmPropertyType.string, primaryKey: true),
+      SchemaProperty('belongToUid', RealmPropertyType.string),
+      SchemaProperty('key', RealmPropertyType.string),
       SchemaProperty('value', RealmPropertyType.string),
     ]);
   }();
@@ -350,17 +451,34 @@ class JusPendingProfileProp extends _JusPendingProfileProp
   SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
 }
 
-class JusPreference extends _JusPreference
-    with RealmEntity, RealmObjectBase, RealmObject {
-  JusPreference(
+class ROProp extends _ROProp with RealmEntity, RealmObjectBase, RealmObject {
+  ROProp(
+    String identifier,
+    String belongToUid,
     String key,
     String value,
   ) {
+    RealmObjectBase.set(this, 'identifier', identifier);
+    RealmObjectBase.set(this, 'belongToUid', belongToUid);
     RealmObjectBase.set(this, 'key', key);
     RealmObjectBase.set(this, 'value', value);
   }
 
-  JusPreference._();
+  ROProp._();
+
+  @override
+  String get identifier =>
+      RealmObjectBase.get<String>(this, 'identifier') as String;
+  @override
+  set identifier(String value) =>
+      RealmObjectBase.set(this, 'identifier', value);
+
+  @override
+  String get belongToUid =>
+      RealmObjectBase.get<String>(this, 'belongToUid') as String;
+  @override
+  set belongToUid(String value) =>
+      RealmObjectBase.set(this, 'belongToUid', value);
 
   @override
   String get key => RealmObjectBase.get<String>(this, 'key') as String;
@@ -373,33 +491,38 @@ class JusPreference extends _JusPreference
   set value(String value) => RealmObjectBase.set(this, 'value', value);
 
   @override
-  Stream<RealmObjectChanges<JusPreference>> get changes =>
-      RealmObjectBase.getChanges<JusPreference>(this);
+  Stream<RealmObjectChanges<ROProp>> get changes =>
+      RealmObjectBase.getChanges<ROProp>(this);
 
   @override
-  Stream<RealmObjectChanges<JusPreference>> changesFor(
-          [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<JusPreference>(this, keyPaths);
+  Stream<RealmObjectChanges<ROProp>> changesFor([List<String>? keyPaths]) =>
+      RealmObjectBase.getChangesFor<ROProp>(this, keyPaths);
 
   @override
-  JusPreference freeze() => RealmObjectBase.freezeObject<JusPreference>(this);
+  ROProp freeze() => RealmObjectBase.freezeObject<ROProp>(this);
 
   EJsonValue toEJson() {
     return <String, dynamic>{
+      'identifier': identifier.toEJson(),
+      'belongToUid': belongToUid.toEJson(),
       'key': key.toEJson(),
       'value': value.toEJson(),
     };
   }
 
-  static EJsonValue _toEJson(JusPreference value) => value.toEJson();
-  static JusPreference _fromEJson(EJsonValue ejson) {
+  static EJsonValue _toEJson(ROProp value) => value.toEJson();
+  static ROProp _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
       {
+        'identifier': EJsonValue identifier,
+        'belongToUid': EJsonValue belongToUid,
         'key': EJsonValue key,
         'value': EJsonValue value,
       } =>
-        JusPreference(
+        ROProp(
+          fromEJson(identifier),
+          fromEJson(belongToUid),
           fromEJson(key),
           fromEJson(value),
         ),
@@ -408,10 +531,82 @@ class JusPreference extends _JusPreference
   }
 
   static final schema = () {
-    RealmObjectBase.registerFactory(JusPreference._);
+    RealmObjectBase.registerFactory(ROProp._);
+    register(_toEJson, _fromEJson);
+    return const SchemaObject(ObjectType.realmObject, ROProp, 'ROProp', [
+      SchemaProperty('identifier', RealmPropertyType.string, primaryKey: true),
+      SchemaProperty('belongToUid', RealmPropertyType.string),
+      SchemaProperty('key', RealmPropertyType.string),
+      SchemaProperty('value', RealmPropertyType.string),
+    ]);
+  }();
+
+  @override
+  SchemaObject get objectSchema => RealmObjectBase.getSchema(this) ?? schema;
+}
+
+class ROPreference extends _ROPreference
+    with RealmEntity, RealmObjectBase, RealmObject {
+  ROPreference(
+    String key,
+    String value,
+  ) {
+    RealmObjectBase.set(this, 'key', key);
+    RealmObjectBase.set(this, 'value', value);
+  }
+
+  ROPreference._();
+
+  @override
+  String get key => RealmObjectBase.get<String>(this, 'key') as String;
+  @override
+  set key(String value) => RealmObjectBase.set(this, 'key', value);
+
+  @override
+  String get value => RealmObjectBase.get<String>(this, 'value') as String;
+  @override
+  set value(String value) => RealmObjectBase.set(this, 'value', value);
+
+  @override
+  Stream<RealmObjectChanges<ROPreference>> get changes =>
+      RealmObjectBase.getChanges<ROPreference>(this);
+
+  @override
+  Stream<RealmObjectChanges<ROPreference>> changesFor(
+          [List<String>? keyPaths]) =>
+      RealmObjectBase.getChangesFor<ROPreference>(this, keyPaths);
+
+  @override
+  ROPreference freeze() => RealmObjectBase.freezeObject<ROPreference>(this);
+
+  EJsonValue toEJson() {
+    return <String, dynamic>{
+      'key': key.toEJson(),
+      'value': value.toEJson(),
+    };
+  }
+
+  static EJsonValue _toEJson(ROPreference value) => value.toEJson();
+  static ROPreference _fromEJson(EJsonValue ejson) {
+    if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
+    return switch (ejson) {
+      {
+        'key': EJsonValue key,
+        'value': EJsonValue value,
+      } =>
+        ROPreference(
+          fromEJson(key),
+          fromEJson(value),
+        ),
+      _ => raiseInvalidEJson(ejson),
+    };
+  }
+
+  static final schema = () {
+    RealmObjectBase.registerFactory(ROPreference._);
     register(_toEJson, _fromEJson);
     return const SchemaObject(
-        ObjectType.realmObject, JusPreference, 'JusPreference', [
+        ObjectType.realmObject, ROPreference, 'ROPreference', [
       SchemaProperty('key', RealmPropertyType.string, primaryKey: true),
       SchemaProperty('value', RealmPropertyType.string),
     ]);

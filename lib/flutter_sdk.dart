@@ -173,14 +173,14 @@ class JusSDK {
               JusPgmNotify.didCallback(int.parse(cookie), error);
             });
           } else if (data.event == 3) { // 好友申请的回调
-            if (data.params['TargetId'] != _mtc.Mtc_UeDbGetUid().toDartString()) {
-              if (data.params['GroupId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
+            if (data.params['TargetId'] != JusProfile().uid) {
+              if (data.params['GroupId'] == JusProfile().uid) {
                 // 此时表示收到他人发起的好友请求
                 (JusSDK.account as JusAccountImpl).onReceiveApplyUserRelation(JusApplyUserRelation.fromJson(data.params));
               }
             }
           } else if (data.event == 6) { // 好友申请通过的回调
-            if (data.params['TargetId'] == _mtc.Mtc_UeDbGetUid().toDartString()) {
+            if (data.params['TargetId'] == JusProfile().uid) {
               (JusSDK.account as JusAccountImpl).onReceiveRespUserRelation(JusRespUserRelation.fromJson(data.params));
             }
           }
@@ -191,10 +191,14 @@ class JusSDK {
           return;
         }
         if (data is _PgmIsolateRelationsUpdated) {
-          (JusSDK.account as JusAccountImpl).onReceiveUserRelationsUpdated(
-              JusUserRelationsUpdated(data.baseTime,
-                  JusProfile().userRelationUpdateTime,
-                  JusProfile().getDiffRelations(data.baseTime).map((relation) => relation.toUser()).toList()));
+          if (JusSDK.tools.isValidUserId(data.belongToUid)) {
+            (JusSDK.account as JusAccountImpl).onReceiveUserRelationsUpdated(
+                JusUserRelationsUpdated(data.baseTime,
+                    JusProfile().getRelationUpdateTime(),
+                    JusProfile().getDiffRelations(data.baseTime).map((relation) => relation.toUser()).toList()));
+          } else {
+            /// TODO 群成员关系列表发生变化
+          }
           return;
         }
         if (data is _PgmIsolateInsertMsg) {
@@ -204,7 +208,7 @@ class JusSDK {
             return;
           }
           String imdnId = data.content['_params']['imdnId'];
-          if (data.senderId == _mtc.Mtc_UeDbGetUid().toDartString()) {
+          if (data.senderId == JusProfile().uid) {
             // 本人发送消息成功
             JusProfile().cacheMsgIdx(imdnId, data.msgIdx);
           } else {
@@ -289,9 +293,10 @@ class _PgmIsolateCacheProps {
 }
 
 class _PgmIsolateRelationsUpdated {
+  final String belongToUid;
   final int baseTime;
 
-  const _PgmIsolateRelationsUpdated(this.baseTime);
+  const _PgmIsolateRelationsUpdated(this.belongToUid, this.baseTime);
 }
 
 class _PgmIsolateInsertMsg {
@@ -323,70 +328,65 @@ int _pgmLoadGroup(
     Pointer<Pointer<JStatusVersMap>> ppcStatusVersMap,
     Pointer<Int64> plStatusTime,
     Pointer<Pointer<JStrStrMap>> ppcProps) {
-  final String uid = pcGroupId.toDartString();
-  JusSDK._log('pgmLoadGroup, pcGroupId=$uid');
-  if (JusSDK.tools.isValidUserId(uid)) {
-    JusProfile.initialize(uid);
-    JusProfile profile = JusProfile();
-    Map<String, dynamic> relationMap = {};
-    Map<String, dynamic> statusMap = {};
-    for (var relation in profile.userRelations) {
-      relationMap[relation.uid] = relation.toJson();
-    }
-    for (var status in profile.userStatus) {
-      statusMap[status.uid] = jsonDecode(status.status);
-    }
-    ppcRelations.value = jsonEncode(relationMap).toNativePointer();
-    plRelationUpdateTime.value = profile.userRelationUpdateTime;
-    ppcStatusVersMap.value = jsonEncode(statusMap).toNativePointer();
-    plStatusTime.value = profile.userStatusUpdateTime;
-    ppcProps.value = jsonEncode(profile.profileProps).toNativePointer();
+  final String belongToUid = pcGroupId.toDartString();
+  JusSDK._log('pgmLoadGroup, pcGroupId=$belongToUid');
+  if (JusSDK.tools.isValidUserId(belongToUid)) {
+    JusProfile.initialize(belongToUid);
   }
+  Map<String, dynamic> relationMap = {};
+  Map<String, dynamic> statusMap = {};
+  for (var relation in JusProfile().getRelations(belongToUid: belongToUid)) {
+    relationMap[relation.uid] = relation.toJson();
+  }
+  for (var status in JusProfile().getStatuses(belongToUid: belongToUid)) {
+    statusMap[status.uid] = jsonDecode(status.status);
+  }
+  ppcRelations.value = jsonEncode(relationMap).toNativePointer();
+  plRelationUpdateTime.value = JusProfile().getRelationUpdateTime(belongToUid: belongToUid);
+  ppcStatusVersMap.value = jsonEncode(statusMap).toNativePointer();
+  plStatusTime.value = JusProfile().getStatusUpdateTime(belongToUid: belongToUid);
+  ppcProps.value = jsonEncode(JusProfile().getProps(belongToUid: belongToUid)).toNativePointer();
   return 0;
 }
 
 int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
     int lUpdateTime, Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
-  final String uid = pcGroupId.toDartString();
+  final String belongToUid = pcGroupId.toDartString();
   final Map<String, dynamic> relationDiff = jsonDecode(pcDiff.toDartString());
   final int relationUpdateTime = lUpdateTime;
   final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
   final int statusUpdateTime = lStatusTime;
   JusSDK._log(
-      'pgmUpdateGroup, pcGroupId=$uid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
+      'pgmUpdateGroup, pcGroupId=$belongToUid, lUpdateTime=$relationUpdateTime, pcDiff=$relationDiff, '
       'lStatusTime=$statusUpdateTime, pcStatusVersMap=$statusDiff');
-  if (JusSDK.tools.isValidUserId(uid)) {
-      List<JusPgmRelation> relations = [];
-      relationDiff.forEach((uid, map) {
-        relations.add(JusPgmRelationUtils.factoryFromJson(uid, map, relationUpdateTime));
-      });
-      List<JusPgmStatus> status = [];
-      statusDiff.forEach((uid, statusMap) {
-        status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
-      });
-      int baseRelationUpdateTime = JusProfile().userRelationUpdateTime;
-      JusProfile().updatePgmRelationsStatuses(relations, relationUpdateTime, status, statusUpdateTime);
-      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-      if (relationUpdateTime > 0 && relationUpdateTime != baseRelationUpdateTime) {
-        JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRelationsUpdated(baseRelationUpdateTime));
-      }
+  List<ROPgmRelation> relations = [];
+  relationDiff.forEach((uid, map) {
+    relations.add(ROPgmRelationExt.fromJson(belongToUid, uid, map, relationUpdateTime));
+  });
+  List<ROPgmStatus> status = [];
+  statusDiff.forEach((uid, map) {
+    status.add(ROPgmStatusExt.fromJson(belongToUid, uid, map));
+  });
+  int baseRelationUpdateTime = JusProfile().getRelationUpdateTime(belongToUid: belongToUid);
+  JusProfile().updatePgmRelationsStatuses(belongToUid, relations, relationUpdateTime, status, statusUpdateTime);
+  JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
+  if (relationUpdateTime > 0 && relationUpdateTime != baseRelationUpdateTime) {
+    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRelationsUpdated(belongToUid, baseRelationUpdateTime));
   }
   return 0;
 }
 
 int _pgmUpdateStatus(Pointer<Char> pcGroupId,
     Pointer<JStatusVersMap> pcStatusVersMap, int lStatusTime) {
-  String uid = pcGroupId.toDartString();
+  String belongToUid = pcGroupId.toDartString();
   final Map<String, dynamic> statusDiff = jsonDecode(pcStatusVersMap.toDartString());
-  JusSDK._log('pgmUpdateStatus, pcGroupId=$uid, lStatusTime=$lStatusTime, pcStatusVersMap=$statusDiff');
-  if (JusSDK.tools.isValidUserId(uid)) {
-    List<JusPgmStatus> status = [];
-    statusDiff.forEach((uid, statusMap) {
-      status.add(JusPgmStatus(uid, jsonEncode(statusMap)));
-    });
-    JusProfile().updatePgmRelationsStatuses([], -1, status, lStatusTime);
-    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-  }
+  JusSDK._log('pgmUpdateStatus, pcGroupId=$belongToUid, lStatusTime=$lStatusTime, pcStatusVersMap=$statusDiff');
+  List<ROPgmStatus> status = [];
+  statusDiff.forEach((uid, map) {
+    status.add(ROPgmStatusExt.fromJson(belongToUid, uid, map));
+  });
+  JusProfile().updatePgmRelationsStatuses(belongToUid, [], -1, status, lStatusTime);
+  JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
   return 0;
 }
 
@@ -395,15 +395,13 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
   final String uid = pcGroupId.toDartString();
   final Map<String, String> props = (jsonDecode(pcProps.toDartString()) as Map<String, dynamic>).castString();
   JusSDK._log('pgmUpdateProps, pcGroupId=$uid, pcProps=$props');
-  if (JusSDK.tools.isValidUserId(uid)) {
-    if (uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      // 本人的属性, 缓存到本地数据库
-      JusProfile().updatePgmProfileProps(props);
-      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-    } else {
-      // 其它用户的属性, 缓存到内存
-      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
-    }
+  if (uid == JusProfile().uid || JusSDK.tools.isValidGroupId(uid)) {
+    // 本人或者群属性, 缓存到本地数据库
+    JusProfile().updatePgmProps(uid, props);
+    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
+  } else {
+    // 其它用户的属性, 缓存到内存
+    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
   }
   return 0;
 }
@@ -419,12 +417,10 @@ int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
   String msgs = pcMsgs.toDartString();
   String status = pcMsgStatuses.toDartString();
   JusSDK._log('pgmInsertMsgs, pcGroupId=$uid, pcMsgs=$msgs, pcMsgStatuses=$status');
-  if (JusSDK.tools.isValidUserId(uid)) {
-    JusProfile().updatePgmRelationsStatuses([], -1, [JusPgmStatus(uid, status)], -1);
-    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-    for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
-      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));
-    }
+  JusProfile().updatePgmRelationsStatuses(JusProfile().uid, [], -1, [ROPgmStatusExt.fromJson(JusProfile().uid, uid, jsonDecode(status))], -1);
+  JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
+  for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
+    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));
   }
   return 0;
 }

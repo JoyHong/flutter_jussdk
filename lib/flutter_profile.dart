@@ -10,10 +10,10 @@ import 'flutter_tools.dart';
 
 class JusProfile {
 
-  /// 同步 pgm 个人节点里列表的时间戳
-  static const String propUserRelationUpdateTime = 'userRelationUpdateTime';
-  /// 同步 pgm 个人节点里状态的时间戳
-  static const String propUserStatusUpdateTime = 'userStatusUpdateTime';
+  /// 同步 JusPgmRelation 列表的时间戳
+  static const String _relationUpdateTime = 'relationUpdateTime';
+  /// 同步 JusPgmStatus 列表的时间戳
+  static const String _statusUpdateTime = 'statusUpdateTime';
 
   // 数据库新删改后务必自增 realm 版本号
   static const _schemaVersion = 1;
@@ -32,11 +32,11 @@ class JusProfile {
     String path = JusTools.getUserPath(uid);
     List<int> keyBytes = 'JusProfile#$uid'.codeUnits;
     _instance!._realm = Realm(Configuration.local([
-      JusPgmRelation.schema,
-      JusPgmStatus.schema,
-      JusPgmProfileProp.schema,
-      JusPendingProfileProp.schema,
-      JusPreference.schema
+      ROPgmRelation.schema,
+      ROPgmStatus.schema,
+      ROPgmProp.schema,
+      ROPgmPreference.schema,
+      ROProp.schema,
     ],
         path: File(p.join(path, 'default.realm')).path,
         encryptionKey: Int64List(64)..setRange(0, keyBytes.length, keyBytes),
@@ -75,42 +75,61 @@ class JusProfile {
 
   JusProfile._();
 
-  /// 用户个人节点上的关系列表
-  RealmResults<JusPgmRelation> get userRelations => _realm.query<JusPgmRelation>('TRUEPREDICATE');
+  String get uid => _uid;
 
-  /// 用户个人节点上的状态列表
-  RealmResults<JusPgmStatus> get userStatus => _realm.query<JusPgmStatus>('TRUEPREDICATE');
+  /// 获取 ROPgmRelation 列表
+  RealmResults<ROPgmRelation> getRelations({String? belongToUid}) =>
+      _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'');
 
-  /// 用户个人节点上的关系列表同步的时间戳
-  int get userRelationUpdateTime =>
-      int.parse(_realm.query<JusPreference>('key == \'$propUserRelationUpdateTime\'').firstOrNull?.value ?? '-1');
+  /// 根据 belongToUid(不传则是本人的 uid) 返回 baseTime 更新后的增量的列表
+  RealmResults<ROPgmRelation> getDiffRelations(int baseTime, {String? belongToUid}) =>
+      _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\' AND ${ROPgmRelationExt.fieldUpdateTime} > $baseTime');
 
-  /// 用户个人节点上的状态列表同步的时间戳
-  int get userStatusUpdateTime =>
-      int.parse(_realm.query<JusPreference>('key == \'$propUserStatusUpdateTime\'').firstOrNull?.value ?? '-1');
+  /// 根据 belongToUid(不传则是本人的 uid) 和 uid 返回对应的 ROPgmRelation 对象
+  ROPgmRelation? getRelation(String uid, {String? belongToUid}) =>
+      _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\' AND ${ROPgmRelationExt.fieldUid} == \'$uid\'')
+      .firstOrNull;
 
-  /// 用户个人节点上已同步的实时个人属性
-  Map<String, String> get profileProps =>
-      Map.fromEntries(_realm.query<JusPgmProfileProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+  /// 获取 JusPgmStatus 列表
+  RealmResults<ROPgmStatus> getStatuses({String? belongToUid}) =>
+      _realm.query<ROPgmStatus>('${ROPgmStatusExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'');
+
+  /// 获取 JusPgmRelation 列表刷新的时间戳
+  /// belongToUid: 如果是个人节点, 可以传空或者用户本人的 uid
+  ///              如果是群组, 则传入对应群组的 uid
+  int getRelationUpdateTime({String? belongToUid}) =>
+      int.parse(_realm.query<ROPgmPreference>('${ROPgmPreferenceExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\' AND ${ROPgmPreferenceExt.fieldKey} == \'$_relationUpdateTime\'')
+          .firstOrNull?.value ?? '-1');
+
+  /// 获取 jusPgmStatus 列表刷新的时间戳
+  /// belongToUid: 参考 getRelationUpdateTime 参数 belongToUid 的解释
+  int getStatusUpdateTime({String? belongToUid}) =>
+      int.parse(_realm.query<ROPgmPreference>('${ROPgmPreferenceExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\' AND ${ROPgmPreferenceExt.fieldKey} == \'$_statusUpdateTime\'')
+        .firstOrNull?.value ?? '-1');
+
+  /// 获取与 pgm 实时同步的本人或者群组的属性
+  Map<String, String> getProps({String? belongToUid}) =>
+      Map.fromEntries(_realm.query<ROPgmProp>('${ROPgmPropExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'').map((item) => MapEntry(item.key, item.value)));
 
   /// 用户将要同步的个人属性
-  Map<String, String> get pendingProfileProps =>
-      Map.fromEntries(_realm.query<JusPendingProfileProp>('TRUEPREDICATE').map((item) => MapEntry(item.key, item.value)));
+  Map<String, String> getPendingProps({String? belongToUid}) =>
+      Map.fromEntries(_realm.query<ROProp>('${ROPropExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'').map((item) => MapEntry(item.key, item.value)));
 
   /// 一般在其它 isolate 操作数据库后, 需要实时同步一下, 以防数据不同步
   void refreshDB() {
     _realm.refresh();
   }
 
-  /// 收到 pgm 个人节点回调时, 同步数据到本地
+  /// 收到 pgm relations 或者是 status 回调时, 同步数据到本地
   void updatePgmRelationsStatuses(
-      List<JusPgmRelation> relations,
+      String belongToUid,
+      List<ROPgmRelation> relations,
       int relationUpdateTime,
-      List<JusPgmStatus> statuses,
+      List<ROPgmStatus> statuses,
       int statusUpdateTime) {
     _realm.write(() {
       for (var status in statuses) {
-        JusPgmStatus? dbRef = _realm.query<JusPgmStatus>('uid == \'${status.uid}\'').firstOrNull;
+        ROPgmStatus? dbRef = _realm.query<ROPgmStatus>('${ROPgmStatusExt.fieldIdentifier} == \'${status.identifier}\'').firstOrNull;
         if (dbRef != null) {
           dbRef.update(status);
         } else {
@@ -118,48 +137,48 @@ class JusProfile {
         }
       }
       for (var relation in relations) {
-        JusPgmRelation? dbRef = _realm.query<JusPgmRelation>('uid == \'${relation.uid}\'').firstOrNull;
+        ROPgmRelation? dbRef = _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldIdentifier} == \'${relation.identifier}\'').firstOrNull;
         if (dbRef != null) {
           dbRef.update(relation);
           dbRef.updateTime = relation.updateTime;
         } else {
           dbRef = _realm.add(relation);
-          dbRef.status = _realm.query<JusPgmStatus>('uid == \'${relation.uid}\'').firstOrNull;
+          dbRef.status = _realm.query<ROPgmStatus>('${ROPgmStatusExt.fieldIdentifier} == \'${relation.identifier}\'').firstOrNull;
         }
       }
       if (relationUpdateTime > 0) {
-        _realm.add(JusPreference(propUserRelationUpdateTime, relationUpdateTime.toString()), update: true);
+        _realm.add(ROPgmPreferenceExt.constructor(belongToUid, _relationUpdateTime, relationUpdateTime.toString()), update: true);
       }
       if (statusUpdateTime > 0) {
-        _realm.add(JusPreference(propUserStatusUpdateTime, statusUpdateTime.toString()), update: true);
+        _realm.add(ROPgmPreferenceExt.constructor(belongToUid, _statusUpdateTime, statusUpdateTime.toString()), update: true);
       }
     });
   }
 
-  /// 收到 pgm 个人属性回调时, 同步数据到本地
-  void updatePgmProfileProps(Map<String, String> map) {
+  /// 收到 pgm 本人或者群组的属性回调时, 同步数据到本地
+  void updatePgmProps(String belongToUid, Map<String, String> map) {
     _realm.write(() {
-      List<JusPgmProfileProp> props = [];
+      List<ROPgmProp> props = [];
       map.forEach((key, value) {
-        props.add(JusPgmProfileProp(key, value));
+        props.add(ROPgmPropExt.constructor(belongToUid, key, value));
       });
       _realm.addAll(props, update: true);
     });
   }
 
-  /// 当 pgm 还未 logined ok, 此时暂缓存到本地
-  void addPendingProfileProps(Map<String, String> map) {
+  /// 当 pgm 还未 login ok, 此时暂缓存到本地
+  void addPendingProps(String belongToUid, Map<String, String> map) {
     _realm.write(() {
-      List<JusPendingProfileProp> props = [];
+      List<ROProp> props = [];
       map.forEach((key, value) {
-        props.add(JusPendingProfileProp(key, value));
+        props.add(ROPropExt.constructor(belongToUid, key, value));
       });
       _realm.addAll(props, update: true);
     });
   }
   
-  void clearPendingProfileProps() {
-    RealmResults<JusPendingProfileProp> results = _realm.query<JusPendingProfileProp>('TRUEPREDICATE');
+  void clearPendingProps({String? belongToUid}) {
+    RealmResults<ROProp> results = _realm.query<ROProp>('${ROPropExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'');
     if (results.isNotEmpty) {
       _realm.write(() {
         _realm.deleteMany(results);
@@ -181,16 +200,6 @@ class JusProfile {
 
   int getCachedMsgIdx(String imdnId) {
     return _cacheMsgIdxs.remove(imdnId)!;
-  }
-
-  /// 根据 uid 获取个人节点列表上的某一关系对象
-  JusPgmRelation? getRelation(String uid) {
-    return _realm.query<JusPgmRelation>('uid == \'$uid\'').firstOrNull;
-  }
-
-  /// 根据 baseTime 获取个人节点列表上的变化集合
-  RealmResults<JusPgmRelation> getDiffRelations(int baseTime) {
-    return _realm.query<JusPgmRelation>('updateTime > $baseTime');
   }
 
 }

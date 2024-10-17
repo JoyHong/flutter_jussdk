@@ -131,7 +131,7 @@ abstract class JusAccount {
 
   /// 设置好友或者拉黑用户的备注名, 失败则抛出异常 JusError(errorNotConnected)
   /// 注: 只能在登陆成功(连上服务器)后调用, 且根据 userRelationsUpdated 监听更新数据库
-  void setTagName({required String uid, required String tagName});
+  void setUserTagName({required String uid, required String tagName});
 
   /// 搜索除本人以外的用户信息, 失败则抛出异常 JusError(errorSearchNotFound)
   Future<JusUserRelation> searchUser({required String username});
@@ -291,9 +291,9 @@ class JusAccountImpl extends JusAccount {
             callback.call();
           }
           _pgmLoginedEndCallbacks.clear();
-          Map<String, String> pendingProps = JusProfile().pendingProfileProps;
+          Map<String, String> pendingProps = JusProfile().getPendingProps();
           if (pendingProps.isNotEmpty) {
-            JusProfile().clearPendingProfileProps();
+            JusProfile().clearPendingProps();
             JusSDK.logger.i(tag: _tag, message: 'setPendingProps($pendingProps)');
             int cookie = JusPgmNotify.addCookie((cookie, error) {
               JusPgmNotify.removeCookie(cookie);
@@ -652,8 +652,8 @@ class JusAccountImpl extends JusAccount {
     JusSDK.logger.i(tag: _tag, message: 'getUserProps($uid)');
     await _pgmLoginedEndTransformer();
     if (uid == null || uid == _mtc.Mtc_UeDbGetUid().toDartString()) {
-      return (JusProfile().profileProps
-        ..addAll(JusProfile().pendingProfileProps)).filterKeys(JusSDK.accountPropNames);
+      return (JusProfile().getProps()
+        ..addAll(JusProfile().getPendingProps())).filterKeys(JusSDK.accountPropNames);
     }
     Completer<Map<String, String>> completer = Completer();
     int cookie = JusPgmNotify.addCookie((cookie, error) {
@@ -682,7 +682,7 @@ class JusAccountImpl extends JusAccount {
     }
     if (!_pgmLoginedEnd) {
       JusSDK.logger.i(tag: _tag, message: 'setUserProps save to pending');
-      JusProfile().addPendingProfileProps(map);
+      JusProfile().addPendingProps(_mtc.Mtc_UeDbGetUid().toDartString(), map);
       return;
     }
     int cookie = JusPgmNotify.addCookie((cookie, error) {
@@ -700,30 +700,30 @@ class JusAccountImpl extends JusAccount {
   }
 
   @override
-  void setTagName({required String uid, required String tagName}) {
-    JusSDK.logger.i(tag: _tag, message: 'setTagName($uid, $tagName)');
+  void setUserTagName({required String uid, required String tagName}) {
+    JusSDK.logger.i(tag: _tag, message: 'setUserTagName($uid, $tagName)');
     if (_mtc.Mtc_UeDbGetUid() == nullptr || _mtc.Mtc_UeDbGetUid().toDartString().isEmpty) {
-      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, no logged user');
+      JusSDK.logger.e(tag: _tag, message: 'setUserTagName fail, no logged user');
       return;
     }
-    JusPgmRelation? userRelation = JusProfile().getRelation(uid);
+    ROPgmRelation? userRelation = JusProfile().getRelation(uid);
     if (userRelation == null) {
-      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, app\'s relations is not sync with jussdk');
+      JusSDK.logger.e(tag: _tag, message: 'setUserTagName fail, app\'s relations is not sync with jussdk');
       throw const JusError(JusSDKConstants.errorDevIntegration, message: 'app\'s relations is not sync with jussdk');
     }
     if (userRelation.type != EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_CONTACT &&
         userRelation.type != EN_MTC_BUDDY_RELATION_TYPE.EN_MTC_BUDDY_RELATION_BLACKLIST) {
-      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, the user is neither contact nor blacklist');
+      JusSDK.logger.e(tag: _tag, message: 'setUserTagName fail, the user is neither contact nor blacklist');
       throw const JusError(JusSDKConstants.errorDevIntegration, message: 'the user is neither contact nor blacklist');
     }
     if (!_pgmLoginedEnd) {
-      JusSDK.logger.i(tag: _tag, message: 'setTagName fail, pgm not logined');
+      JusSDK.logger.i(tag: _tag, message: 'setUserTagName fail, pgm not logined');
       throw const JusError(JusAccountConstants.errorNotConnected, message: 'not connected');
     }
     int cookie = JusPgmNotify.addCookie((cookie, error) {
       JusPgmNotify.removeCookie(cookie);
       if (error.isNotEmpty) {
-        JusSDK.logger.e(tag: _tag, message: 'setTagName fail, $error');
+        JusSDK.logger.e(tag: _tag, message: 'setUserTagName fail, $error');
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
@@ -735,7 +735,7 @@ class JusAccountImpl extends JusAccount {
         jsonEncode(changed).toNativePointer(),
         pcErr) != JusSDKConstants.ZOK) {
       JusPgmNotify.removeCookie(cookie);
-      JusSDK.logger.e(tag: _tag, message: 'setTagName fail, call pgm_c_nowait_ack_set_props did fail ${pcErr.toDartString()}');
+      JusSDK.logger.e(tag: _tag, message: 'setUserTagName fail, call pgm_c_nowait_ack_set_props did fail ${pcErr.toDartString()}');
     }
   }
 
@@ -921,7 +921,7 @@ class JusAccountImpl extends JusAccount {
       }
     });
     Pointer<Char> pcErr = ''.toNativePointer();
-    JusPgmRelation? userRelation = JusProfile().getRelation(uid);
+    ROPgmRelation? userRelation = JusProfile().getRelation(uid);
     if (userRelation != null) {
       final changed = userRelation.toJson();
       changed['type'] = type;
@@ -956,7 +956,7 @@ class JusAccountImpl extends JusAccount {
     JusSDK.logger.i(tag: _tag, message: 'getUserRelationsUpdated($baseTime)');
     return JusUserRelationsUpdated(
         baseTime,
-        JusProfile().userRelationUpdateTime,
+        JusProfile().getRelationUpdateTime(),
         JusProfile().getDiffRelations(baseTime).map((relation) => relation.toUser()).toList());
   }
 
@@ -966,7 +966,7 @@ class JusAccountImpl extends JusAccount {
     await _pgmLoginedEndTransformer();
     return JusUserRelationsUpdated(
         baseTime,
-        JusProfile().userRelationUpdateTime,
+        JusProfile().getRelationUpdateTime(),
         JusProfile().getDiffRelations(baseTime).map((relation) => relation.toUser()).toList());
   }
 

@@ -17,7 +17,7 @@ class JusPreferences {
     String path = '${JusSDK.baseDir.path}/jussdk/preferences';
     List<int> keyBytes = 'JusPreferences'.codeUnits;
     _realm = Realm(Configuration.local([
-      JusPreference.schema
+      ROPreference.schema
     ],
         path: File(p.join(path, 'default.realm')).path,
         encryptionKey: Int64List(64)..setRange(0, keyBytes.length, keyBytes),
@@ -39,17 +39,17 @@ class JusPreferences {
 
   static Future setString({required String key, required String value}) async {
     await _realm.writeAsync(() {
-      _realm.add(JusPreference(key, value), update: true);
+      _realm.add(ROPreference(key, value), update: true);
     });
   }
 
   static String getString({required String key, String defValue = ''}) {
-    return _realm.query<JusPreference>('key == \'$key\'').firstOrNull?.value ?? defValue;
+    return _realm.query<ROPreference>('key == \'$key\'').firstOrNull?.value ?? defValue;
   }
 
   static Future remove({required String key}) async {
     await _realm.writeAsync(() {
-      JusPreference? preference = _realm.query<JusPreference>('key == \'$key\'').firstOrNull;
+      ROPreference? preference = _realm.query<ROPreference>('key == \'$key\'').firstOrNull;
       if (preference != null) {
         _realm.delete(preference);
       }
