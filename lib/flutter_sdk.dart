@@ -341,9 +341,8 @@ int _pgmLoadGroup(
     ppcStatusVersMap.value = jsonEncode(statusMap).toNativePointer();
     plStatusTime.value = profile.userStatusUpdateTime;
     ppcProps.value = jsonEncode(profile.profileProps).toNativePointer();
-    return 0;
   }
-  return 1;
+  return 0;
 }
 
 int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
@@ -371,9 +370,8 @@ int _pgmUpdateGroup(Pointer<Char> pcGroupId, Pointer<JRelationsMap> pcDiff,
       if (relationUpdateTime > 0 && relationUpdateTime != baseRelationUpdateTime) {
         JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRelationsUpdated(baseRelationUpdateTime));
       }
-    return 0;
   }
-  return 1;
+  return 0;
 }
 
 int _pgmUpdateStatus(Pointer<Char> pcGroupId,
@@ -388,9 +386,8 @@ int _pgmUpdateStatus(Pointer<Char> pcGroupId,
     });
     JusProfile().updatePgmRelationsStatuses([], -1, status, lStatusTime);
     JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-    return 0;
   }
-  return 1;
+  return 0;
 }
 
 /// 触发属性的上报
@@ -407,9 +404,8 @@ int _pgmUpdateProps(Pointer<Char> pcGroupId, Pointer<JStrStrMap> pcProps) {
       // 其它用户的属性, 缓存到内存
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateCacheProps(uid, props));
     }
-    return 0;
   }
-  return 1;
+  return 0;
 }
 
 int _pgmGetTicks(Pointer<Uint64> ticks) {
@@ -429,9 +425,8 @@ int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
     for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
       JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));
     }
-    return 0;
   }
-  return 1;
+  return 0;
 }
 
 DynamicLibrary _openLibrary(String libName) {
