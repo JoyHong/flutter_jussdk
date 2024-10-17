@@ -195,7 +195,9 @@ class JusSDK {
             (JusSDK.account as JusAccountImpl).onReceiveUserRelationsUpdated(
                 JusUserRelationsUpdated(data.baseTime,
                     JusProfile().getRelationUpdateTime(),
-                    JusProfile().getRelations(baseTime: data.baseTime).map((relation) => relation.toUser()).toList()));
+                    JusProfile().getRelations(baseTime: data.baseTime)
+                        .where((relation) => JusSDK.tools.isValidUserId(relation.uid))
+                        .map((relation) => relation.toUser()).toList()));
           } else {
             /// TODO 群成员关系列表发生变化
           }

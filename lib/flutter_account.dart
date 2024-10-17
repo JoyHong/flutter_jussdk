@@ -957,7 +957,9 @@ class JusAccountImpl extends JusAccount {
     return JusUserRelationsUpdated(
         baseTime,
         JusProfile().getRelationUpdateTime(),
-        JusProfile().getRelations(baseTime: baseTime).map((relation) => relation.toUser()).toList());
+        JusProfile().getRelations(baseTime: baseTime)
+            .where((relation) => JusSDK.tools.isValidUserId(relation.uid))
+            .map((relation) => relation.toUser()).toList());
   }
 
   @override
@@ -967,7 +969,9 @@ class JusAccountImpl extends JusAccount {
     return JusUserRelationsUpdated(
         baseTime,
         JusProfile().getRelationUpdateTime(),
-        JusProfile().getRelations(baseTime: baseTime).map((relation) => relation.toUser()).toList());
+        JusProfile().getRelations(baseTime: baseTime)
+            .where((relation) => JusSDK.tools.isValidUserId(relation.uid))
+            .map((relation) => relation.toUser()).toList());
   }
 
   @override
