@@ -305,8 +305,6 @@ class _PgmIsolateInsertMsg {
 
 class _PgmIsolateRefreshDB {}
 
-final Map<int, Completer> _pgmIsolateResponses = {};
-
 final DynamicLibrary _library = _openLibrary('mtc');
 final FlutterMtcBindings _mtc = FlutterMtcBindings(_library);
 final FlutterPGMBindings _pgm = FlutterPGMBindings(_library);
