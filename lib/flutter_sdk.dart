@@ -419,8 +419,10 @@ int _pgmInsertMsgs(Pointer<Char> pcGroupId, Pointer<JSortedMsgs> pcMsgs,
   JusSDK._log('pgmInsertMsgs, pcGroupId=$uid, pcMsgs=$msgs, pcMsgStatuses=$status');
   JusProfile().updatePgmRelationsStatuses(JusProfile().uid, [], -1, [ROPgmStatusExt.fromJson(JusProfile().uid, uid, jsonDecode(status))], -1);
   JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateRefreshDB());
-  for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
-    JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));
+  if (JusSDK.tools.isValidUserId(uid)) { // 当前仅支持 user 的消息
+    for (final msg in (jsonDecode(msgs) as List<dynamic>)) {
+      JusSDK._fromPgmIsolateSendPort.send(_PgmIsolateInsertMsg(msg['_sender'], msg['_content'], msg['_msgIdx'], msg['_time']));
+    }
   }
   return 0;
 }
