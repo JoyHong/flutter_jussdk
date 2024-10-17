@@ -957,7 +957,7 @@ class JusAccountImpl extends JusAccount {
     return JusUserRelationsUpdated(
         baseTime,
         JusProfile().getRelationUpdateTime(),
-        JusProfile().getDiffRelations(baseTime).map((relation) => relation.toUser()).toList());
+        JusProfile().getRelations(baseTime: baseTime).map((relation) => relation.toUser()).toList());
   }
 
   @override
@@ -967,7 +967,7 @@ class JusAccountImpl extends JusAccount {
     return JusUserRelationsUpdated(
         baseTime,
         JusProfile().getRelationUpdateTime(),
-        JusProfile().getDiffRelations(baseTime).map((relation) => relation.toUser()).toList());
+        JusProfile().getRelations(baseTime: baseTime).map((relation) => relation.toUser()).toList());
   }
 
   @override

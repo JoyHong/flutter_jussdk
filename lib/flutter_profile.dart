@@ -77,13 +77,11 @@ class JusProfile {
 
   String get uid => _uid;
 
-  /// 获取 ROPgmRelation 列表
-  RealmResults<ROPgmRelation> getRelations({String? belongToUid}) =>
-      _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'');
-
-  /// 根据 belongToUid(不传则是本人的 uid) 返回 baseTime 更新后的增量的列表
-  RealmResults<ROPgmRelation> getDiffRelations(int baseTime, {String? belongToUid}) =>
-      _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\' AND ${ROPgmRelationExt.fieldUpdateTime} > $baseTime');
+  /// 获取 ROPgmRelation 列表; 如果 baseTime 为空, 则全量刷新; 否则是增量刷新
+  /// 如果 belongToUid 为空或者是本人, 则返回的列表里包含了个人节点上的用户列表和群列表
+  /// 如果 belongToUid 为群 uid, 则返回该群下的群成员列表
+  RealmResults<ROPgmRelation> getRelations({String? belongToUid, int? baseTime}) =>
+      _realm.query<ROPgmRelation>('${ROPgmRelationExt.fieldBelongToUid} == \'${belongToUid ?? _uid}\'${baseTime != null ? ' AND ${ROPgmRelationExt.fieldUpdateTime} > $baseTime' : ''}');
 
   /// 根据 belongToUid(不传则是本人的 uid) 和 uid 返回对应的 ROPgmRelation 对象
   ROPgmRelation? getRelation(String uid, {String? belongToUid}) =>
